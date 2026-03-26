@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tinker-cli"
+version = "0.1.1"
+description = "Build interactive demo files for exploring code changes. A CLI tool designed to be used by AI agents — the --help text is the only documentation needed. Produces cell-based percent-format scripts that users step through interactively in their editor. Inspired by Showboat (LLM-as-user CLI design), Solveit (exploratory dialog over code dumps), and jupytext.nvim (plain .py files, no notebook JSON)."
+requires-python = ">=3.10"
+license = "MIT"
+readme = "README.md"
+authors = [
+    { name = "munatsi", email = "munziu@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "tomli; python_version < '3.11'",
+    "tomli-w",
+]
+
+[project.urls]
+Homepage = "https://github.com/munziu263/tinker-cli"
+Repository = "https://github.com/munziu263/tinker-cli"
+Issues = "https://github.com/munziu263/tinker-cli/issues"
+
+[project.scripts]
+tinker = "tinker.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
