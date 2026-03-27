@@ -35,7 +35,7 @@ class TestVersion:
     def test_version_prints_version(self):
         stdout, stderr, rc = run_tinker("--version")
         assert rc == 0
-        assert "0.1.0" in stdout
+        assert "0.1.1" in stdout
 
 
 # === tinker --help ===
