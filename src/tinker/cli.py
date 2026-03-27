@@ -64,6 +64,8 @@ File formats:
   or its PYTHONPATH. For projects with src/ layouts or uninstalled
   packages, the LLM should emit a setup cell as the first code block:
   import sys; sys.path.insert(0, ".")
+  Avoid __file__ in setup cells — it raises NameError in interactive
+  IPython sessions. Use sys.path.insert(0, ".") instead.
 
   Compiled language demos are standalone source files. Commentary is
   written as block comments. The entire file is compiled and run using
