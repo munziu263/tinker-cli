@@ -59,6 +59,12 @@ File formats:
   based exploration. Each cell can be sent individually to an IPython
   session. Commentary cells use # %% [markdown].
 
+  Editor REPL note: When sending cells to an editor REPL (e.g. IPython
+  via tinker-nvim or VS Code), the REPL does NOT inherit the run command
+  or its PYTHONPATH. For projects with src/ layouts or uninstalled
+  packages, the LLM should emit a setup cell as the first code block:
+  import sys; sys.path.insert(0, ".")
+
   Compiled language demos are standalone source files. Commentary is
   written as block comments. The entire file is compiled and run using
   the set command.
@@ -74,6 +80,7 @@ Workflow:
      tinker init parser-demo --lang python
      tinker cell parser-demo "Import and test the new parser"
      tinker code parser-demo <<'EOF'
+     import sys; sys.path.insert(0, ".")  # ensure project root is importable
      from myproject.parser import Parser
      p = Parser()
      result = p.parse("hello")
