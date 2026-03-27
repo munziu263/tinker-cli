@@ -44,6 +44,8 @@ Usage:
   tinker cell <name> [text]              Append commentary (text or stdin)
   tinker code <name> [code]              Append code (code or stdin)
   tinker set-command <name> <command>    Set the run command
+  tinker set-repl <name> <cmd> [--startup <cmd>...]
+                                         Set the REPL command
   tinker run <name>                      Execute the demo
   tinker show <name>                     Print demo file and command
   tinker pop <name>                      Remove the last cell
@@ -70,6 +72,11 @@ File formats:
   Compiled language demos are standalone source files. Commentary is
   written as block comments. The entire file is compiled and run using
   the set command.
+
+REPL configuration:
+  The LLM should call set-repl whenever the project uses a non-default
+  Python or virtualenv. This writes [repl] to tinker.toml, which
+  tinker-nvim reads to launch the right IPython.
 
 Run command:
   The run command is an arbitrary shell string — no templates or
@@ -294,6 +301,18 @@ def cmd_set_command(args, root: Path) -> None:
     print(command)
 
 
+def cmd_set_repl(args, root: Path) -> None:
+    name = args.name
+    manifest = get_manifest(root, name)
+
+    manifest["repl"] = {"cmd": args.cmd, "startup": args.startup or []}
+    write_toml(get_demo_dir(root, name) / "tinker.toml", manifest)
+
+    print(f"[repl] cmd = {args.cmd!r}")
+    if args.startup:
+        print(f"[repl] startup = {args.startup}")
+
+
 def cmd_run(args, root: Path) -> None:
     name = args.name
     manifest = get_manifest(root, name)
@@ -451,6 +470,12 @@ def main():
     p_setcmd.add_argument("name")
     p_setcmd.add_argument("command")
 
+    # set-repl
+    p_setrepl = subparsers.add_parser("set-repl")
+    p_setrepl.add_argument("name")
+    p_setrepl.add_argument("cmd")
+    p_setrepl.add_argument("--startup", action="append", default=None)
+
     # run
     p_run = subparsers.add_parser("run")
     p_run.add_argument("name")
@@ -487,6 +512,7 @@ def main():
         "cell": cmd_cell,
         "code": cmd_code,
         "set-command": cmd_set_command,
+        "set-repl": cmd_set_repl,
         "run": cmd_run,
         "show": cmd_show,
         "pop": cmd_pop,

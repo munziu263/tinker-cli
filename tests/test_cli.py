@@ -292,6 +292,47 @@ class TestSetCommand:
         assert "make run" in stdout
 
 
+# === tinker set-repl ===
+
+class TestSetRepl:
+    def test_set_repl_writes_toml(self, project_dir):
+        run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
+        stdout, _, rc = run_tinker("set-repl", "demo", ".venv/bin/ipython", cwd=project_dir)
+        assert rc == 0
+        assert ".venv/bin/ipython" in stdout
+        toml_path = project_dir / ".tinker" / "demo" / "tinker.toml"
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+        data = tomllib.loads(toml_path.read_text())
+        assert data["repl"]["cmd"] == ".venv/bin/ipython"
+        assert data["repl"]["startup"] == []
+
+    def test_set_repl_with_startup(self, project_dir):
+        run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
+        stdout, _, rc = run_tinker(
+            "set-repl", "demo", ".venv/bin/ipython",
+            "--startup", "%load_ext autoreload",
+            "--startup", "%autoreload 2",
+            cwd=project_dir,
+        )
+        assert rc == 0
+        toml_path = project_dir / ".tinker" / "demo" / "tinker.toml"
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
+        data = tomllib.loads(toml_path.read_text())
+        assert data["repl"]["cmd"] == ".venv/bin/ipython"
+        assert data["repl"]["startup"] == ["%load_ext autoreload", "%autoreload 2"]
+
+    def test_set_repl_nonexistent_demo(self, project_dir):
+        _, stderr, rc = run_tinker("set-repl", "nope", ".venv/bin/ipython", cwd=project_dir)
+        assert rc == 1
+        assert "not found" in stderr
+
+
 # === tinker run ===
 
 class TestRun:
