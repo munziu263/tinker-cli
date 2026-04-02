@@ -52,6 +52,7 @@ class TestHelp:
         assert "tinker cell" in stdout
         assert "tinker code" in stdout
         assert "tinker set-command" in stdout
+        assert "tinker set-repl" in stdout
         assert "tinker run" in stdout
         assert "tinker show" in stdout
         assert "tinker pop" in stdout
@@ -60,6 +61,18 @@ class TestHelp:
     def test_help_contains_workflow(self):
         stdout, _, _ = run_tinker("--help")
         assert "Workflow:" in stdout
+
+    def test_help_workflow_mentions_set_repl(self):
+        stdout, _, _ = run_tinker("--help")
+        assert "set-repl" in stdout
+        # Workflow should guide agents to configure the REPL for venvs
+        assert "set-repl parser-demo" in stdout
+
+    def test_help_directory_structure_mentions_repl(self):
+        stdout, _, _ = run_tinker("--help")
+        assert "repl" in stdout.lower()
+        # tinker.toml description should mention repl config
+        assert "command, repl" in stdout
 
     def test_help_contains_file_formats(self):
         stdout, _, _ = run_tinker("--help")
