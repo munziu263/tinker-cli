@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tinker-cli"
-version = "0.1.1"
+version = "0.1.2"
 description = "Build interactive demo files for exploring code changes. A CLI tool designed to be used by AI agents — the --help text is the only documentation needed. Produces cell-based percent-format scripts that users step through interactively in their editor. Inspired by Showboat (LLM-as-user CLI design), Solveit (exploratory dialog over code dumps), and jupytext.nvim (plain .py files, no notebook JSON)."
 requires-python = ">=3.10"
 license = "MIT"
