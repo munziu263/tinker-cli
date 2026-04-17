@@ -1,5 +1,7 @@
 # tinker-cli
 
+> Part of the **tinker** toolkit: **tinker-cli** (this repo) · [tinker-nvim](https://github.com/munziu263/tinker-nvim)
+
 A CLI tool that helps AI agents build interactive demo files for users to explore in their editor.
 
 The `--help` text is comprehensive enough to serve as the only documentation an LLM needs.

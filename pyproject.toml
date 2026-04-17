@@ -28,6 +28,7 @@ dependencies = [
 Homepage = "https://github.com/munziu263/tinker-cli"
 Repository = "https://github.com/munziu263/tinker-cli"
 Issues = "https://github.com/munziu263/tinker-cli/issues"
+"Editor Plugin" = "https://github.com/munziu263/tinker-nvim"
 
 [project.scripts]
 tinker = "tinker.cli:main"
