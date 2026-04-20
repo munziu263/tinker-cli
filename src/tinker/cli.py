@@ -97,6 +97,7 @@ Workflow:
      print("Parser works:", result)
      EOF
      tinker set-command parser-demo "python .tinker/parser-demo/demo.py"
+     tinker set-repl parser-demo .venv/bin/ipython  # if project uses a venv
      tinker run parser-demo
 
   2. LLM verifies the output (exit code 0 = success)
@@ -112,7 +113,7 @@ Directory structure:
   .tinker/
     <name>/
       demo.<ext>       Demo file (py, c, zig, go, js, sh)
-      tinker.toml      Manifest (name, lang, command)
+      tinker.toml      Manifest (name, lang, command, repl)
 
 Stdin:
   The cell and code commands accept input from stdin when the text/code
