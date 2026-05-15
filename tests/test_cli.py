@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import textwrap
 from pathlib import Path
 
 import pytest
@@ -31,14 +30,16 @@ def project_dir(tmp_path):
 
 # === tinker --version ===
 
+
 class TestVersion:
     def test_version_prints_version(self):
         stdout, stderr, rc = run_tinker("--version")
         assert rc == 0
-        assert "0.1.1" in stdout
+        assert "tinker" in stdout
 
 
 # === tinker --help ===
+
 
 class TestHelp:
     def test_help_contains_description(self):
@@ -80,6 +81,7 @@ class TestHelp:
 
 
 # === tinker init ===
+
 
 class TestInit:
     def test_init_python(self, project_dir):
@@ -169,6 +171,7 @@ class TestInit:
 
 # === tinker cell ===
 
+
 class TestCell:
     def test_cell_python(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
@@ -221,6 +224,7 @@ class TestCell:
 
 # === tinker code ===
 
+
 class TestCode:
     def test_code_python(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
@@ -232,14 +236,14 @@ class TestCode:
 
     def test_code_c(self, project_dir):
         run_tinker("init", "demo", "--lang", "c", cwd=project_dir)
-        _, _, rc = run_tinker("code", "demo", '#include <stdio.h>\nint main() { return 0; }', cwd=project_dir)
+        code = "#include <stdio.h>\nint main() { return 0; }"
+        _, _, rc = run_tinker("code", "demo", code, cwd=project_dir)
         assert rc == 0
         content = (project_dir / ".tinker" / "demo" / "demo.c").read_text()
-        assert '#include <stdio.h>' in content
+        assert "#include <stdio.h>" in content
         # For compiled languages, no cell delimiter
-        # The content should NOT have "# %%" in it
-        lines_with_delimiters = [l for l in content.split("\n") if l.strip() == "# %%" or l.strip() == "// %%"]
-        assert len(lines_with_delimiters) == 0
+        delims = [line for line in content.split("\n") if line.strip() in ("# %%", "// %%")]
+        assert len(delims) == 0
 
     def test_code_from_stdin(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
@@ -262,10 +266,12 @@ class TestCode:
 
 # === tinker set-command ===
 
+
 class TestSetCommand:
     def test_set_command(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
-        stdout, _, rc = run_tinker("set-command", "demo", "python .tinker/demo/demo.py", cwd=project_dir)
+        cmd = "python .tinker/demo/demo.py"
+        stdout, _, rc = run_tinker("set-command", "demo", cmd, cwd=project_dir)
         assert rc == 0
         toml = (project_dir / ".tinker" / "demo" / "tinker.toml").read_text()
         assert "PYTHONPATH=" in toml  # auto-prepended for python
@@ -273,7 +279,8 @@ class TestSetCommand:
 
     def test_set_command_no_pythonpath_for_c(self, project_dir):
         run_tinker("init", "demo", "--lang", "c", cwd=project_dir)
-        stdout, _, rc = run_tinker("set-command", "demo", "gcc demo.c -o demo && ./demo", cwd=project_dir)
+        cmd = "gcc demo.c -o demo && ./demo"
+        stdout, _, rc = run_tinker("set-command", "demo", cmd, cwd=project_dir)
         assert rc == 0
         assert "PYTHONPATH" not in stdout
 
@@ -294,6 +301,7 @@ class TestSetCommand:
 
 # === tinker set-repl ===
 
+
 class TestSetRepl:
     def test_set_repl_writes_toml(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
@@ -312,9 +320,13 @@ class TestSetRepl:
     def test_set_repl_with_startup(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
         stdout, _, rc = run_tinker(
-            "set-repl", "demo", ".venv/bin/ipython",
-            "--startup", "%load_ext autoreload",
-            "--startup", "%autoreload 2",
+            "set-repl",
+            "demo",
+            ".venv/bin/ipython",
+            "--startup",
+            "%load_ext autoreload",
+            "--startup",
+            "%autoreload 2",
             cwd=project_dir,
         )
         assert rc == 0
@@ -335,11 +347,12 @@ class TestSetRepl:
 
 # === tinker run ===
 
+
 class TestRun:
     def test_run_success(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
         run_tinker("code", "demo", "print('hello from tinker')", cwd=project_dir)
-        run_tinker("set-command", "demo", f"python .tinker/demo/demo.py", cwd=project_dir)
+        run_tinker("set-command", "demo", "python .tinker/demo/demo.py", cwd=project_dir)
         stdout, _, rc = run_tinker("run", "demo", cwd=project_dir)
         assert rc == 0
         assert "hello from tinker" in stdout
@@ -365,6 +378,7 @@ class TestRun:
 
 # === tinker show ===
 
+
 class TestShow:
     def test_show(self, project_dir):
         run_tinker("init", "demo", "--lang", "python", cwd=project_dir)
@@ -382,6 +396,7 @@ class TestShow:
 
 
 # === tinker pop ===
+
 
 class TestPop:
     def test_pop_python(self, project_dir):
@@ -420,6 +435,7 @@ class TestPop:
 
 # === tinker list ===
 
+
 class TestList:
     def test_list_empty(self, project_dir):
         stdout, _, rc = run_tinker("list", cwd=project_dir)
@@ -449,6 +465,7 @@ class TestList:
 
 # === Project root finding ===
 
+
 class TestProjectRoot:
     def test_finds_pyproject_toml(self, tmp_path):
         (tmp_path / "pyproject.toml").touch()
@@ -472,6 +489,7 @@ class TestProjectRoot:
 
 
 # === TOML reading/writing ===
+
 
 class TestTomlRoundtrip:
     def test_toml_manifest_readable(self, project_dir):

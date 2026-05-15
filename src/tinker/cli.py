@@ -1,7 +1,6 @@
 """Tinker CLI - Build interactive demo files for exploring code changes."""
 
 import argparse
-import os
 import re
 import subprocess
 import sys
@@ -11,7 +10,7 @@ from pathlib import Path
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib
+    import tomli as tomllib  # ty: ignore[unresolved-import]
 
 import tomli_w
 
@@ -228,12 +227,15 @@ def cmd_init(args, root: Path) -> None:
 
     # Write manifest
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    write_toml(demo_dir / "tinker.toml", {
-        "name": name,
-        "lang": lang,
-        "created": now,
-        "command": "",
-    })
+    write_toml(
+        demo_dir / "tinker.toml",
+        {
+            "name": name,
+            "lang": lang,
+            "created": now,
+            "command": "",
+        },
+    )
 
     print(f".tinker/{name}/demo.{ext}")
 
@@ -388,7 +390,7 @@ def cmd_pop(args, root: Path) -> None:
     if lang == "python":
         if len(delimiter_positions) <= 1:
             error(f"cannot pop: only one cell (the header) remains in '{name}'.")
-        new_lines = lines[:delimiter_positions[-1]]
+        new_lines = lines[: delimiter_positions[-1]]
     else:
         if not delimiter_positions:
             error(f"cannot pop: only one cell (the header) remains in '{name}'.")
@@ -396,9 +398,7 @@ def cmd_pop(args, root: Path) -> None:
         last_delim = delimiter_positions[-1]
         section_end = find_comment_block_end(lines, last_delim + 1, lang)
 
-        has_trailing_content = any(
-            lines[i].strip() for i in range(section_end, len(lines))
-        )
+        has_trailing_content = any(lines[i].strip() for i in range(section_end, len(lines)))
 
         if has_trailing_content:
             new_lines = lines[:section_end]
