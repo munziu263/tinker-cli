@@ -2150,7 +2150,7 @@
     "disc": 0.3
    },
    "confidence": "measured",
-   "notes": "Outer south-east corner of the rear outshot at ground level. X runs south from here, Y runs east. Tape measurements from this corner are the easiest way to improve the model."
+   "notes": "Outer south-east corner of the rear outshot at ground level. X runs south from here, Y runs east. To do 6, three tape or laser measurements that would tighten the far garden: the outer edge of the patio (the model says 4.96 m), the apple tree trunk to the exposed brick of the west wall (15.2 m), and the south-west corner of the outshot to the west front corner of the outbuilding (14.1 m)."
   },
   {
    "id": "level_01",
@@ -2567,55 +2567,7 @@
   },
   {
    "id": "shot_1",
-   "label": "To film 1: Front garden and house front",
-   "layer": "gaps",
-   "type": "marker_post",
-   "at": [-14.5, -4.0],
-   "rot": 0.0,
-   "params": {
-    "h": 1.8,
-    "r": 0.03,
-    "mat": "marker",
-    "disc": 0.45
-   },
-   "confidence": "assumed",
-   "notes": "Walk a slow loop of the front garden with the camera on the house, then turn your back to the house and walk it again looking outwards. Keep the ground in frame."
-  },
-  {
-   "id": "shot_2",
-   "label": "To film 2: West side: house, shed, outbuilding",
-   "layer": "gaps",
-   "type": "marker_post",
-   "at": [-7.3, -7.9],
-   "rot": 0.0,
-   "params": {
-    "h": 1.8,
-    "r": 0.03,
-    "mat": "marker",
-    "disc": 0.45
-   },
-   "confidence": "assumed",
-   "notes": "Walk the gap between the house and the shed and on round the back of the shed and the outbuilding. All four sides of both, with corners in shot."
-  },
-  {
-   "id": "shot_3",
-   "label": "To film 3: Drive, entrance and south-east corner",
-   "layer": "gaps",
-   "type": "marker_post",
-   "at": [12.8, 5.0],
-   "rot": 0.0,
-   "params": {
-    "h": 1.8,
-    "r": 0.03,
-    "mat": "marker",
-    "disc": 0.45
-   },
-   "confidence": "assumed",
-   "notes": "From the road entrance walk in along the drive, then along the inside of the south wall to the bench."
-  },
-  {
-   "id": "shot_4",
-   "label": "To film 4: South and west garden on foot",
+   "label": "To film 1: South and west garden, on foot",
    "layer": "gaps",
    "type": "marker_post",
    "at": [6.5, -13.0],
@@ -2627,14 +2579,62 @@
     "disc": 0.45
    },
    "confidence": "assumed",
-   "notes": "This part was filmed from one spot, so its distances are the weakest in the model. Walk two loops round it: one hugging the walls looking in, one in the middle looking out."
+   "notes": "This part was filmed from one spot, so its distances are the weakest in the model. Two slow loops: one hugging the walls and looking in, one down the middle looking out at the walls. Start and finish on the patio."
+  },
+  {
+   "id": "shot_2",
+   "label": "To film 2: Round the outbuilding and the shed",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-7.3, -7.9],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "Every side of both that you can reach, with the corners and the ground line in shot, including the passage between the house and the shed and whatever is behind them. This settles how big the outbuilding really is."
+  },
+  {
+   "id": "shot_3",
+   "label": "To film 3: Front garden and the front of the house",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-14.5, -4.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "A slow loop of the front garden with the camera on the house, then the same loop with your back to the house, looking out. Keep the ground in frame."
+  },
+  {
+   "id": "shot_4",
+   "label": "To film 4: Drive, entrance and south-east corner",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [12.8, 5.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "From the road entrance walk in along the drive, then along the inside of the south wall as far as the bench."
   },
   {
    "id": "shot_5",
-   "label": "To film 5: Outbuilding",
+   "label": "To film 5: Roof and chimneys",
    "layer": "gaps",
    "type": "marker_post",
-   "at": [-1.6, -15.0],
+   "at": [6.5, 5.5],
    "rot": 0.0,
    "params": {
     "h": 1.8,
@@ -2643,27 +2643,43 @@
     "disc": 0.45
    },
    "confidence": "assumed",
-   "notes": "Outside: every wall, square on and at each corner, with the ground line visible. Inside: stand in each corner in turn and film the opposite corner, floor to ceiling."
-  },
-  {
-   "id": "shot_6",
-   "label": "To film 6: Shed",
-   "layer": "gaps",
-   "type": "marker_post",
-   "at": [-3.2, -7.4],
-   "rot": 0.0,
-   "params": {
-    "h": 1.8,
-    "r": 0.03,
-    "mat": "marker",
-    "disc": 0.45
-   },
-   "confidence": "assumed",
-   "notes": "The same as the outbuilding. Leave the door open and film from outside to inside in one go, so the two join up."
+   "notes": "Still photos rather than video: each roof slope and each chimney, zoomed in, from the far corners of the garden and from the road."
   },
   {
    "id": "shot_7",
-   "label": "To film 7: Inside the house",
+   "label": "To film 7: Inside the outbuilding",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-1.4, -14.3],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "Stand in each corner in turn and film the opposite corner from floor to ceiling. Then walk out through the open door with the camera running, so inside and outside join up."
+  },
+  {
+   "id": "shot_8",
+   "label": "To film 8: Inside the shed",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-1.9, -7.6],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "The same as the outbuilding: each corner, floor to ceiling, then out through the open door in one go."
+  },
+  {
+   "id": "shot_9",
+   "label": "To film 9: Inside the house",
    "layer": "gaps",
    "type": "marker_post",
    "at": [-4.3, 0.9],
@@ -2675,23 +2691,7 @@
     "disc": 0.45
    },
    "confidence": "assumed",
-   "notes": "Room by room, slowly, from each corner; walk through every doorway with the camera running so the rooms link together. Ground floor, then stairs, then upstairs."
-  },
-  {
-   "id": "shot_8",
-   "label": "To film 8: Roof and chimneys",
-   "layer": "gaps",
-   "type": "marker_post",
-   "at": [2.0, -2.0],
-   "rot": 0.0,
-   "params": {
-    "h": 1.8,
-    "r": 0.03,
-    "mat": "marker",
-    "disc": 0.45
-   },
-   "confidence": "assumed",
-   "notes": "From the far corners of the garden and from the road, a few still photos of each roof slope and chimney, zoomed in."
+   "notes": "Room by room, slowly, from each corner; walk through every doorway with the camera running so the rooms link together. Ground floor, stairs, upstairs, attic. The floor plans already give the room sizes, so this is for heights, beams and fittings."
   }
  ]
 }

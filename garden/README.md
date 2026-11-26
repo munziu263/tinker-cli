@@ -97,6 +97,9 @@ saw is 2.4 m further west, and longer, than the one drawn on the block plan.
 
 ### Making it better
 
+`SURVEY_TODO.md` is the running list of what to film and measure next, in order of
+usefulness; its numbers match the markers in the viewer. In general:
+
 - **Tape measurements.** A distance from the grid origin (or between any two things in
   the footage) goes into `control.json` under `distances` and is used by `calibrate.py`.
   The most useful ones run from the origin out to the far walls.

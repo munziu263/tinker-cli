@@ -606,13 +606,17 @@ function select(f) {
   scene.add(selBox);
   $('card-title').textContent = u.label;
   const c = u.confidence || 'estimated';
-  $('card-chips').innerHTML = `<span class="chip">${LAYER_NAMES[u.layer] || u.layer}</span><span class="chip"><i class="dot" style="background: var(--${c})"></i>${CONF_TEXT[c]}</span>`;
+  // a "to film" marker is an instruction, not a measurement: no confidence chip, and no sizes for anything drawn on
+  $('card-chips').innerHTML = `<span class="chip">${LAYER_NAMES[u.layer] || u.layer}</span>`
+    + (u.layer === 'gaps' ? '' : `<span class="chip"><i class="dot" style="background: var(--${c})"></i>${CONF_TEXT[c]}</span>`);
   const dims = [];
   const m = (v) => Number(v).toFixed(v >= 10 ? 1 : 2) + ' m';
-  if (f.name === 'lawn') dims.push(['Surveyed area', 'about 37 × 55 m']);
+  if (OVERLAY_LAYERS.has(u.layer)) { /* nothing to size */ }
+  else if (f.name === 'lawn') dims.push(['Modelled area', 'about 47 × 53 m']);
   else if (u.length) { dims.push(['Length', m(u.length)]); dims.push(['Height', m(u.size_h)]); }
   else { dims.push(['Footprint', `${m(u.size_w)} × ${m(u.size_d)}`]); dims.push(['Height', m(u.size_h)]); }
   $('card-dims').innerHTML = dims.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  $('card-dims').hidden = !dims.length;
   $('card-notes').textContent = u.notes || '';
   $('card-notes').hidden = !u.notes;
   invalidate();
