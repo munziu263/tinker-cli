@@ -6,14 +6,22 @@
   "grid": "Site grid. Origin: the outer south-east corner of the rear outshot at ground level, by the back door. +X runs south, away from the back of the house; +Y runs east, towards the road. z = 0 is level 20.00 m on the measured survey.",
   "north": [-0.943, -0.334],
   "north_note": "Grid north, as a direction in (X, Y). The back of the house faces 20 degrees west of south.",
-  "source": "Phone clips reconstructed with COLMAP: a pan from the lawn and 60 short walks, 1,910 frames and 900,000 points in all. Vertical from brick coursing. Scale, position and height datum from eight control points read off the measured building survey (1:50 plans, 1:100 elevations). Plot boundary and north from the 1:500 block plan. Walks that leave the surveyed part and come back (round the back of the outbuilding) were reconstructed on their own and tied in through the frames they share with the rest. Ground levels from the survey points, tied to the 22 spot levels of the measured survey.",
-  "accuracy": "House and old shed: a few centimetres (measured survey). Outbuilding: walls within 2 cm of straight lines on all four sides, openings read off straightened photographs to 2 or 3 cm. Patio, east garden, kitchen garden, gate path, drive, front garden and the passage by the shed, all filmed on foot: 0.1 to 0.2 m. South and west garden: the east end of the south wall is now fixed to 0.1 m; the far corner still rests on the first clips, checked from a second viewpoint, and is good to about half a metre. Ground levels: a few centimetres on open ground that was filmed on foot, interpolated under shrubs and behind buildings. The lane beyond the hedge was seen only at the gate.",
+  "source": "Phone clips reconstructed with COLMAP: a pan from the lawn and 59 short walks, 1,888 frames and 900,000 points in all. Vertical from brick coursing. Scale, position and height datum from eight control points read off the measured building survey (1:50 plans, 1:100 elevations). Plot boundary and north from the 1:500 block plan. Walks that leave the surveyed part and come back (round the back of the outbuilding) were reconstructed on their own and tied in through the frames they share with the rest. Ground levels from the survey points, tied to the 22 spot levels of the measured survey. Every clip was then checked against the model point by point: walks that had slipped on their way round the house were slid back onto its measured walls, one that had swung was pinned by sightings of things with known places, and frames that could be checked against nothing were left out.",
+  "accuracy": "House and old shed: a few centimetres (measured survey). Outbuilding: walls within 2 cm of straight lines on all four sides, openings read off straightened photographs to 2 or 3 cm; its front and the first 4 m of its east side are fixed as well as that, its back corners to about 0.15 m. Patio, east garden, kitchen garden, gate path, drive, front garden and the passage by the shed, all filmed on foot: 0.1 to 0.2 m. South and west garden: the east end of the south wall is now fixed to 0.1 m; the far corner still rests on the first clips, checked from a second viewpoint, and is good to about half a metre. Ground levels: a few centimetres on open ground that was filmed on foot, interpolated under shrubs and behind buildings. The lane beyond the hedge was seen only at the gate.",
   "calibration": {
    "control_points": 8,
    "rms_m": 0.058,
    "scale_vs_first_model": 0.786,
    "levels_checked": 22,
-   "levels_rms_m": 0.062
+   "levels_rms_m": 0.072
+  },
+  "check": {
+   "tool": "tools/survey/fit.py",
+   "survey_points_on_the_plot": 837836,
+   "within_0.1_m_of_a_modelled_surface": 0.68,
+   "within_0.2_m": 0.84,
+   "within_0.3_m_or_beside_a_plant": 0.97,
+   "note": "What is left over is mostly things deliberately not modelled: a parked car, the contents of the outbuilding, branches overhanging from outside the plot."
   },
   "plot_area_m2": 1035,
   "viewpoint": {
@@ -174,10 +182,11 @@
     "kind": "gravel",
     "shape": "band",
     "path": [
-     [-4.4, -7.75],
-     [-7.0, -7.9],
-     [-9.4, -7.8],
-     [-10.9, -7.3]
+     [-4.4, -7.8],
+     [-7.0, -8.1],
+     [-9.6, -8.1],
+     [-11.2, -7.9],
+     [-11.75, -7.3]
     ],
     "w": 0.5,
     "soft": 0.25,
@@ -227,26 +236,27 @@
     "strength": 0.8
    },
    {
-    "kind": "gravel",
-    "shape": "band",
-    "path": [
-     [-10.95, 1.6],
-     [-10.95, -7.2]
+    "kind": "mulch",
+    "shape": "poly",
+    "pts": [
+     [-10.0, 1.7],
+     [-11.4, 1.7],
+     [-11.4, -6.9],
+     [-10.0, -6.9]
     ],
-    "w": 0.65,
-    "soft": 0.25,
+    "soft": 0.2,
     "rough": 0.4
    },
    {
-    "kind": "mulch",
+    "kind": "gravel",
     "shape": "band",
     "path": [
-     [-10.1, 1.5],
-     [-10.1, -6.6]
+     [-11.75, 2.2],
+     [-11.75, -7.3]
     ],
-    "w": 0.2,
-    "soft": 0.15,
-    "rough": 0.3
+    "w": 0.32,
+    "soft": 0.2,
+    "rough": 0.35
    },
    {
     "kind": "gravel",
@@ -281,9 +291,10 @@
      [15.45, -2.2],
      [14.3, -1.9],
      [13.3, -1.4],
-     [11.6, -1.5],
-     [10.6, -0.8],
-     [10.0, 0.5]
+     [11.9, -1.5],
+     [11.8, -0.3],
+     [11.4, 0.6],
+     [10.6, 1.2]
     ],
     "soft": 0.25,
     "rough": 0.25
@@ -733,12 +744,12 @@
       "pots": 1
      },
      {
-      "box": [-8.02, -7.21, -7.31, -6.76],
-      "top": 7.39,
-      "pots": 1,
+      "box": [-8.24, -7.21, -7.31, -6.76],
+      "top": 7.45,
+      "pots": 2,
       "base": {
        "box": [-8.6, -7.21, -7.31, -6.76],
-       "top": 2.6
+       "top": 3.6
       }
      },
      {
@@ -951,14 +962,14 @@
     ],
     "porch": {
      "face": "north",
-     "at": [3.76, 5.56],
-     "out": 1.25,
-     "h": 2.2
+     "at": [4.21, 5.91],
+     "out": 0.95,
+     "h": 2.3
     },
     "posts": [-2.17]
    },
    "confidence": "measured",
-   "notes": "From the measured building survey (1:50 plans, 1:100 elevations and section): main range 8.52 x 5.66 m, rear outshot 4.38 x 4.38 m under a catslide roof that comes down to 0.9 m, ridge 7.62 m, half-hipped at both ends, three chimneys, lean-to WC on the west side. Wall positions are good to a few centimetres. The east end of the rear wing is timber-framed with brick infill, and its black frame is drawn from the east elevation and the footage. The front has an open black timber porch with a bench either side, and three first-floor oriel windows on brackets: two on the front, one at the north end of the east wall. The oriels are placed from the drawings; the porch from the survey points on its posts (1.8 m wide, standing 1.25 m out from the wall, 2.1 m high). A straightened photograph of the front made from the footage agrees with the drawn window positions to within 0.1 m. Glazing bars and joinery are indicative."
+   "notes": "From the measured building survey (1:50 plans, 1:100 elevations and section): main range 8.52 x 5.66 m, rear outshot 4.38 x 4.38 m under a catslide roof that comes down to 0.9 m, ridge 7.62 m, half-hipped at both ends, three chimneys, lean-to WC on the west side. Wall positions are good to a few centimetres. The east end of the rear wing is timber-framed with brick infill, and its black frame is drawn from the east elevation and the footage. The front has an open black timber porch with a bench either side, and three first-floor oriel windows on brackets: two on the front, one at the north end of the east wall. The oriels are placed from the drawings; the porch from the survey points on its timbers (1.7 m wide, centred on the front door, standing 0.95 m out from the wall, 2.3 m high). The external stack on the west gable is 1.39 m wide to a tiled shoulder 3.3 to 4.0 m up and 1.03 m wide above it, with two pots: read off a straightened photograph of the gable. Glazing bars and joinery are indicative."
   },
   {
    "id": "render_west",
@@ -970,8 +981,8 @@
    "params": {
     "items": [
      {
-      "box": [-9.75, -8.05, -6.8, -6.765],
-      "z": [0.35, 2.75],
+      "box": [-9.93, -8.6, -6.97, -6.765],
+      "z": [0.2, 4.3],
       "mat": "tarp_cream"
      },
      {
@@ -986,8 +997,8 @@
      }
     ]
    },
-   "confidence": "estimated",
-   "notes": "Condition, late November 2026: the render has come away from the west gable on both sides of the chimney stack, the larger area (about 1.7 m wide and 2.4 m high) towards the front corner, where it carries on round the corner for a metre along the front wall, up to 3 m above the ground. All of it is covered with sheeting. Cracks run up the gable above. Extent read off the straightened photograph of the front and judged by eye on the gable."
+   "confidence": "measured",
+   "notes": "Condition, late November 2026: the render has come away from the west gable on both sides of the chimney stack, the larger area between the stack and the front corner, where it carries on round the corner for a metre along the front wall, up to 3 m above the ground. All of it is covered with sheeting. The sheet on the gable hangs loose from about 4.3 m up, 1.3 m wide, and stands 0.1 to 0.3 m off the wall in folds (0.6 m at the most): 1,000 survey points on it. It is drawn as a slab 0.2 m thick. Cracks run up the gable above. The patch south of the stack is judged by eye."
   },
   {
    "id": "shed",
@@ -1021,14 +1032,14 @@
    "label": "White outbuilding",
    "layer": "buildings",
    "type": "outbuilding",
-   "at": [-3.0, -18.38, -0.05],
+   "at": [-3.01, -18.41, -0.05],
    "rot": 88.8,
    "params": {
-    "width": 5.47,
-    "depth": 6.99,
+    "width": 5.5,
+    "depth": 6.65,
     "back": [
-     [5.05, 7.14],
-     [-0.19, 6.84]
+     [5.1, 6.81],
+     [-0.17, 6.49]
     ],
     "front_h": 2.21,
     "back_h": 2.62,
@@ -1038,20 +1049,20 @@
     "openings": [
      {
       "face": "front",
-      "at": [1.1, 3.13],
+      "at": [1.13, 3.16],
       "z": [0.73, 1.95],
       "bars": [3, 1]
      },
      {
       "face": "front",
-      "at": [4.2, 5.07],
+      "at": [4.23, 5.1],
       "z": [0.0, 1.95],
       "kind": "door",
       "bars": [2, 4]
      },
      {
       "face": "right",
-      "at": [4.09, 5.58],
+      "at": [4.09, 5.44],
       "z": [0.9, 2.12],
       "bars": [3, 4]
      },
@@ -1072,14 +1083,14 @@
     ]
    },
    "confidence": "measured",
-   "notes": "Roughcast walls under a green corrugated sheet roof that falls about 0.45 m from back to front, where a gutter runs to a downpipe at the west corner. Measured all round from clips walked along every side: the points on each wall lie within 1.5 cm of a straight line. It is not square: the front is 5.47 m long and the back 5.24, the east side 7.16 and the west 6.84, and the corner by the shed is 86.5 degrees. Worth confirming with a tape across the diagonals (the model gives 8.74 m from the front west corner to the back east corner and 8.88 m the other way). Openings are read off straightened photographs of each wall, good to 2 or 3 cm: front window 2.03 x 1.22 m and glazed door 0.87 m; east window 1.49 x 1.22 m; on the north side a door 0.82 m wide and a six-light window 1.97 m wide. The west wall has no openings in its northern 3 m; the rest of it was seen only at a glancing angle. The earlier model, from two distant clips and a view through the attic window, had the building half a metre wider and its roof falling the other way. The 1:500 block plan draws it 5.0 x 6.7 m and 1 to 2 m further east. It stands with its front threshold 0.05 m below the datum; the ground rises to 0.15 m above datum at its north-west corner."
+   "notes": "Roughcast walls under a green corrugated sheet roof that falls about 0.45 m from back to front, where a gutter runs to a downpipe at the west corner. The front is 5.50 m long and the first 4 m of the east side are fixed just as well: both from clips tied directly to the survey, the points on each wall within 2 cm of a straight line. The corner between them measures 86.7 degrees, so the building is not quite square. The back half is less certain. It was filmed on a walk right round the building, and that walk slipped a third of a metre where it turned the far corner: the house, which it also saw, showed the slip, and the clips were moved back by it (see README, \"Anchoring to a building\"). As corrected the east side is 6.82 m, the back 5.29 m and the west side 6.50 m, good to about 0.15 m; before the correction the east side read 7.15 m. A sighting through the attic window, which owes nothing to that walk, puts the far jamb of the east window within 5 cm of where the corrected survey has it. A tape along the east wall, and across the diagonals (8.51 m from the front west corner to the back east corner, 8.62 m the other way), would settle it. Openings are read off straightened photographs of each wall: front window 2.03 x 1.22 m and glazed door 0.87 m; east window 1.35 x 1.22 m; on the north side a door 0.82 m wide and a six-light window 1.97 m wide. The west wall has no openings in its northern 3 m; the rest of it was seen only at a glancing angle. The 1:500 block plan draws the building 5.0 x 6.7 m and 1 to 2 m further east. It stands with its front threshold 0.05 m below the datum; the ground rises to 0.15 m above datum at its north-west corner."
   },
   {
    "id": "log_store",
    "label": "Log store against the outbuilding",
    "layer": "objects",
    "type": "log_store",
-   "at": [-8.0, -13.08],
+   "at": [-7.67, -13.07],
    "rot": 182.3,
    "params": {
     "width": 2.0,
@@ -1095,8 +1106,8 @@
    "label": "Small timber shed",
    "layer": "buildings",
    "type": "timber_shed",
-   "at": [-13.4, -19.3],
-   "rot": 180.0,
+   "at": [-13.39, -18.8],
+   "rot": 90.0,
    "params": {
     "width": 1.22,
     "depth": 1.83,
@@ -1108,22 +1119,22 @@
     "door": "gable",
     "windows": [
      {
-      "wall": "-x",
+      "wall": "+x",
       "at": [0.55, 1.3],
       "z": [0.95, 1.45],
       "lights": 2
      }
     ]
    },
-   "confidence": "estimated",
-   "notes": "A brown shiplap shed of the 6 x 4 ft kind (1.2 m wide across the gable, about 1.8 m long) under a felt roof, north-west of the outbuilding, with its door in the east gable and a small window on the south side. Logs and bags inside; the door stands open and the roof felt is torn. Its two nearer faces are placed from survey points; its length is taken from its type. It stands 2 to 3 m beyond the boundary drawn on the block plan, at the edge of the field: whose it is should be checked."
+   "confidence": "measured",
+   "notes": "A brown shiplap shed of the 6 x 4 ft kind (1.2 m wide across the gable, about 1.8 m long) under a felt roof, 2.8 m north of the outbuilding. Its door is in the south gable, facing the outbuilding, and a small window looks east. Logs and bags inside; the door stands open and the roof felt is torn. The gable and the east side are fixed by survey points on them (within about 0.2 m); its length is taken from its type. It stands 2 to 3 m beyond the boundary drawn on the block plan, at the edge of the field: whose it is should be checked."
   },
   {
    "id": "tarp_west",
    "label": "Heap under a blue tarpaulin",
    "layer": "objects",
    "type": "lump",
-   "at": [-7.15, -18.87],
+   "at": [-6.82, -18.87],
    "rot": 0.0,
    "params": {
     "size": [3.1, 0.85, 1.0],
@@ -1139,7 +1150,7 @@
    "label": "Compost bay made of pallets",
    "layer": "objects",
    "type": "raised_bed",
-   "at": [-4.1, -20.2],
+   "at": [-3.8, -20.2],
    "rot": 0.0,
    "params": {
     "size": [1.2, 1.2],
@@ -1155,16 +1166,16 @@
    "label": "Wheelbarrow",
    "layer": "objects",
    "type": "lump",
-   "at": [-10.25, -17.85],
+   "at": [-9.8, -17.8],
    "rot": 90.0,
    "params": {
-    "size": [1.25, 0.6, 0.62],
+    "size": [0.65, 0.5, 1.25],
     "mat": "plastic_black",
     "seed": 14,
     "lumps": 0.08
    },
    "confidence": "measured",
-   "notes": "Stood on end against the north wall of the outbuilding."
+   "notes": "Stood on end against the north wall of the outbuilding, just past the window, its handles 1.25 m up."
   },
   {
    "id": "patio",
@@ -2079,15 +2090,15 @@
    "label": "Cane wigwam",
    "layer": "objects",
    "type": "cane_wigwam",
-   "at": [-6.7, 8.45],
+   "at": [-6.5, 7.85],
    "rot": 0.0,
    "params": {
     "n": 7,
     "r": 0.5,
     "h": 2.2
    },
-   "confidence": "estimated",
-   "notes": "Bean canes tied in a wigwam, standing over the brick edging: about 2.2 m tall. Position within about 0.4 m."
+   "confidence": "measured",
+   "notes": "Bean canes tied in a wigwam at the corner of the vegetable plot nearest the hedge: about 2.2 m tall. Placed from the survey points where the canes meet (55 of them): within about 0.2 m. It was first drawn 0.6 m nearer the hedge, from a single distant view along its line."
   },
   {
    "id": "cane_1",
@@ -2230,14 +2241,14 @@
    "label": "Wooden mushroom",
    "layer": "objects",
    "type": "mushroom",
-   "at": [-9.7, 8.6],
+   "at": [-10.0, 8.12],
    "rot": 0.0,
    "params": {
-    "h": 0.5,
-    "cap_r": 0.2
+    "h": 0.58,
+    "cap_r": 0.17
    },
    "confidence": "measured",
-   "notes": "A carved garden ornament in the strip under the hedge."
+   "notes": "A carved garden ornament in the strip under the hedge, 0.6 m tall: 320 survey points on it from four clips. An ivy-covered mound 0.8 m east of it has as many points and was first taken for it. Thin saplings in yellow leaf stand between it and the hedge; they are not drawn."
   },
   {
    "id": "picnic_table",
@@ -2364,7 +2375,7 @@
    "label": "Plastic chair",
    "layer": "objects",
    "type": "monobloc_chair",
-   "at": [8.9, -5.9],
+   "at": [8.25, -6.05],
    "rot": 9.4,
    "params": {
     "back_h": 0.79
@@ -2502,13 +2513,13 @@
   },
   {
    "id": "bag_black",
-   "label": "Black sack",
+   "label": "Black sacks of cuttings",
    "layer": "objects",
    "type": "lump",
-   "at": [-2.3, -11.9],
+   "at": [-1.9, -11.0],
    "rot": 0.0,
    "params": {
-    "size": [0.6, 0.5, 0.55],
+    "size": [0.9, 0.7, 0.7],
     "mat": "plastic_black",
     "seed": 19,
     "lumps": 0.15
@@ -2527,51 +2538,114 @@
   },
   {
    "id": "drum",
-   "label": "Galvanised drum on a stand",
+   "label": "Steel drum on a stand",
    "layer": "objects",
    "type": "barrel_lying",
-   "at": [-3.9, -11.85, 0.45],
-   "rot": 100.0,
+   "at": [-3.3, -12.0, 0.62],
+   "rot": 10.0,
    "params": {
-    "r": 0.29,
-    "length": 0.95,
+    "r": 0.28,
+    "length": 0.9,
     "mat": "galvanised"
    },
-   "confidence": "estimated",
-   "notes": "A grey steel drum lying on a stand at the mouth of the gap between the shed and the outbuilding, with a wreath of twigs hung on it: an oil-drum barbecue or an old tank. The first survey, from across the lawn, took it for a covered barbecue 2 m from here."
+   "confidence": "measured",
+   "notes": "A grey steel drum with holes punched in it, lying tilted on a black metal stand in front of the ivy at the corner of the outbuilding: an oil-drum barbecue or incinerator. The first survey, from across the lawn, took it for a covered barbecue 1.5 m from here. Placed from frames with the survey grid drawn on the ground, within about 0.2 m."
   },
   {
    "id": "drum_stand",
    "label": "Stand of the drum",
    "layer": "objects",
    "type": "fittings",
-   "at": [-3.9, -11.85],
-   "rot": 100.0,
+   "at": [-3.3, -12.0],
+   "rot": 10.0,
    "params": {
     "items": [
      {
-      "box": [-0.38, -0.34, -0.22, -0.18],
-      "z": [0.0, 0.5],
+      "box": [-0.36, -0.32, -0.22, -0.18],
+      "z": [0.0, 0.66],
       "mat": "steel_black"
      },
      {
-      "box": [-0.38, -0.34, 0.18, 0.22],
-      "z": [0.0, 0.5],
+      "box": [-0.36, -0.32, 0.18, 0.22],
+      "z": [0.0, 0.66],
       "mat": "steel_black"
      },
      {
-      "box": [0.34, 0.38, -0.22, -0.18],
-      "z": [0.0, 0.5],
+      "box": [0.32, 0.36, -0.22, -0.18],
+      "z": [0.0, 0.66],
       "mat": "steel_black"
      },
      {
-      "box": [0.34, 0.38, 0.18, 0.22],
-      "z": [0.0, 0.5],
+      "box": [0.32, 0.36, 0.18, 0.22],
+      "z": [0.0, 0.66],
       "mat": "steel_black"
      }
     ]
    },
    "confidence": "estimated"
+  },
+  {
+   "id": "ivy_outb_corner",
+   "label": "Ivy at the corner of the outbuilding",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [-3.5, -12.3],
+   "rot": 0.0,
+   "params": {
+    "rx": 0.55,
+    "ry": 0.75,
+    "h": 2.15,
+    "leaf": "leaf_ivy",
+    "body": "foliage_ivy",
+    "seed": 71,
+    "density": 26,
+    "card": 0.24
+   },
+   "confidence": "measured",
+   "notes": "A mass of ivy and a self-sown shrub filling the gap between the outbuilding and the old shed, 2 m high. 2,500 survey points."
+  },
+  {
+   "id": "shrubs_yard",
+   "label": "Shrubs in the yard north of the shed",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [-7.3, -10.9],
+   "rot": 0.0,
+   "params": {
+    "rx": 2.0,
+    "ry": 1.5,
+    "h": 2.5,
+    "leaf": "leaf_green",
+    "body": "foliage_green",
+    "seed": 72,
+    "density": 16,
+    "card": 0.32,
+    "twiggy": "twigs_brown"
+   },
+   "confidence": "measured",
+   "notes": "Big-leaved evergreen shrubs and brambles filling the yard between the old shed, the bins and the outbuilding: about 4 x 3 m and 2.5 m high. 6,900 survey points. Individual plants are not distinguished."
+  },
+  {
+   "id": "shrubs_outb_north",
+   "label": "Shrubs north of the outbuilding",
+   "layer": "boundaries",
+   "type": "hedge",
+   "params": {
+    "path": [
+     [-11.75, -16.0],
+     [-11.9, -13.0],
+     [-11.75, -10.6]
+    ],
+    "height": 2.1,
+    "width": 1.5,
+    "body": "foliage_green",
+    "leaf": "leaf_lime",
+    "lumps": 0.45,
+    "density": 10,
+    "seed": 19
+   },
+   "confidence": "measured",
+   "notes": "A line of yellow-leaved shrubs and brambles 2 m high, 1.5 to 2 m out from the north wall of the outbuilding, with a rough path between. Whether they mark anything is not known."
   },
   {
    "id": "boards_shed",
@@ -2606,34 +2680,34 @@
    "label": "New fence post",
    "layer": "objects",
    "type": "plank_slab",
-   "at": [-2.45, -6.86],
+   "at": [-1.8, -7.03],
    "rot": 90.0,
    "params": {
-    "length": 1.8,
+    "length": 2.1,
     "width": 0.09,
     "thick": 0.09,
-    "lean": 7,
+    "lean": 2,
     "mat": "wood_new"
    },
-   "confidence": "estimated",
-   "notes": "Two new sawn posts stand leaning against the west wall of the lean-to. Seen at the edge of the first clip, they were taken for gate posts across the passage: there is no gate."
+   "confidence": "measured",
+   "notes": "Two new sawn posts, 2.1 m long, stand upright side by side 0.3 m off the west wall of the lean-to, near its south end: 320 survey points on them, within 0.1 m. Seen at the edge of the first clip, they were taken for gate posts across the passage: there is no gate."
   },
   {
    "id": "post_leaning_2",
    "label": "New fence post",
    "layer": "objects",
    "type": "plank_slab",
-   "at": [-2.75, -6.83],
+   "at": [-1.8, -6.92],
    "rot": 90.0,
    "params": {
-    "length": 1.8,
+    "length": 2.1,
     "width": 0.09,
     "thick": 0.09,
-    "lean": 10,
+    "lean": 2,
     "mat": "wood_new"
    },
-   "confidence": "estimated",
-   "notes": "Two new sawn posts stand leaning against the west wall of the lean-to. Seen at the edge of the first clip, they were taken for gate posts across the passage: there is no gate."
+   "confidence": "measured",
+   "notes": "Two new sawn posts, 2.1 m long, stand upright side by side 0.3 m off the west wall of the lean-to, near its south end: 320 survey points on them, within 0.1 m. Seen at the edge of the first clip, they were taken for gate posts across the passage: there is no gate."
   },
   {
    "id": "bin_1",
@@ -2973,7 +3047,7 @@
    "label": "Garden gate",
    "layer": "boundaries",
    "type": "picket_gate",
-   "at": [-12.25, 10.1],
+   "at": [-12.05, 10.2],
    "rot": 0.0,
    "params": {
     "width": 0.95,
@@ -2982,33 +3056,33 @@
     "post": 0.13
    },
    "confidence": "measured",
-   "notes": "A white picket gate between two square posts, 1.05 m apart, opening straight onto the pavement. The ground here is 0.45 m below the datum at the house. It leans, and was filmed both shut and open. Placed from the survey points on its posts."
+   "notes": "A white picket gate between two square posts, 1.08 m apart centre to centre, opening straight onto the pavement. The ground here is 0.45 m below the datum at the house. It leans, and was filmed both shut and open. Placed from the white survey points on its posts in three clips, which agree to 5 cm: the first placing, made before the clips of the front garden were tied to the house, stood 0.2 m too far north."
   },
   {
    "id": "conifer_gate",
    "label": "Big conifer by the gate",
    "layer": "planting",
    "type": "conifer",
-   "at": [-10.4, 10.4],
+   "at": [-9.86, 9.9],
    "rot": 0.0,
    "params": {
     "height": 9.5,
     "r": 2.3,
     "seed": 31
    },
-   "confidence": "estimated",
-   "notes": "A dark evergreen with a bare red-brown trunk for its first 2 m, standing in the hedge line on the south side of the gate and overhanging the vegetable plot. Position within about half a metre; height 9 to 10 m by eye."
+   "confidence": "measured",
+   "notes": "A dark evergreen with a bare red-brown trunk for its first 2 m on the gate side, standing in the hedge line on the south side of the gate. On the garden side its branches come down to head height and reach 4 to 5 m out over the vegetable plot (survey points on them as far as 5.3 m east of the grid origin): it is drawn narrower than that so as not to bury the gate. The trunk, 0.35 m thick, is fixed by four lines of sight, two from the front lawn and two from the east lawn, nearly square to each other: they meet within 0.13 m. It was first drawn 0.7 m nearer the gate. Height 9 to 10 m by eye."
   },
   {
    "id": "shrub_gold",
    "label": "Yellow-leaved shrub",
    "layer": "planting",
    "type": "shrub",
-   "at": [-14.0, 9.0],
+   "at": [-13.3, 8.5],
    "rot": 0.0,
    "params": {
-    "rx": 1.25,
-    "ry": 0.9,
+    "rx": 1.6,
+    "ry": 0.75,
     "h": 2.4,
     "leaf": "leaf_lime",
     "body": "foliage_green",
@@ -3017,31 +3091,31 @@
     "card": 0.26
    },
    "confidence": "measured",
-   "notes": "A bright mass of yellow leaves 2.5 m across on the north side of the gate, where a hedge would be."
+   "notes": "A bright mass of yellow leaves 3 m long on the north side of the gate path, inside the hedge line, its branches reaching over the path."
   },
   {
    "id": "well",
    "label": "Wishing well",
    "layer": "objects",
    "type": "wishing_well",
-   "at": [-16.45, 0.9],
-   "rot": 0.0,
+   "at": [-16.73, 0.15],
+   "rot": 60.0,
    "params": {
-    "r": 0.47,
-    "wall_h": 0.75,
-    "post_h": 1.9,
-    "roof": [1.45, 1.25],
-    "ridge": 0.5
+    "r": 0.48,
+    "wall_h": 0.55,
+    "post_h": 1.15,
+    "roof": [1.55, 1.4],
+    "ridge": 0.42
    },
    "confidence": "measured",
-   "notes": "An ornamental well in the front lawn: a brick drum 0.95 m across, two posts with a windlass and a little tiled roof, its ridge running north to south. Triangulated from two frames; within about 0.15 m."
+   "notes": "An ornamental well in the front lawn, 6.8 m out from the front wall: a brick drum 0.96 m across and 0.55 m high, two posts with a windlass, and a little tiled roof whose ridge is 1.6 m above the grass. The posts and the ridge stand on a line from west-north-west to east-south-east. The drum is a circle fitted through 500 survey points from the two clips that walked round it (they lie within 2 cm of it), in clips anchored to the house: within about 0.1 m. The roof and the turn of the posts are from 400 points on the tiles and 70 on the posts. A clip filmed from the house wall showed the well 1.3 m from here until it was found to have swung by 4.3 degrees and was pinned by sightings."
   },
   {
    "id": "tree_front",
    "label": "Leaning tree in the front garden",
    "layer": "planting",
    "type": "broadleaf",
-   "at": [-16.2, 5.3],
+   "at": [-16.33, 5.33],
    "rot": 20.0,
    "params": {
     "height": 6.5,
@@ -3065,16 +3139,16 @@
    "label": "Heap under a blue tarpaulin",
    "layer": "objects",
    "type": "lump",
-   "at": [-19.2, 7.1],
-   "rot": 30.0,
+   "at": [-18.0, 6.35],
+   "rot": 40.0,
    "params": {
-    "size": [3.0, 2.4, 0.45],
+    "size": [2.9, 2.1, 0.4],
     "mat": "tarp_blue",
     "seed": 10,
     "lumps": 0.12
    },
    "confidence": "measured",
-   "notes": "About 3 x 2.4 m, under the leaning tree in the north-east corner. What is under it is not known."
+   "notes": "About 2.9 x 2.1 m and 0.4 m high, beside the leaning tree in the north-east corner, the tree standing at its south-east end. What is under it is not known. Placed from 1,300 blue survey points in five clips: within about 0.3 m. It was first drawn 1.4 m further into the corner, from clips that had drifted."
   },
   {
    "id": "tile_pile",
@@ -3096,12 +3170,12 @@
    "label": "Evergreen bush in the front lawn",
    "layer": "planting",
    "type": "shrub",
-   "at": [-15.1, -1.4],
+   "at": [-14.96, -1.77],
    "rot": 0.0,
    "params": {
-    "rx": 0.6,
-    "ry": 0.5,
-    "h": 1.5,
+    "rx": 0.7,
+    "ry": 0.47,
+    "h": 1.55,
     "leaf": "leaf_green",
     "body": "foliage_green",
     "seed": 65,
@@ -3115,11 +3189,11 @@
    "label": "Evergreen bush in the front lawn",
    "layer": "planting",
    "type": "shrub",
-   "at": [-14.65, -4.35],
+   "at": [-14.55, -5.06],
    "rot": 0.0,
    "params": {
-    "rx": 0.8,
-    "ry": 0.7,
+    "rx": 0.64,
+    "ry": 0.45,
     "h": 1.25,
     "leaf": "leaf_green",
     "body": "foliage_green",
@@ -3131,30 +3205,30 @@
   },
   {
    "id": "rose_front",
-   "label": "Shrub in front of the right-hand window",
+   "label": "Thin shrub by the north-west corner",
    "layer": "planting",
    "type": "shrub",
-   "at": [-11.2, -4.9],
+   "at": [-11.78, -7.03],
    "rot": 0.0,
    "params": {
-    "rx": 0.4,
-    "ry": 0.4,
-    "h": 1.3,
+    "rx": 0.3,
+    "ry": 0.55,
+    "h": 1.15,
     "leaf": "leaf_green",
     "seed": 67,
     "density": 10,
     "card": 0.18,
     "twiggy": "twigs_brown"
    },
-   "confidence": "estimated",
-   "notes": "A thin shrub with pale stems, a rose by the look of it, at the edge of the gravel."
+   "confidence": "measured",
+   "notes": "A thin shrub with pale stems, a rose by the look of it, standing 1.9 m out from the front wall in line with the corner of the house, beyond the gravel path."
   },
   {
    "id": "pot_front",
    "label": "Black pot by the front wall",
    "layer": "objects",
    "type": "pot",
-   "at": [-10.55, -0.55],
+   "at": [-10.3, -1.2],
    "rot": 0.0,
    "params": {
     "r": 0.19,
@@ -3162,22 +3236,44 @@
     "style": "bucket",
     "mat": "plastic_black"
    },
-   "confidence": "estimated"
+   "confidence": "measured"
+  },
+  {
+   "id": "tree_nw",
+   "label": "Small tree in the north-west corner",
+   "layer": "planting",
+   "type": "small_tree",
+   "at": [-14.65, -11.3],
+   "rot": 0.0,
+   "params": {
+    "height": 5.0,
+    "trunk_r": 0.07,
+    "twist": 0.1,
+    "fork_h": 1.4,
+    "bark": "bark_grey",
+    "twigs": "twigs_brown",
+    "twig_size": 1.0,
+    "lean": [0.05, 0.0],
+    "seed": 88
+   },
+   "confidence": "estimated",
+   "notes": "A small bare tree or large shrub with branches from 1.3 to 3.7 m up, between the front lawn and the yard west of the house. Species not identified; trunk position within about 0.4 m."
   },
   {
    "id": "logs_north",
-   "label": "Cut branches stacked by the north boundary",
+   "label": "Cut branches stacked in the north-west corner",
    "layer": "objects",
    "type": "log_stack",
-   "at": [-18.5, -10.8],
-   "rot": 100.0,
+   "at": [-18.0, -12.05],
+   "rot": 90.0,
    "params": {
-    "length": 2.2,
-    "height": 0.5,
-    "depth": 0.8,
+    "length": 1.5,
+    "height": 1.2,
+    "depth": 1.0,
     "seed": 6
    },
-   "confidence": "estimated"
+   "confidence": "measured",
+   "notes": "A heap of sawn branches about 1.5 x 1.2 m and over a metre high at the edge of the shrubs."
   },
   {
    "id": "shrubs_north",
@@ -3186,22 +3282,41 @@
    "type": "hedge",
    "params": {
     "path": [
-     [-18.3, -13.5],
+     [-18.75, -13.5],
      [-18.6, -8.0],
-     [-18.9, -3.0],
-     [-19.3, 2.0],
-     [-19.9, 5.0]
+     [-18.65, -3.0],
+     [-18.9, 0.5],
+     [-19.9, 3.0],
+     [-20.7, 5.5]
     ],
     "height": 3.2,
     "width": 2.4,
     "body": "foliage_green",
     "leaf": "leaf_green",
-    "lumps": 0.45,
+    "lumps": 0.35,
     "density": 10,
     "seed": 16
    },
    "confidence": "estimated",
-   "notes": "A belt of shrubs, brambles and young trees 2 to 4 m deep along the whole north side: the lawn stops at its edge, about 7.5 m from the front of the house. Whatever marks the boundary itself (a fence or an old hedge) is hidden inside it. The inner edge is measured; its depth is taken from the block plan."
+   "notes": "A belt of shrubs, brambles and young trees 2 to 4 m deep along the whole north side: the lawn stops at its edge, 7.5 m from the front of the house for most of its length and nearly 10 m in the north-east corner, behind the tarpaulin. Whatever marks the boundary itself (a fence or an old hedge) is hidden inside it. The inner edge is measured; its depth is taken from the block plan."
+  },
+  {
+   "id": "hedge_gate_north",
+   "label": "Beech hedge north of the garden gate",
+   "layer": "boundaries",
+   "type": "hedge",
+   "params": {
+    "path": [
+     [-12.85, 10.35],
+     [-14.2, 10.3],
+     [-15.6, 10.0]
+    ],
+    "height": 1.8,
+    "width": 1.0,
+    "seed": 17
+   },
+   "confidence": "estimated",
+   "notes": "The clipped beech hedge carries on past the gate: its first metre is in the survey (330 points, 1.6 to 2 m high above the pavement). Beyond that it is hidden behind the yellow shrub from inside the garden; it is drawn on to where the shrubs of the corner begin."
   },
   {
    "id": "shrubs_ne",
@@ -3363,6 +3478,26 @@
    "notes": "Beside the drive the beech hedge has been cut back to bare stems and brushwood about 1.5 m high, held with a stake. Its line is carried on from the measured hedge; the road side is not seen."
   },
   {
+   "id": "hedge_drive_south",
+   "label": "Beech growing out over the foot of the low wall",
+   "layer": "boundaries",
+   "type": "hedge",
+   "params": {
+    "path": [
+     [15.75, 3.5],
+     [15.95, 5.0],
+     [16.15, 6.4]
+    ],
+    "height": 1.6,
+    "width": 1.0,
+    "density": 7,
+    "lumps": 0.3,
+    "seed": 16
+   },
+   "confidence": "estimated",
+   "notes": "Copper beech, still in brown leaf, standing 1 m out from the low wall and up to 1.6 m high where the bulk bag is: 1,500 survey points. Whether it is rooted on this side of the wall or has grown through from the neighbour's hedge was not seen."
+  },
+  {
    "id": "bag_drive_1",
    "label": "Bulk bag of garden waste",
    "layer": "objects",
@@ -3399,7 +3534,7 @@
    "label": "Bulk bag of garden waste",
    "layer": "objects",
    "type": "lump",
-   "at": [14.3, 6.0],
+   "at": [14.95, 5.15],
    "rot": 40.0,
    "params": {
     "size": [0.95, 0.95, 0.7],
@@ -3426,6 +3561,64 @@
    "notes": "Lying along the edge of the bed between the drive and the hedge."
   },
   {
+   "id": "shrub_drive_edge",
+   "label": "Shrubs at the lawn end of the sleeper",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [8.8, 3.3],
+   "rot": 0.0,
+   "params": {
+    "rx": 0.95,
+    "ry": 0.9,
+    "h": 1.35,
+    "leaf": "leaf_lime",
+    "body": "foliage_green",
+    "seed": 73,
+    "density": 22,
+    "card": 0.26,
+    "twiggy": "twigs_brown"
+   },
+   "confidence": "measured",
+   "notes": "A leafy shrub and a twiggy one together, carrying the line of the grey-leaved shrub on to the brick kerb. 1,100 survey points."
+  },
+  {
+   "id": "shrub_drive_evergreen",
+   "label": "Clipped evergreen by the drive",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [10.9, -0.25],
+   "rot": 0.0,
+   "params": {
+    "rx": 0.75,
+    "ry": 0.6,
+    "h": 1.65,
+    "leaf": "leaf_green",
+    "body": "foliage_green",
+    "seed": 74,
+    "density": 30,
+    "card": 0.22
+   },
+   "confidence": "measured",
+   "notes": "A dense dark evergreen 1.65 m high at the edge of the gravel, where the drive bends round the end of the shrub bed."
+  },
+  {
+   "id": "grass_compost",
+   "label": "Long grass round the compost bin",
+   "layer": "planting",
+   "type": "clump",
+   "at": [-4.75, 5.05],
+   "rot": 0.0,
+   "params": {
+    "radius": 0.75,
+    "h": 0.6,
+    "leaf": "leaf_lime",
+    "density": 45,
+    "card": 0.3,
+    "seed": 95
+   },
+   "confidence": "measured"
+  },
+  {
    "id": "shrub_drive",
    "label": "Small shrub by the drive",
    "layer": "planting",
@@ -3448,7 +3641,7 @@
    "label": "Staked sapling",
    "layer": "planting",
    "type": "sapling",
-   "at": [12.3, 7.5],
+   "at": [13.3, 7.75],
    "rot": 0.0,
    "params": {
     "height": 1.7,
@@ -3457,7 +3650,8 @@
     "leaf_size": 0.1,
     "seed": 86
    },
-   "confidence": "estimated"
+   "confidence": "measured",
+   "notes": "A young tree tied to a pale stake that leans, in the bed in front of the cut-back hedge: 130 survey points on stake and stem."
   },
   {
    "id": "bricks_drive",

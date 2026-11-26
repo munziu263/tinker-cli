@@ -366,13 +366,25 @@ def merge(sv_path, out_path, piece, s, R, t, add):
         m = clips == c
         yaw[m] = np.degrees(np.unwrap(np.radians(yaw[m])))
     keep = {piece.frames[n]["id"] for n in names}
-    P, col, err, trk = [], [], [], []
+    clip_by_id = {im_id: clip_of(im.name) for im_id, im in piece.rec.images.items()}
+    P, col, err, trk, homes = [], [], [], [], []
     for pid, p in piece.rec.points3D.items():
         if any(e.image_id in keep for e in p.track.elements):
             P.append(s * R @ np.asarray(p.xyz) + t)
             col.append(p.color)
             err.append(p.error)
             trk.append(p.track.length())
+            seen = {}
+            for e in p.track.elements:
+                if e.image_id in keep:
+                    seen[clip_by_id[e.image_id]] = seen.get(clip_by_id[e.image_id], 0) + 1
+            homes.append(max(seen, key=seen.get))
+    if "home" in d:                                     # which clip each point lives in (align.py): keep the table going
+        table = sorted(set(str(c) for c in d["home_names"]) | set(homes))
+        old_names = [str(c) for c in d["home_names"]]
+        remap = np.array([table.index(c) for c in old_names], np.int16)
+        d["home"] = np.concatenate([remap[d["home"]], np.array([table.index(h) for h in homes], np.int16)])
+        d["home_names"] = np.array(table)
     for key, extra in (("names", np.array(names)), ("R", Rw), ("C", Cw), ("intr", intr), ("yaw", yaw), ("pitch", pitch), ("roll", roll),
                        ("P", np.array(P)), ("col", np.array(col, d["col"].dtype)), ("err", np.array(err)), ("track", np.array(trk))):
         d[key] = np.concatenate([d[key], extra.astype(d[key].dtype) if key != "names" else extra]) if len(extra) else d[key]

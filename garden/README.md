@@ -1,6 +1,6 @@
 # Garden survey model
 
-A 3D model of the house and garden as they stand (late November 2026), rebuilt from sixty-one
+A 3D model of the house and garden as they stand (late November 2026), rebuilt from sixty
 short phone clips and tied to a measured building survey. It is the "before" picture:
 the base for trying out new layouts, and something to hand to an architect or a
 landscaper.
@@ -89,8 +89,8 @@ finishes and fittings from a set of interior clips.
 
 ## How it was measured
 
-1. **Reconstruction.** COLMAP structure-from-motion on a pan from the lawn and 60 short
-   walks: 1,910 frames, 900,000 points, every camera position and direction.
+1. **Reconstruction.** COLMAP structure-from-motion on a pan from the lawn and 59 short
+   walks: 1,888 frames, 900,000 points, every camera position and direction.
    `sfm.py` does one clip, `sfm_add.py` registers further clips into it (landscape or
    upright, same day or not), `sfm_refine.py` lets everything settle together.
 2. **Vertical** from brick coursing (`gravity.py`). Brick walls are laid level, so the
@@ -131,7 +131,45 @@ finishes and fittings from a set of interior clips.
    and windows are read off it.
 9. **Ground levels** (`terrain.py`). The lowest survey points in each quarter-metre cell,
    with buildings cut out and shrubs planed off, tied to the 22 spot levels of the
-   measured survey. Before tying, the surface agreed with them to 6 cm.
+   measured survey. Before tying, the surface agreed with them to 7 cm.
+10. **Checking the survey against the model** (`fit.py`). Every survey point is compared
+   with the built model: how far is it from the nearest modelled surface? Two lists come
+   out. Points with nothing near them, gathered into clusters, each with a crop of the
+   footage that shows it: things missing from the model or drawn in the wrong place (a
+   hedge that carries on past the gate, a bulk bag a metre from where it stands), and
+   things that two clips put in two places. And for each feature, how much of its surface
+   has points on it: one that several frames looked at and that has none is not where the
+   model says. As it stands 68% of 838,000 points lie within 0.1 m of a modelled surface
+   and 84% within 0.2 m. Most of the rest is a parked car, the contents of the
+   outbuilding and branches overhanging from outside the plot.
+11. **Anchoring to a building** (`anchor.py`). The first run of that check had the front
+   wall of the house 0.3 m from where the clips of the front garden showed it. Clips are
+   joined to the survey one frame at a time, and along a walk with a weak stretch in it
+   the placing slips and carries everything after it along. Nothing inside the survey can
+   show that, because the clips still agree with one another. A building drawn from a
+   measured survey can. The points that belong to the clips in doubt (each point
+   remembers the clip that saw it most) are laid on the building's faces by the turn,
+   slide and, if need be, change of size that fits best, each point pulled square on to
+   the nearest face and never along it. Seven clips of the front garden had come out 8%
+   small, turned 2.2 degrees and 0.4 m out; afterwards their points lie 4 cm from the
+   walls. The clips round the back of the outbuilding had slipped 0.32 m along it, which
+   takes its east side from 7.15 m to 6.82 m: the figure the sighting through the attic
+   window (6) had given all along. A flat wall holds a walk square to itself and leaves
+   it free to slide along; frames at one end of the walk that a free reconstruction (7)
+   ties to sound clips hold that (`--hold`).
+12. **Sightings of known things** (`anchor.py --sights`, `control/east_sights.json`). A
+   clip that hangs on the survey by one neighbour can swing. One filmed along the east
+   wall showed the well across the front lawn 1.3 m from where the clips that walked
+   round it had it. It sees too little wall to be laid on the house, but it does see
+   things whose places are known: a corner of the house, the well, the foot of a tree.
+   Each is picked in a few of its frames, and the clip is turned and slid until every one
+   lies on the line of sight through its pick. It had swung 4.3 degrees; eleven picks of
+   three things then agree to 2 cm. Only the direction of a sighting is used, never the
+   distance. The second half of the same clip, after the camera pans round, would not fit
+   the same correction, so it and the clip that hangs on it are left out of the survey
+   (`align.py --without c3426:86-999,c3428`). Frames that can be checked against nothing
+   do a survey more harm than good: their points go into the ground levels like any
+   others.
 
 The first version of this model sized itself on "standard" objects (brick courses, a
 door, paving flags) and came out 27% too big near the house. Guessing a scale is not
@@ -142,7 +180,7 @@ good enough; control is.
 | Where | Roughly |
 | --- | --- |
 | House, old shed, apple tree, drains, spot levels (measured survey) | a few centimetres |
-| Outbuilding (walked all round) | walls 2 cm, openings 2 to 3 cm; the partition inside is a judgement |
+| Outbuilding (walked all round) | front and the first 4 m of the east side 2 cm, back corners 0.15 m, openings 2 to 3 cm; the partition inside is a judgement |
 | Patio, east lawn, kitchen garden, gate path, drive, front garden, passage by the shed (filmed on foot) | 0.1 to 0.2 m |
 | East end of the south wall and the shrubs by the bench | 0.1 to 0.2 m |
 | West wall, stock wall, log pile, picnic table and the rest of the far south-west corner (first clips, seen from two viewpoints) | 0.3 to 0.5 m |
@@ -158,7 +196,7 @@ colour the model by it. Tree crowns are generic; species are mostly not identifi
 
 Disagreements between sources are left visible rather than papered over. The west wall
 runs about 1.2 m outside the block-plan boundary. The outbuilding, now measured on all
-four sides, is 5.47 m wide where the block plan draws 5.0, and stands 1 to 2 m further
+four sides, is 5.50 m wide where the block plan draws 5.0, and stands 1 to 2 m further
 west (the two agree on how deep it is). The paved strip that ends the drive lies 0.5 to
 0.8 m outside the mapped boundary. And a small shed stands 2 to 3 m beyond the mapped
 line at the edge of the field. A 1:500 map is good to about a metre, so only the last of
@@ -178,6 +216,10 @@ usefulness; its numbers match the markers in the viewer. In general:
 - **Keep more than one thing in the picture.** Three clips filmed close against a brick
   wall could not be joined to anything: a frame full of bricks could be anywhere along the
   wall. Stand back and film along a wall, not at it.
+- **Keep the house in the picture when you can.** It is the one thing whose shape is
+  known to the centimetre. A clip that shows a wall or two of it can be checked against
+  it and put right (11 above); a clip of nothing but lawn and shrubs has to be taken on
+  trust.
 - **Sight things twice.** Anything that matters can be fixed by picking it in two frames
   taken a few metres apart and adding it to `sightings.json`. It is worth doing even for
   things that look settled: a second set of clips, filmed close to a tree stump that the
@@ -285,6 +327,67 @@ python $S/elevation.py survey5.npz front.png -3.00,-18.38 -2.89,-12.91 --z -0.2,
 python $S/overlay.py survey5.npz garden.json c3376_0118 check.jpg -- c3376
 ```
 
+Then the model is built (`build.py`) and the survey is checked against it, point by
+point. `fit.py` prints the clusters of points that have no surface, with the features
+nearest each, and the features with least of their surface confirmed; it writes a plan
+(`fit_plan.png`), the lists (`fit.json`) and a crop of the footage for each of the largest
+clusters:
+
+```
+python $S/fit.py survey5.npz viewer/model fit --garden garden.json --sheets 24 -- frames walk1 ... c3350 ...
+```
+
+A cluster is one of four things: something not modelled (add it, or leave it and say
+so), something modelled in the wrong place (move it), a ghost (a clip that turns on the
+spot, or looks from far off, puts points at the wrong distance; reflections in window
+glass appear behind the wall), or a clip that is itself in the wrong place. Look at the
+footage, and at which clips the points come from, before changing anything: saplings
+that clips filmed 12 m away put beside the gate path stand a metre and a half further
+back in the clips filmed next to them. The last shows as the same thing
+twice, or as a wall of the house standing off its own points. `anchor.py` deals with it
+(see "How it was measured", 11 and 12):
+
+```
+python $S/anchor.py d.npz viewer/model e.npz --to house --clips c3404,c3405,c3406,c3407,c3408,c3409,c3410 --size --lift --hold ref.npz
+python $S/anchor.py e.npz viewer/model f.npz --to house --plane -3.2,-12.93,-10.2,-13.20,0.2,2.5 --clips c3387,c3390,c3391,c3393,c3399,c3400,c3401 --carry c3394,c3395,c3396,c3398 --no-turn
+python $S/anchor.py f.npz viewer/model g.npz --to house --no-turn --clips c3425 --carry c3426
+python $S/anchor.py g.npz viewer/model survey.npz --sights $S/control/east_sights.json --clips c3426
+```
+
+Read what it prints before believing it. It gives the distance of the points from the
+faces before and after, the turn, slide and change of size, how much of the pull came
+from faces looking each way, and how firmly the weakest direction is held: a group that
+sees one flat wall is pinned square to it and free to slide along, and is left where it
+was in that direction. So the first line above frees the size and the height (`--size`,
+`--lift`) only because nine frames at the end of the walk have known places to hold it
+by (`--hold`: a copy of the survey made without the clips in doubt, with a free
+reconstruction of the last of them laid over it by `place.py`). The second keeps the
+group's direction (`--no-turn`), because its one run of house wall is too short to judge
+a turn by, and adds a wall the model does not have (`--plane`: the east wall of the
+outbuilding, as fitted to the points of clips that are not in doubt). `--carry` moves
+clips along with the group without giving them a say: the ones filmed indoors on the
+same walk, whose points lie on the inside of the walls. Height stays locked unless
+`--lift` is given: walls say nothing about it, and left free it followed sills and eaves
+to an answer 0.18 m out against the measured spot levels.
+
+The picks for `--sights` are made like any others (`gridcrop.py`), in the group's own
+frames, of things whose places are known from sound clips or from the measured house.
+Three things well apart are enough if one of them is near. More picks, from both ends of
+the clip, show whether the clip is sound in itself: here the gate posts, picked in its
+last frames, missed by 0.4 m after a correction that fitted its first frames to 2 cm,
+and that half of the clip was left out.
+
+The whole chain behind the survey as it stands, from the registered model on:
+
+```
+python $S/align.py work6/sparse a.npz --like survey2.npz --without c3411,c3412,c3428,c3426:86-999,c3425:206-999
+python $S/place.py back/0 a.npz b.npz --shared c3375,...,c3385 --add c3386,c3387,...,c3401
+python $S/place.py south/0 b.npz c.npz --db work7/db.db --clips c3362 --scale 0.76
+python $S/place.py front/2 c.npz d.npz --shared i --add c3411,c3412
+# the four anchor.py lines above, then:
+python $S/terrain.py survey.npz terrain.npz --levels $S/control/levels.json --buildings garden.json --json levels.json
+```
+
 `export_frames.py` writes the stills and camera poses behind the viewer's "Compare with
 video". `control/clips.json` lists the walks to show, the frames to leave out (someone
 in shot) and the things to blur wherever they appear (a number plate, a name board).
@@ -298,12 +401,12 @@ anything lying on the ground (an edging, a path, the foot of a post) can be plac
 eye to a quarter of a metre or better. Give it the ground surface (below) rather than a
 height: on the drive, a grid drawn a quarter of a metre too high reads a metre out.
 
-Three more work on the survey as a whole:
+Five more work on the survey as a whole:
 
 - `terrain.py` makes the **ground surface** from the survey's own points: the lowest
   points in each quarter-metre cell, with buildings cut out and shrubs planed off, tied
   to the spot levels of the measured survey (`control/levels.json`; the surface agreed
-  with them to 6 cm before it was tied). It writes `levels.json`, which `build.py` reads.
+  with them to 7 cm before it was tied). It writes `levels.json`, which `build.py` reads.
 - `elevation.py` makes a **straightened photograph of a wall**, to scale, by projecting
   every frame that faces the wall onto its plane. Whatever lies in the plane comes out
   sharp; window and door openings are then read straight off a ruled picture, to a
@@ -312,3 +415,11 @@ Three more work on the survey as a whole:
 - `overlay.py` draws the model as lines over any frame: the check that needs no
   rendering. If the house's wireframe sits on the house, the camera is right; if a wall
   is then drawn off its picture, the wall is wrong in the model.
+- `fit.py` is the **check of survey against model**: every point against the nearest
+  modelled surface. It reads the web copy of the model that `build.py` writes, so what
+  is checked is what the viewer shows. Plants count as explained within 0.6 m, since the
+  model only sketches them; hard surfaces within 0.3 m.
+- `anchor.py` **moves a group of clips** (frames and the points that belong to them)
+  onto a building of known shape or onto sightings of things with known places, and
+  leaves the rest of the survey alone. `align.py` records which clip each point belongs
+  to, and can leave clips, or part of one, out of a survey altogether (`--without`).

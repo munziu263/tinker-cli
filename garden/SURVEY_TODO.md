@@ -15,7 +15,11 @@ once its footage has been worked into the model, and moved to the log at the bot
 - Keep something other than the thing itself in the picture. A frame filled with one
   brick wall, a hedge or a lawn could be anywhere; the same wall with a tree, a corner or
   a building beyond it can only be in one place. Stand back and film along, not at.
-- Turn corners slowly: three or four seconds for a quarter turn.
+- Turn corners slowly: three or four seconds for a quarter turn. A clip is most likely to
+  go wrong where the camera swings round, and what follows the swing goes wrong with it.
+- Have part of the house in the picture whenever you can. Its shape is known to the
+  centimetre, so a clip that shows a wall or two of it can be checked against it and put
+  right; one that shows only lawn and shrubs has to be taken on trust.
 - One clip per item, 30 to 60 seconds. Photos every step or two work just as well.
 - Flat, overcast light is best. Send the original files, not trimmed or compressed copies.
 - Keep the earlier clips: new footage is registered against them.
@@ -51,10 +55,16 @@ once its footage has been worked into the model, and moved to the log at the bot
   - outer edge of the patio, end to end (4.96 m)
   - apple tree trunk to the exposed brick of the west wall (15.2 m)
   - south-west corner of the rear outshot to the west front corner of the outbuilding (14.3 m)
-  - outbuilding: the front wall (5.47 m) and both diagonals, corner to corner outside
-    (8.74 m from the front west corner, 8.88 m from the front east corner). The footage
-    says it is 0.2 m out of square; the diagonals would prove it
-  - north-east corner of the house to the nearer gate post (8.4 m)
+  - outbuilding, outside: the front wall (5.50 m), the east side (6.82 m) and both
+    diagonals, corner to corner (8.51 m from the front west corner, 8.62 m from the front
+    east corner). The front is sound; the back corners rest on clips that had slipped and
+    were slid back, and are good to 0.15 m. These four figures would settle them, and
+    whether the building really is out of square
+  - north-east corner of the house to the nearest brick of the wishing well (6.5 m).
+    *Worth doing:* the clips of the front garden came out 8% small and were scaled back
+    up against the house; this checks that at the far side of the lawn
+  - north-east corner of the house to the nearer gate post (8.5 m)
+  - front wall of the house, at the porch, straight out to the edge of the shrubs (7.5 m)
   - along the paved strip across the drive, from the brick pier to the end of the low
     wall (6.7 m)
   - inside the outbuilding, the length and width of each room, and the same for the shed
@@ -88,4 +98,5 @@ once its footage has been worked into the model, and moved to the log at the bot
 | 2026-11-26 | Fourteen short clips and a photo inside the house | Both floors built from the floor plans; finishes, beams and fittings for the rooms filmed |
 | 2026-11-26 | Six clips in the attic | Attic storey built from the attic plan and section. One clip looks out of the gable window: it fixed the outbuilding's east wall and depth |
 | 2026-11-26 | Three upright clips from the east lawn | Joined to the survey (all 247 frames). East side of the house checked and detailed; kitchen garden, hedge, brick edging and a dozen objects placed; the stump and the compost bin corrected by more than a metre |
-| 2026-11-26 | 67 clips from all round the outside (old items 2, 3 and 4, and part of 1) | 55 joined to the survey, which now has 61 clips and 1,910 frames. Newly measured: the drive, the kitchen garden and the path to the gate, the front garden and the front of the house, the passage by the shed, and everything behind the outbuilding. The outbuilding is measured on all four sides (5.47 x 7.0 m, out of square) with its doors and windows; the first model had it half a metre too wide and its roof falling the wrong way. Ground levels are modelled: the drive lies 0.25 m below the lawn and the gate 0.5 m below the back door. Not joined (12): three clips close against the south and west walls (item 1), five dark ones inside the sheds, two in the front garden, one at the gate and one behind the outbuilding |
+| 2026-11-26 | 67 clips from all round the outside (old items 2, 3 and 4, and part of 1) | 55 joined to the survey. Newly measured: the drive, the kitchen garden and the path to the gate, the front garden and the front of the house, the passage by the shed, and everything behind the outbuilding. The outbuilding is measured on all four sides (5.50 x 6.82 m as since corrected, out of square) with its doors and windows; the first model had it half a metre too wide and its roof falling the wrong way. Ground levels are modelled: the drive lies 0.25 m below the lawn and the gate 0.5 m below the back door. Not joined (12): three clips close against the south and west walls (item 1), five dark ones inside the sheds, two in the front garden, one at the gate and one behind the outbuilding |
+| 2026-11-26 | No new footage: every survey point compared with the built model, and every disagreement followed up in the clips | Three groups of clips were found out of place and put right. The seven clips of the front garden had come out 8% small and 0.4 m out, and were laid back on the measured walls of the house. Those round the back of the outbuilding had slipped 0.32 m along it: its east side is 6.82 m, not 7.15. One clip along the east wall had swung by 4 degrees and was pinned by sightings of the house corner, the well and a tree; the half of it that could not be checked, and one clip that hung on it, were taken out (the survey now has 60 clips and 1,888 frames). Moved in the model as a result: the wishing well (and its roof lowered and turned), the garden gate, the heap under the blue tarpaulin, the cane wigwam, the wooden mushroom, the new fence posts, the big conifer by the gate, the edge of the shrubs along the north side, a bulk bag on the drive. Added: the beech hedge north of the gate, and beech in front of the low wall by the drive. 68% of 838,000 survey points now lie within 0.1 m of a modelled surface, 84% within 0.2 m |

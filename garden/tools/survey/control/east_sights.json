@@ -1,0 +1,87 @@
+{
+ "note": "Things whose places are known from sound clips or from the measured house, as they show in frames of the clip filmed walking north along the east wall (c3426), which hangs on the survey by the clip before it and had swung. Places on plan in the site grid, metres; picks in pixels of the 1920 x 1440 frames. Used by anchor.py --sights. All the picks are in the first half of the clip (frames 10 to 81). Its second half, after it pans round to look along the gate path, does not fit the same correction: sightings of the gate posts there are 0.4 m out, and no single turn, slide and change of size brings both halves in (11 cm rms at best), so only the first half is trusted.",
+ "sights": [
+  {
+   "what": "north-east corner of the house (measured)",
+   "at": [
+    -9.91,
+    1.76
+   ],
+   "picks": [
+    [
+     "c3426_0010",
+     366,
+     200
+    ],
+    [
+     "c3426_0010",
+     383,
+     300
+    ],
+    [
+     "c3426_0030",
+     188,
+     100
+    ],
+    [
+     "c3426_0030",
+     225,
+     300
+    ]
+   ]
+  },
+  {
+   "what": "axis of the well's brick drum (circle through 500 points of the clips that walked round it)",
+   "at": [
+    -16.73,
+    0.15
+   ],
+   "picks": [
+    [
+     "c3426_0010",
+     571,
+     225
+    ],
+    [
+     "c3426_0030",
+     583,
+     245
+    ],
+    [
+     "c3426_0048",
+     208,
+     296
+    ]
+   ]
+  },
+  {
+   "what": "foot of the leaning tree's trunk (100 points of the clip that passed 1.6 m from it)",
+   "at": [
+    -16.3,
+    5.35
+   ],
+   "picks": [
+    [
+     "c3426_0010",
+     1512,
+     275
+    ],
+    [
+     "c3426_0030",
+     1610,
+     290
+    ],
+    [
+     "c3426_0048",
+     1336,
+     250
+    ],
+    [
+     "c3426_0081",
+     716,
+     260
+    ]
+   ]
+  }
+ ]
+}

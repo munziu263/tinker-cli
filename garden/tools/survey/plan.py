@@ -30,6 +30,9 @@ class Survey:
         # per-frame intrinsics (f, cx, cy, k1): clips added later have their own calibration
         n = len(self.names)
         self.intr = d["intr"] if "intr" in d.files else np.tile([self.f, self.cx, self.cy, self.k1], (n, 1))
+        # for each point, the clip that saw it most (surveys made before this was kept have none)
+        self.home = d["home"] if "home" in d.files else None
+        self.home_names = [str(c) for c in d["home_names"]] if "home_names" in d.files else []
         self.frames_dir = frames_dir
         self.frames_dirs = [frames_dir] if isinstance(frames_dir, str) else list(frames_dir or [])
         self.T = np.eye(3)           # extra plan transform (rotation about Z + shift), see set_plan_frame
@@ -63,6 +66,13 @@ class Survey:
     def clips(self):
         """Names of the clips in the survey, in order."""
         return sorted({clip_of(n) for n in self.names})
+
+    def points_of(self, clips):
+        """Mask of the points that live in the given clips (see align.py)."""
+        if self.home is None:
+            raise SystemExit("this survey does not record which clip each point belongs to: make it again with align.py")
+        want = [k for k, c in enumerate(self.home_names) if c in set(clips)]
+        return np.isin(self.home, want)
 
     def clip(self, clip):
         """Indices of the registered frames of one clip, in time order."""

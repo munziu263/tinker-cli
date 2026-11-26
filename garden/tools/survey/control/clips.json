@@ -1,5 +1,5 @@
 {
-  "about": "What the viewer's 'Compare with video' shows, for export_frames.py. Clips f to k are the first six; c33xx and c34xx are named after the phone's own file numbers. Clips filmed indoors are left out on purpose, and so is the lane outside the gate. A clip listed here that is not in the survey (c3363 to c3365, c3392, c3402, c3403 and c3427 could not be joined to it) is simply passed over.",
+  "about": "What the viewer's 'Compare with video' shows, for export_frames.py. Clips f to k are the first six; c33xx and c34xx are named after the phone's own file numbers. Clips filmed indoors are left out on purpose, and so is the lane outside the gate. A clip listed here that is not in the survey (c3363 to c3365, c3392, c3402, c3403 and c3427 could not be joined to it) is simply passed over. Left out because their places are not good enough to compare with the model: the end of c3425 (after frame 205), the second half of c3426 and all of c3428, which hang on one another along the east wall and swing by several degrees where the camera pans.",
 
   "walks": [
     {"title": "Pan from the lawn", "clips": [{"clip": "f", "stills": 44, "spread": "yaw"}]},
@@ -29,8 +29,8 @@
       {"clip": "c3405", "stills": 4}, {"clip": "c3406", "stills": 3}, {"clip": "c3407", "stills": 3}, {"clip": "c3408", "stills": 2, "last": 125},
       {"clip": "c3410", "stills": 3, "first": 105}, {"clip": "c3411", "stills": 3}, {"clip": "c3412", "stills": 2}, {"clip": "c3413", "stills": 3}]},
     {"title": "Kitchen garden and the path to the gate", "clips": [
-      {"clip": "c3416", "stills": 2, "first": 225}, {"clip": "c3417", "stills": 3, "skip": [[75, 140]]}, {"clip": "c3425", "stills": 3}, {"clip": "c3426", "stills": 4},
-      {"clip": "c3427", "stills": 2}, {"clip": "c3428", "stills": 3}]},
+      {"clip": "c3416", "stills": 2, "first": 225}, {"clip": "c3417", "stills": 3, "skip": [[75, 140]]}, {"clip": "c3425", "stills": 3, "last": 205}, {"clip": "c3426", "stills": 4, "last": 85},
+      {"clip": "c3427", "stills": 2}]},
     {"title": "Patio and back door", "clips": [
       {"clip": "c3421", "stills": 4}, {"clip": "c3422", "stills": 3}, {"clip": "c3423", "stills": 3}, {"clip": "c3424", "stills": 3}]}
   ],
@@ -40,8 +40,8 @@
     {"what": "name board on the garden gate, gate open", "at": [-12.3, 9.5, 0.9], "size": 1.4},
     {"what": "rear number plate of the car on the drive", "at": [9.7, 5.1, 0.9], "size": 0.8},
     {"what": "front number plate of the car on the drive", "at": [14.15, 3.2, 0.43], "size": 0.9},
-    {"what": "sign board on the verge", "at": [-1.9, 11.64, 2.61], "size": 1.3},
+    {"what": "sign board on the verge", "at": [-2.88, 11.2, 2.45], "size": 1.5},
     {"what": "supplier's name and telephone number printed on the bulk bags by the south border", "at": [12.8, -2.0, 0.35], "size": 2.6},
-    {"what": "supplier's name and telephone number printed on the bulk bag by the low wall", "at": [14.4, 6.2, 0.3], "size": 2.2}
+    {"what": "supplier's name and telephone number printed on the bulk bag by the low wall", "at": [14.95, 5.15, 0.45], "size": 1.9}
   ]
 }
