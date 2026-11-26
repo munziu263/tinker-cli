@@ -52,10 +52,13 @@ once its footage has been worked into the model, and moved to the log at the bot
   corner, floor to ceiling. Then walk out through the open door with the camera running,
   so inside and outside join up.
 - [ ] **8. Inside the shed.** The same.
-- [ ] **9. Inside the house.** Room by room from each corner, walking through every
-  doorway with the camera running: ground floor, stairs, upstairs, attic. *Lowest
-  priority:* the floor plans already give every room's size, so this adds heights, beams
-  and fittings rather than dimensions.
+- [ ] **9. Inside the house: the rooms not yet filmed.** The layout of both floors is in
+  the model from the floor plans, and a first set of clips has given finishes and fittings
+  for about half the rooms. Each room's card in the viewer (open the house with **Ground
+  floor** or **First floor**) says whether it has been filmed. For the rest: one clip per
+  room, 20 to 30 seconds, standing in a corner and turning slowly, lights on and curtains
+  open. *Lowest priority:* the plans already fix every size; footage only adds what the
+  rooms look like.
 
 ## Done
 
@@ -65,3 +68,4 @@ once its footage has been worked into the model, and moved to the log at the bot
 | 2026-11-26 | Walk east across the lawn | East garden: lawn, shrubs, stump, hedge |
 | 2026-11-26 | Walk round the patio | Back of the house, patio, a second viewpoint on the west side |
 | 2026-11-26 | Measured building survey and block plan | Scale, levels, north, house, shed, apple tree, drains, plot boundary |
+| 2026-11-26 | Fourteen short clips and a photo inside the house | Both floors built from the floor plans; finishes, beams and fittings for the rooms filmed |

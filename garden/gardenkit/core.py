@@ -92,6 +92,19 @@ MATERIAL_DEFS = {
     "polycarbonate": dict(colour=(0.72, 0.76, 0.78), rough=0.25),
     "gravel_grey": dict(colour=(0.60, 0.57, 0.52), rough=1.0),
     "stump_wood": dict(colour=(0.62, 0.58, 0.52), rough=0.9),
+    # inside the house: flat colours, read like a painted model
+    "plaster": dict(colour=(0.90, 0.89, 0.84), rough=0.9),
+    "wall_cut": dict(colour=(0.17, 0.18, 0.19), rough=0.8),
+    "timber_black": dict(colour=(0.06, 0.055, 0.05), rough=0.75),
+    "quarry_tiles": dict(colour=(0.50, 0.21, 0.15), rough=0.6),
+    "floor_red": dict(colour=(0.55, 0.11, 0.12), rough=0.55),
+    "floor_boards": dict(colour=(0.40, 0.28, 0.19), rough=0.6),
+    "carpet_red": dict(colour=(0.60, 0.07, 0.09), rough=1.0),
+    "terracotta_tiles": dict(colour=(0.76, 0.45, 0.32), rough=0.6),
+    "sanitary": dict(colour=(0.94, 0.94, 0.93), rough=0.25),
+    "aga_cream": dict(colour=(0.88, 0.84, 0.72), rough=0.35),
+    "appliance_white": dict(colour=(0.90, 0.90, 0.90), rough=0.4),
+    "worktop": dict(colour=(0.70, 0.57, 0.40), rough=0.6),
 }
 
 

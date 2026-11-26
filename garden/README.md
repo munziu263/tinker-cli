@@ -13,6 +13,8 @@ landscaper.
   and a mode that puts the 3D camera exactly where the phone was for each still so the
   model can be checked against the footage.
 - `tools/survey/` is the surveying: reconstruction, levelling, control, triangulation.
+- `gardenkit/` holds the builders: ground, walls and buildings, plants, objects, and the
+  inside of the house.
 
 ## Rebuild
 
@@ -46,10 +48,27 @@ remove the thing; copy one to add another. The available `type`s are the keys of
 things can also be moved or hidden by hand.
 
 Layers: Ground, Boundaries, Buildings, Planting, Furniture and objects, Surroundings,
-plus two that are information rather than things. **Survey data** holds the plot boundary
+the two storeys of the house interior (when `interior.json` is present), plus two that
+are information rather than things. **Survey data** holds the plot boundary
 from the block plan, the spot levels and inspection chambers from the measured survey and
 the grid origin. **Still to survey** hatches the parts nobody has filmed and plants a
 numbered marker wherever more footage would help, with what to film in its note.
+
+## Inside the house
+
+`gardenkit/interior.py` draws the inside of a building the way a floor plan does: walls as
+solid blocks at their true thickness with openings for doors and windows, floors at their
+own levels, stairs, ceiling beams and fixed fittings. In the viewer, **First floor** and
+**Ground floor** slice the whole model at ceiling height (4.11 m and 2.16 m above datum)
+so the rooms can be looked down into, or read as a true floor plan in Plan view; each room
+has a card with its size, floor level and ceiling height.
+
+The description of the rooms themselves lives in `interior.json`, beside `garden.json` and
+in the same format, and is **not in this repository**: the layout of the inside of a home
+is nobody else's business. `build.py` adds it to the model when the file is there and
+carries on without it when it is not. It was drawn from the measured floor plans (wall
+faces read off the drawing's own vector lines, so good to a centimetre or two), with
+finishes and fittings from a set of interior clips.
 
 ## How it was measured
 
@@ -85,7 +104,8 @@ good enough; control is.
 | Other things in the south and west garden (one viewpoint, corrected) | 0.5 m along the line of sight, less across it |
 | Outbuilding | front wall 0.3 m; depth and east end assumed |
 | Plot boundary from the block plan | about 1 m |
-| Front garden, drive, behind the shed and outbuilding, interiors | not surveyed |
+| Inside the house (measured floor plans) | a few centimetres |
+| Front garden, drive, behind the shed and outbuilding, inside the outbuildings | not surveyed |
 
 Every feature carries `confidence`: `measured` (drawings, or two viewpoints),
 `estimated` (one viewpoint, or partly hidden) or `assumed` (not seen). The viewer can
@@ -114,7 +134,7 @@ usefulness; its numbers match the markers in the viewer. In general:
 This repository is public, so nothing captured by the camera is committed: not the video,
 not the stills the viewer fades against (`viewer/frames/`, `viewer/frames.json`), not the
 survey point cloud. The drawings are not here either, only site-grid dimensions read off
-them. Without the stills the viewer simply hides "Compare with video"; the model itself
+them, and the inside of the house (`interior.json`) is left out altogether. Without the stills the viewer simply hides "Compare with video"; the model itself
 needs none of them. To bring the survey back from the original clips
 (`pip install pycolmap opencv-python`, and `ffmpeg` on the path):
 

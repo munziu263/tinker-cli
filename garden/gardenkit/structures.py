@@ -494,7 +494,7 @@ def catslide_wing(length=7.5, eaves=1.05, depth=3.6, ridge=3.9, wall="render_whi
 
 
 def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=(), openings=(),
-            rooflights=(), posts=(), wall="render_white", roof="clay_tiles"):
+            rooflights=(), posts=(), wall="render_white", roof="clay_tiles", outshot_east_kink=None):
     """The house, from the measured building survey. Everything is in site-grid metres
     relative to the feature's origin: X south, Y east, Z up.
 
@@ -509,9 +509,12 @@ def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=
       hip_z     height at which the half-hips start, at the gables
       north_eaves dict(x, z) edge of the north slope
       chimneys  dicts(box=[x_n, x_s, y_w, y_e], top, z0, pots)
-      openings  dicts(face="south"|"north"|"east"|"outshot_east"|"leanto_south",
-                at=[lo, hi] along the face, z=[sill, head], kind="window"|"door", bars)
+      openings  dicts(face="south"|"north"|"east"|"west"|"outshot_south"|"outshot_east"|
+                "outshot_west"|"leanto_south"|"leanto_west", at=[lo, hi] along the face,
+                z=[sill, head], kind="window"|"door", bars)
       rooflights dicts(y=[west, east], z=[low, high]) on the south slope
+      outshot_east_kink dict(x, y_north): the outshot's east wall runs straight from its
+                south end to x, then turns in to reach y_north where it meets the main range
     """
     m = Mesh()
     ts, rts = tex_size(wall), tex_size(roof)
@@ -572,29 +575,43 @@ def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=
 
     # --- outshot walls (low south wall, both ends up to the roof)
     face_wall((oxs, oyw), (oxs, oye), prof[-1][1] - 0.12, "outshot_south")
+    def roof_under(x):
+        zt = prof[-1][1]
+        for (xa, za), (xb, zb) in zip(prof[:-1], prof[1:]):
+            if xa <= x <= xb:
+                zt = za + (zb - za) * (x - xa) / (xb - xa)
+        return zt - 0.12
+
+    kink = outshot_east_kink
+
+    def east_y(x):
+        if not kink or x >= kink["x"]:
+            return oye
+        return oye + (kink["y_north"] - oye) * (kink["x"] - x) / (kink["x"] - oxn)
+
     for y, flip, face in ((oye, False, "outshot_east"), (oyw, True, "outshot_west")):
-        n = 7
-        xs_ = np.linspace(oxs, oxn, n)
-        top = []
-        for x in xs_:                                               # wall top follows the underside of the roof
-            zt = prof[-1][1]
-            for (xa, za), (xb, zb) in zip(prof[:-1], prof[1:]):
-                if xa <= x <= xb:
-                    zt = za + (zb - za) * (x - xa) / (xb - xa)
-            top.append(zt - 0.12)
-        pts = [(x, y, 0.0) for x in xs_] + [(x, y, z) for x, z in zip(xs_[::-1], top[::-1])]
-        uv = [(q[0] / ts[0], q[2] / ts[1]) for q in pts]
-        if flip:
-            pts, uv = pts[::-1], uv[::-1]
-        m.add(pts, [tuple(range(len(pts)))], [uv], wall)
+        yf = east_y if face == "outshot_east" else (lambda x, y=y: y)
+        runs = [(oxs, oxn)] if not (kink and face == "outshot_east") else [(oxs, kink["x"]), (kink["x"], oxn)]
+        for xa_, xb_ in runs:                                       # each run is one flat piece of wall
+            xs_ = np.linspace(xa_, xb_, 5)
+            pts = [(x, yf(x), 0.0) for x in xs_] + [(x, yf(x), roof_under(x)) for x in xs_[::-1]]
+            uv = [(q[0] / ts[0], q[2] / ts[1]) for q in pts]
+            if flip:
+                pts, uv = pts[::-1], uv[::-1]
+            m.add(pts, [tuple(range(len(pts)))], [uv], wall)
         for o in openings:
             if o["face"] == face:
                 x0, x1 = oxs - o["at"][1], oxs - o["at"][0]
                 sgn = 1 if face == "outshot_east" else -1
-                m.box((x1 - x0, 0.05, o["z"][1] - o["z"][0]), "glass_dark", M=translate(x0, y + sgn * 0.01 - 0.025, o["z"][0]), origin="corner")
-                for k in range(o.get("lights", 3) + 1):
-                    xx = x0 + (x1 - x0) * k / o.get("lights", 3)
-                    m.box((0.05, 0.07, o["z"][1] - o["z"][0] + 0.08), "paint_slate", M=translate(xx - 0.025, y + sgn * 0.02 - 0.035, o["z"][0] - 0.04), origin="corner")
+                n_l = o.get("lights", 3)
+                for k in range(n_l):                                # each light sits on its own bit of wall
+                    xa_, xb_ = x0 + (x1 - x0) * k / n_l, x0 + (x1 - x0) * (k + 1) / n_l
+                    ang = math.degrees(math.atan2(yf(xb_) - yf(xa_), xb_ - xa_))
+                    Mw = translate(xa_, yf(xa_), 0) @ rot_z(ang)
+                    Lw = math.hypot(xb_ - xa_, yf(xb_) - yf(xa_))
+                    m.box((Lw, 0.05, o["z"][1] - o["z"][0]), "glass_dark", M=Mw @ translate(0, sgn * 0.01 - 0.025, o["z"][0]), origin="corner")
+                    for xx in (0.0, Lw):
+                        m.box((0.05, 0.07, o["z"][1] - o["z"][0] + 0.08), "paint_slate", M=Mw @ translate(xx - 0.025, sgn * 0.02 - 0.035, o["z"][0] - 0.04), origin="corner")
     for y in posts:                                                 # studs showing in the low wall
         m.box((0.03, 0.1, prof[-1][1] - 0.14), "paint_black", M=translate(oxs + 0.0, y - 0.05, 0), origin="corner")
 
@@ -679,7 +696,7 @@ def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=
         wts = tex_size("weatherboard_dark")
         face_wall((lxs, lyw), (lxs, lye), zl, "leanto_south", mat="weatherboard_dark", frame="wood_grey")
         m.add([(lxs, lyw, zl), (lxs, lye, zl), (lxs, lye, zh)], [(0, 1, 2)], [[(0, 0), (1, 0), (1, 1)]], "weatherboard_dark")
-        m.quad((lxn, lyw, 0), (lxs, lyw, 0), (lxs, lyw, zl), (lxn, lyw, zl), "weatherboard_dark", ts=wts)
+        face_wall((lxn, lyw), (lxs, lyw), zl, "leanto_west", mat="weatherboard_dark", frame="wood_grey")
         m.add([(lxn, lyw - 0.15, zl + 0.05), (lxs + 0.2, lyw - 0.15, zl + 0.05), (lxs + 0.2, lye, zh + 0.05), (lxn, lye, zh + 0.05)],
               [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "polycarbonate")
         m.beam((lxs + 0.2, lyw - 0.15, zl), (lxs + 0.2, lye, zh), 0.04, 0.12, "wood_grey", roll=90)

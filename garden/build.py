@@ -20,7 +20,7 @@ sys.path.insert(0, HERE)
 import bpy  # noqa: E402
 import numpy as np  # noqa: E402
 
-from gardenkit import core, ground, objects, plants, structures  # noqa: E402
+from gardenkit import core, ground, interior, objects, plants, structures  # noqa: E402
 
 LAYERS = {
     "ground": "Ground",
@@ -31,6 +31,8 @@ LAYERS = {
     "context": "Surroundings",
     "survey": "Survey data",
     "gaps": "Still to survey",
+    "inside_gf": "Inside: ground floor",
+    "inside_ff": "Inside: first floor",
 }
 
 BUILDERS = {
@@ -104,6 +106,12 @@ BUILDERS = {
     "sign_board": objects.sign_board,
     "goal_posts": objects.goal_posts,
     "massing": objects.massing,
+    # inside a building
+    "walls": interior.walls,
+    "floor": interior.floor,
+    "stairs": interior.stairs,
+    "beams": interior.beams,
+    "fittings": interior.fittings,
 }
 
 
@@ -260,6 +268,11 @@ def export_web_model(model_dir):
 def main():
     t0 = time.time()
     spec = json.load(open(os.path.join(HERE, "garden.json")))
+    inside = os.path.join(HERE, "interior.json")      # optional and kept out of git: the inside of the house
+    if os.path.exists(inside):
+        extra = json.load(open(inside))["features"]
+        spec["features"] += extra
+        print(f"interior.json: {len(extra)} features")
     out_dir = os.path.join(HERE, "out")
     os.makedirs(out_dir, exist_ok=True)
     stats = build_scene(spec, os.path.join(HERE, "textures"))

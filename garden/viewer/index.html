@@ -92,6 +92,9 @@
   #scalebar .bar { height: 7px; border: 1.5px solid var(--ink); border-top: 0; position: relative; min-width: 20px; }
   #scalebar .bar::after { content: ""; position: absolute; left: 50%; bottom: 0; height: 5px; border-left: 1.5px solid var(--ink); }
   #scalebar .data { font-size: 11px; line-height: 1; }
+  #room-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .room-label { position: absolute; transform: translate(-50%, -50%); padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+    font-family: var(--font-label); font-weight: 600; font-size: 11.5px; letter-spacing: 0.03em; color: #fff; background: rgba(22, 30, 26, 0.74); }
   .keyrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
   #north { display: flex; align-items: center; gap: 3px; color: var(--ink); }
   #north svg { display: block; transform-origin: 50% 50%; }
@@ -146,12 +149,18 @@
 
 <div id="app">
   <div id="stage"><img id="photo" alt="Frame from the garden video"></div>
+  <div id="room-labels" aria-hidden="true"></div>
 
   <div id="top">
     <div class="panel seg" role="group" aria-label="View">
       <button id="mode-explore" aria-pressed="true">Explore</button>
       <button id="mode-plan" aria-pressed="false">Plan</button>
       <button id="mode-compare" aria-pressed="false">Compare with video</button>
+    </div>
+    <div class="panel seg" id="storey" role="group" aria-label="Open the house at a storey" hidden>
+      <button data-storey="all" aria-pressed="true">Whole house</button>
+      <button data-storey="ff" aria-pressed="false">First floor</button>
+      <button data-storey="gf" aria-pressed="false">Ground floor</button>
     </div>
     <div class="spacer"></div>
     <button class="tool" id="tool-measure" aria-pressed="false">Measure</button>
@@ -280,15 +289,22 @@ controls.addEventListener('change', invalidate);
 planControls.addEventListener('change', invalidate);
 
 // ---------------------------------------------------------------- state
-const state = { mode: 'explore', measuring: false, confidence: false, frames: null, frameImgs: [], blend: 0.5, scrub: 14 };
+const state = { mode: 'explore', storey: 'all', measuring: false, confidence: false, frames: null, frameImgs: [], blend: 0.5, scrub: 14 };
 const features = [];            // feature root objects (have userData.label)
 const layerRoots = {};          // layer key -> root object
 const pickables = [];
 const original = new Map();     // mesh -> original material(s)
-const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'planting', 'objects', 'context', 'survey', 'gaps'];
+const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'inside_gf', 'inside_ff', 'planting', 'objects', 'context', 'survey', 'gaps'];
 const LAYER_NAMES = { ground: 'Ground', boundaries: 'Walls and hedges', buildings: 'Buildings', planting: 'Trees and planting', objects: 'Furniture and objects', context: 'Surroundings',
-  survey: 'Boundary, levels, drains', gaps: 'Still to survey' };
+  survey: 'Boundary, levels, drains', gaps: 'Still to survey', inside_gf: 'Inside: ground floor', inside_ff: 'Inside: first floor' };
 const OVERLAY_LAYERS = new Set(['survey', 'gaps']);   // drawn-on information, not physical things
+const INSIDE_LAYERS = new Set(['inside_gf', 'inside_ff']);
+// Opening the house: one horizontal plane that every material is clipped by. Parked far overhead
+// it cuts nothing; lowered to just under a ceiling it lifts the storeys above clean off, shadows included.
+const STOREYS = { all: { cut: 1e6 }, ff: { cut: 4.11, layer: 'inside_ff', pos: [0.6, 5.2, 15.5], target: [-6.9, -2.4, 2.4] }, gf: { cut: 2.16, layer: 'inside_gf', pos: [2.6, 4.6, 13.5], target: [-5.2, -2.4, 0.3] } };
+const cutPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), STOREYS.all.cut);
+renderer.localClippingEnabled = true;
+const clipped = (mat) => { mat.clippingPlanes = [cutPlane]; mat.clipShadows = true; return mat; };
 const CONF_TEXT = { measured: 'Measured', estimated: 'Estimated', assumed: 'Assumed' };
 const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
@@ -317,6 +333,7 @@ function onModel(gltf) {
       pickables.push(m);
       const mats = Array.isArray(m.material) ? m.material : [m.material];
       for (const mat of mats) {
+        clipped(mat);
         if (mat.name === 'hatch') { mat.transparent = true; mat.opacity = 0.42; mat.depthWrite = false; mat.polygonOffset = true; mat.polygonOffsetFactor = -2; }
         if (/^marker/.test(mat.name)) { mat.polygonOffset = true; mat.polygonOffsetFactor = -3; mat.emissive = mat.color.clone().multiplyScalar(0.25); }
         for (const key of ['map', 'normalMap']) if (mat[key]) mat[key].anisotropy = key === 'map' ? maxAniso : 4;
@@ -331,6 +348,7 @@ function onModel(gltf) {
   }
   scene.add(root);
   buildLayerList();
+  setupInside();
   setupBackdrop();
   $('loading').hidden = true;
   setMode('explore', true);
@@ -442,7 +460,7 @@ function applyConfidence(on) {
     const f = mesh.userData.feature;
     if (!on || f.name === 'lawn' || OVERLAY_LAYERS.has(f.userData.layer)) { mesh.material = mat; continue; }
     const c = f.userData.confidence || 'estimated';
-    if (!confMats[c]) confMats[c] = new THREE.MeshLambertMaterial({ color: new THREE.Color(cssVar('--' + c)), side: THREE.DoubleSide });
+    if (!confMats[c]) confMats[c] = clipped(new THREE.MeshLambertMaterial({ color: new THREE.Color(cssVar('--' + c)), side: THREE.DoubleSide }));
     mesh.material = confMats[c];
   }
   invalidate();
@@ -485,7 +503,8 @@ function setMode(mode, force = false) {
   $('comparebar').hidden = mode !== 'compare';
   $('titleblock').hidden = mode === 'compare';
   photo.style.opacity = mode === 'compare' ? String(state.blend) : '0';
-  if (mode === 'compare') { select(null); setMeasuring(false); }
+  if (mode === 'compare') { select(null); setMeasuring(false); if (state.storey !== 'all') setStorey('all'); }
+  $('storey').hidden = mode === 'compare' || !layerRoots.inside_gf;
   $('tool-measure').hidden = mode === 'compare';
   camera = mode === 'plan' ? ortho : persp;
   persp.fov = 50;
@@ -509,6 +528,59 @@ function updateHint() {
   const h = $('hint');
   if (state.measuring) { h.hidden = false; h.textContent = measure.pts.length === 1 ? 'Now click the second point.' : 'Click two points on the model to measure between them.'; }
   else h.hidden = true;
+}
+
+// ---------------------------------------------------------------- inside the house
+const isRoom = (f) => INSIDE_LAYERS.has(f.userData.layer) && f.userData.kind === 'floor' && !/slab|structure|threshold/i.test(f.userData.label);
+const roomLabels = [];            // { el, layer, at }
+function setupInside() {
+  if (!layerRoots.inside_gf && !layerRoots.inside_ff) return;
+  $('storey').hidden = false;
+  const b = new THREE.Box3();
+  for (const f of features) {
+    if (!isRoom(f)) continue;
+    b.setFromObject(f);
+    const el = document.createElement('div');
+    el.className = 'room-label'; el.textContent = f.userData.label.replace(/\s*\(.*\)$/, ''); el.hidden = true;
+    $('room-labels').appendChild(el);
+    roomLabels.push({ el, layer: f.userData.layer, at: new THREE.Vector3((b.min.x + b.max.x) / 2, b.max.y, (b.min.z + b.max.z) / 2) });
+  }
+  for (const btn of $('storey').querySelectorAll('button')) btn.addEventListener('click', () => setStorey(btn.dataset.storey));
+}
+function setStorey(key) {
+  if (!STOREYS[key] || !layerRoots.inside_gf) return;
+  if (key !== 'all' && state.mode === 'compare') setMode('explore');
+  state.storey = key;
+  cutPlane.constant = STOREYS[key].cut;
+  sun.castShadow = key === 'all';                    // walls cut at head height throw long shadows across the rooms: read better without
+  for (const btn of $('storey').querySelectorAll('button')) btn.setAttribute('aria-pressed', String(btn.dataset.storey === key));
+  select(null);
+  const s = STOREYS[key];
+  // on the ground floor the long rear roof and the lean-to's roof sheet come down below the cut: take them off as well
+  const house = features.find((f) => f.name === 'house');
+  if (house) house.traverse((o) => { if (o.isMesh) o.visible = !(key === 'gf' && /^(clay_tiles|polycarbonate|paint_black|terracotta)$/.test(original.get(o)?.name || '')); });
+  if (key !== 'all') {
+    for (const k of ['buildings', s.layer]) { const boxEl = $('layer-' + k); if (boxEl && !boxEl.checked) { boxEl.checked = true; syncLayers(); } }
+    if (state.mode === 'explore') {
+      const p1 = P(...s.pos), q1 = P(...s.target);
+      if (reduceMotion) { persp.position.copy(p1); controls.target.copy(q1); controls.update(); }
+      else tween = { t0: performance.now(), dur: 900, p0: persp.position.clone(), p1, q0: controls.target.clone(), q1 };
+    } else if (state.mode === 'plan') {
+      const c = P(-5.4, -2.6, 0);
+      ortho.position.set(c.x, 120, c.z); planControls.target.copy(c); ortho.zoom = 3.2; ortho.updateProjectionMatrix(); planControls.update();
+    }
+  }
+  invalidate();
+}
+function updateRoomLabels() {
+  const s = STOREYS[state.storey], show = state.storey !== 'all' && state.mode !== 'compare';
+  for (const r of roomLabels) {
+    if (!show || r.layer !== s.layer || !layerRoots[r.layer].visible) { r.el.hidden = true; continue; }
+    v3.copy(r.at).project(camera);
+    r.el.hidden = v3.z > 1 || Math.abs(v3.x) > 1.05 || Math.abs(v3.y) > 1.05;
+    r.el.style.left = (box.x + (v3.x + 1) / 2 * box.w) + 'px';
+    r.el.style.top = (box.y + (1 - v3.y) / 2 * box.h) + 'px';
+  }
 }
 
 // ---------------------------------------------------------------- layout
@@ -588,6 +660,7 @@ function hitAt(ev) {
   ray.setFromCamera(ndc, camera);
   const hits = ray.intersectObjects(pickables, false);
   for (const h of hits) {
+    if (h.point.y > cutPlane.constant) continue;       // that part of the model has been lifted off
     let o = h.object, vis = true;
     while (o) { if (!o.visible) { vis = false; break; } o = o.parent; }
     if (vis) return h;
@@ -612,6 +685,7 @@ function select(f) {
   const dims = [];
   const m = (v) => Number(v).toFixed(v >= 10 ? 1 : 2) + ' m';
   if (OVERLAY_LAYERS.has(u.layer)) { /* nothing to size */ }
+  else if (INSIDE_LAYERS.has(u.layer)) { if (isRoom(f)) dims.push(['Overall', `${m(u.size_w)} × ${m(u.size_d)}`]); }
   else if (f.name === 'lawn') dims.push(['Modelled area', 'about 47 × 53 m']);
   else if (u.length) { dims.push(['Length', m(u.length)]); dims.push(['Height', m(u.size_h)]); }
   else { dims.push(['Footprint', `${m(u.size_w)} × ${m(u.size_d)}`]); dims.push(['Height', m(u.size_h)]); }
@@ -705,6 +779,7 @@ function frame(now) {
   sky.position.copy(camera.position);
   renderer.render(scene, camera);
   if (state.mode !== 'compare') updateScaleBar();
+  updateRoomLabels();
   if (measure.pts.length === 2) {
     v3.copy(measure.pts[0]).add(measure.pts[1]).multiplyScalar(0.5).project(camera);
     const lab = $('measure-label');
@@ -716,7 +791,7 @@ requestAnimationFrame(frame);
 
 // hooks used for automated checks
 window.__garden = {
-  ready: false, setMode, applyFrame, goPreset, select, applyConfidence,
+  ready: false, setMode, setStorey, applyFrame, goPreset, select, applyConfidence,
   setBlend(v) { $('blend').value = v; $('blend').dispatchEvent(new Event('input')); },
   setScrub(v) { $('scrub').value = v; applyFrame(v); },
   camera: () => camera, controls, planControls, scene, features, invalidate,
