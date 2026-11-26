@@ -2,7 +2,12 @@
 
 The lawn is not uniform, so instead of tiling a grass texture the surface is painted in
 plan from the zones in garden.json (bare soil under the willow, leaf litter along the
-walls, gravel beyond the gate ...) and laid over a single flat mesh at z = 0.
+walls, gravel beyond the gate ...) and laid over a single mesh.
+
+The mesh has the shape of the ground. garden.json's ground may carry a "relief": heights
+on a regular grid ({x0, y0, step, z}, made by tools/survey/terrain.py from the survey and
+the measured spot levels), or the name of a JSON file holding one. Without it the ground
+is flat at z = 0, the survey datum.
 """
 from __future__ import annotations
 
@@ -105,6 +110,8 @@ def paint_ground(path, extent, zones, px_per_m=64, seed=5):
         "field": (col(104, 136, 70), 0.3, 0.2),
         "mulch": (col(74, 60, 50), 0.45, 0.4),
         "tarmac": (col(84, 84, 86), 0.2, 0.4),
+        "paving": (col(158, 156, 148), 0.18, 0.3),     # concrete slabs laid as a path
+        "leaves": (col(118, 84, 52), 0.5, 0.6),        # a path or corner deep in fallen leaves
     }
     for k, z in enumerate(zones):
         base, a_fine, a_speck = palette[z["kind"]]
@@ -131,24 +138,117 @@ def paint_ground(path, extent, zones, px_per_m=64, seed=5):
     return W, H
 
 
-def ground(extent, zones, texture_dir, px_per_m=64, seed=5):
-    """Flat ground mesh with the painted plan texture. Registers the 'ground' texture."""
+class Relief:
+    """Ground heights on a grid, read with bilinear interpolation. Beyond the grid the
+    nearest edge value holds, and everything eases to zero over the last `fade` metres
+    inside `extent`, so that the modelled patch meets the flat land drawn round it."""
+
+    def __init__(self, data=None, extent=None, fade=4.0):
+        self.flat = not data
+        self.extent, self.fade = extent, fade
+        if not self.flat:
+            self.x0, self.y0, self.step = float(data["x0"]), float(data["y0"]), float(data["step"])
+            self.z = np.asarray(data["z"], np.float32)
+
+    def __call__(self, x, y):
+        x, y = np.asarray(x, float), np.asarray(y, float)
+        if self.flat:
+            return np.zeros(np.broadcast(x, y).shape) if x.ndim or y.ndim else 0.0
+        fx = np.clip((x - self.x0) / self.step, 0, self.z.shape[0] - 1.001)
+        fy = np.clip((y - self.y0) / self.step, 0, self.z.shape[1] - 1.001)
+        ix, iy = fx.astype(int), fy.astype(int)
+        tx, ty = fx - ix, fy - iy
+        z = self.z
+        h = (z[ix, iy] * (1 - tx) * (1 - ty) + z[ix + 1, iy] * tx * (1 - ty)
+             + z[ix, iy + 1] * (1 - tx) * ty + z[ix + 1, iy + 1] * tx * ty)
+        if self.extent is not None:
+            ex0, ey0, ex1, ey1 = self.extent
+            edge = np.minimum(np.minimum(x - ex0, ex1 - x), np.minimum(y - ey0, ey1 - y))
+            t = np.clip(edge / self.fade, 0.0, 1.0)
+            h = h * (t * t * (3 - 2 * t))
+        return h if np.ndim(h) else float(h)
+
+
+def _grid_lines(lo, hi, heights=None, coarse=0.5, fine=0.25, tol=0.08):
+    """Mesh lines between lo and hi: every `coarse` metres, and every `fine` metres across
+    any strip where the ground rises or falls by more than `tol` within the strip.
+    heights(t) gives the ground along positions t of this axis, one row per test line of
+    the other axis. A sunken path half a metre wide then gets the lines it needs for its
+    whole length, and open lawn gets few."""
+    out = [lo]
+    n = int(math.ceil((hi - lo) / coarse - 1e-9))
+    for k in range(n):
+        a, b = lo + k * coarse, min(hi, lo + (k + 1) * coarse)
+        sub = 1
+        if heights is not None:
+            h = heights(np.linspace(a, b, int(round((b - a) / fine)) + 1))
+            if float((h.max(1) - h.min(1)).max()) > tol:
+                sub = int(round((b - a) / fine))
+        out += [a + (b - a) * (j + 1) / sub for j in range(sub)]
+    return np.array(out)
+
+
+def _inside(poly, X, Y, inset=0.0):
+    """Mask of the points inside a polygon drawn in from its corners by about `inset` metres."""
+    P = np.asarray(poly, float)
+    if inset:
+        c = P.mean(0)
+        P = c + (P - c) * (1 - inset * 1.4 / np.maximum(np.linalg.norm(P - c, axis=1, keepdims=True), 1e-6))
+    inside = np.zeros(np.shape(X), bool)
+    for i in range(len(P)):
+        a, b = P[i], P[(i + 1) % len(P)]
+        inside ^= ((a[1] > Y) != (b[1] > Y)) & (X < (b[0] - a[0]) * (Y - a[1]) / (b[1] - a[1] + 1e-12) + a[0])
+    return inside
+
+
+def ground(extent, zones, texture_dir, px_per_m=64, seed=5, relief=None, cuts=()):
+    """Ground mesh with the painted plan texture, shaped by the relief if there is one.
+    Registers the 'ground' texture.
+
+    cuts: (outline, level) pairs, the footprints of buildings that have floors of their
+    own. The ground outside a building is often higher than the floor inside it (earth
+    builds up against old walls), and a surface carried straight across would come up
+    through the floor. Inside each outline the ground is therefore held down to `level`.
+    The step is made within a hand's breadth of the outline, so it is hidden in the
+    thickness of the wall: mesh lines are added along the walls to make that possible."""
     x0, y0, x1, y1 = extent
     path = os.path.join(texture_dir, "ground.jpg")
     paint_ground(path, extent, zones, px_per_m, seed)
     TEX["ground"] = {"path": path, "size": (x1 - x0, y1 - y0), "normal": None}
+    relief = relief or Relief()
     m = Mesh()
-    nx, ny = max(1, int((x1 - x0) / 4)), max(1, int((y1 - y0) / 4))
-    verts, faces, uvs = [], [], []
-    for j in range(ny + 1):
-        for i in range(nx + 1):
-            verts.append((x0 + (x1 - x0) * i / nx, y0 + (y1 - y0) * j / ny, 0.0))
+    if relief.flat:
+        xs = np.linspace(x0, x1, max(1, int((x1 - x0) / 4)) + 1)
+        ys = np.linspace(y0, y1, max(1, int((y1 - y0) / 4)) + 1)
+    else:
+        probe_y, probe_x = np.arange(y0, y1 + 1e-6, 0.25), np.arange(x0, x1 + 1e-6, 0.25)
+        xs = _grid_lines(x0, x1, lambda t: relief(*np.meshgrid(t, probe_y, indexing="xy")))
+        ys = _grid_lines(y0, y1, lambda t: relief(*np.meshgrid(probe_x, t, indexing="ij")))
+        ex, ey = [], []
+        for poly, _ in cuts:                            # lines along each wall, a tenth of a metre apart across its run
+            for k in range(len(poly)):
+                (ax, ay), (bx, by) = poly[k], poly[(k + 1) % len(poly)]
+                if abs(by - ay) >= abs(bx - ax):
+                    ex += list(np.arange(min(ax, bx) - 0.1, max(ax, bx) + 0.1001, 0.1))
+                else:
+                    ey += list(np.arange(min(ay, by) - 0.1, max(ay, by) + 0.1001, 0.1))
+        xs = np.unique(np.round(np.concatenate([xs, [v for v in ex if x0 < v < x1]]), 3))
+        ys = np.unique(np.round(np.concatenate([ys, [v for v in ey if y0 < v < y1]]), 3))
+    X, Y = np.meshgrid(xs, ys, indexing="xy")
+    Z = np.array(relief(X, Y), float)
+    for poly, level in cuts:
+        Z = np.where(_inside(poly, X, Y, inset=0.06), np.minimum(Z, level), Z)
+    nx, ny = len(xs) - 1, len(ys) - 1
+    verts = np.stack([X, Y, Z], -1).reshape(-1, 3)
+    U, V = (X - x0) / (x1 - x0), (Y - y0) / (y1 - y0)
+    faces, uvs = [], []
     for j in range(ny):
         for i in range(nx):
             a = j * (nx + 1) + i
-            faces.append((a, a + 1, a + nx + 2, a + nx + 1))
-            uvs.append([(i / nx, j / ny), ((i + 1) / nx, j / ny), ((i + 1) / nx, (j + 1) / ny), (i / nx, (j + 1) / ny)])
-    m.add(verts, faces, uvs, "ground")
+            quad = (a, a + 1, a + nx + 2, a + nx + 1)
+            faces.append(quad)
+            uvs.append([(float(U.flat[q]), float(V.flat[q])) for q in quad])
+    m.add(verts, faces, uvs, "ground", smooth=not relief.flat)
     return m
 
 

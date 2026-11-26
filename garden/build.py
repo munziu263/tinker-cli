@@ -97,12 +97,18 @@ BUILDERS = {
     "bbq_covered": objects.bbq_covered,
     "tarp_heap": objects.tarp_heap,
     "lump": objects.lump,
+    "tile_scatter": objects.tile_scatter,
     "ball": objects.ball,
     "hose_coil": objects.hose_coil,
     "pop_up_goal": objects.pop_up_goal,
     "stake": objects.stake,
     "brick_edging": objects.brick_edging,
     "brick_row": objects.brick_row,
+    "wheelie_bin": objects.wheelie_bin,
+    "round_log_stack": objects.round_log_stack,
+    "wishing_well": structures.wishing_well,
+    "picket_gate": structures.picket_gate,
+    "log_store": structures.log_store,
     "cane_wigwam": objects.cane_wigwam,
     "leaning_poles": objects.leaning_poles,
     "mushroom": objects.mushroom,
@@ -129,6 +135,53 @@ def _tuplify(v):
     return v
 
 
+# Things that lie on the ground and take its shape, wherever they are placed from
+SOFT = {"lump", "tarp_heap", "tile_scatter", "log_rounds", "flag_patio", "brick_edging", "border", "ground_patch", "ground_line"}
+
+
+def seat(f):
+    """How a feature meets the ground surface (garden.json may say so itself with "seat"):
+      "none"   it states its own level: the house and what is inside it (the survey datum is
+               their floor), anything given a z in "at" (a spot level, a ball on a stump, a
+               building whose threshold level is known);
+      "drape"  every point of it is raised by the ground under that point: anything drawn
+               from a path or an outline in site coordinates (walls, hedges, edgings, beds),
+               and soft things that lie on the ground;
+      "rigid"  lifted as a whole by the ground under its position, staying upright and
+               level: furniture, pots, trees, sheds;
+      "with:<id>"  lifted by whatever another feature was lifted by."""
+    if "seat" in f:
+        return f["seat"]
+    at = f.get("at")
+    if at is not None and len(at) > 2:
+        return "none"
+    if f["layer"].startswith("inside") or f["type"] in ("cottage",) or (f["layer"] == "buildings" and f["type"] == "fittings"):
+        return "none"
+    if at is None or list(at[:2]) == [0, 0] or f["type"] in SOFT:
+        return "drape"
+    return "rigid"
+
+
+def floor_cuts(features):
+    """Footprints of the buildings that have floors of their own, with the level the ground
+    is to be kept below inside each (see ground.ground): the house, whose floors are at
+    and just above the datum, and an outbuilding that states its own level in "at"."""
+    cuts = []
+    for f in features:
+        p, at = f.get("params", {}), f.get("at", [0.0, 0.0])
+        a = math.radians(f.get("rot", 0.0))
+        c, s = math.cos(a), math.sin(a)
+        put = lambda q: (at[0] + c * q[0] - s * q[1], at[1] + s * q[0] + c * q[1])
+        if f["type"] == "cottage":
+            boxes = [p["main"], p["outshot"]] + ([p["leanto"]["box"]] if p.get("leanto") else [])
+            for xn, xs, yw, ye in boxes:
+                cuts.append(([put(q) for q in ((xn, yw), (xs, yw), (xs, ye), (xn, ye))], -0.12))
+        elif f["type"] == "outbuilding" and len(at) > 2:
+            br, bl = p.get("back") or ((p["width"], p["depth"]), (0.0, p["depth"]))
+            cuts.append(([put(q) for q in ((0.0, 0.0), (p["width"], 0.0), tuple(br), tuple(bl))], at[2] - 0.12))
+    return cuts
+
+
 def build_scene(spec, tex_dir):
     core.init(tex_dir)
     scene = bpy.context.scene
@@ -143,18 +196,36 @@ def build_scene(spec, tex_dir):
 
     stats = {k: [0, 0] for k in LAYERS}
     g = spec["ground"]
-    gm = ground.ground(tuple(g["extent"]), g["zones"], tex_dir, g.get("px_per_m", 64))
+    data = g.get("relief")
+    if isinstance(data, str):                            # kept in a file of its own: it is 28,000 numbers
+        data = json.load(open(os.path.join(HERE, data)))
+    relief = ground.Relief(data, tuple(g["extent"]))
+    cuts = [] if relief.flat else floor_cuts(spec["features"])
+    gm = ground.ground(tuple(g["extent"]), g["zones"], tex_dir, g.get("px_per_m", 64), relief=relief, cuts=cuts)
+    note = "Painted from the survey: grass, bare soil under the pollarded tree, leaf litter along the walls, gravel, the road. "
+    note += g.get("relief_note", "Drawn flat.") if not relief.flat else "Drawn flat."
     core.add_object("lawn", gm, cols["ground"], parents["ground"],
-                    props={"label": "Lawn and ground", "layer": "ground", "kind": "ground", "confidence": "measured",
-                           "notes": "Painted from the survey: grass, bare soil under the pollarded tree, leaf litter along the walls, gravel, the road. Drawn flat: the measured levels put the whole garden within 0.3 m of level."})
+                    props={"label": "Lawn and ground", "layer": "ground", "kind": "ground",
+                           "confidence": "measured" if not relief.flat else "estimated", "notes": note})
     stats["ground"][0] += 1
     stats["ground"][1] += gm.tri_count
 
+    lifted = {}
     for f in spec["features"]:
         t0 = time.time()
         fn = BUILDERS[f["type"]]
         mesh = fn(**_tuplify(f.get("params", {})))
-        at = f.get("at", [0.0, 0.0])
+        at = list(f.get("at", [0.0, 0.0]))
+        how = seat(f)
+        if how == "drape":
+            mesh.drape(relief, at, f.get("rot", 0.0))
+        elif how == "rigid":
+            lifted[f["id"]] = float(relief(at[0], at[1]))
+            at = [at[0], at[1], lifted[f["id"]]]
+        elif how.startswith("with:"):                    # moves with another feature (the inside of an outbuilding)
+            at = [at[0], at[1], (at[2] if len(at) > 2 else 0.0) + lifted.get(how[5:], 0.0)]
+        elif len(at) > 2:
+            lifted[f["id"]] = at[2]
         lo, hi = mesh.bounds()
         props = {
             "label": f.get("label", f["id"]),

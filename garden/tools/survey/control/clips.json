@@ -1,0 +1,47 @@
+{
+  "about": "What the viewer's 'Compare with video' shows, for export_frames.py. Clips f to k are the first six; c33xx and c34xx are named after the phone's own file numbers. Clips filmed indoors are left out on purpose, and so is the lane outside the gate. A clip listed here that is not in the survey (c3363 to c3365, c3392, c3402, c3403 and c3427 could not be joined to it) is simply passed over.",
+
+  "walks": [
+    {"title": "Pan from the lawn", "clips": [{"clip": "f", "stills": 44, "spread": "yaw"}]},
+    {"title": "Walk east across the lawn", "clips": [{"clip": "g", "stills": 28}]},
+    {"title": "Walk round the patio", "clips": [{"clip": "h", "stills": 28}]},
+    {"title": "Along the road hedge", "clips": [{"clip": "i", "stills": 22}]},
+    {"title": "East side of the house", "clips": [{"clip": "j", "stills": 8}]},
+    {"title": "Turn by the stump", "clips": [{"clip": "k", "stills": 22, "last": 284}]},
+
+    {"title": "Round the east lawn", "clips": [
+      {"clip": "c3350", "stills": 3}, {"clip": "c3351", "stills": 3}, {"clip": "c3352", "stills": 3},
+      {"clip": "c3353", "stills": 3}, {"clip": "c3360", "stills": 3}, {"clip": "c3361", "stills": 3}]},
+    {"title": "Drive and south-east corner", "clips": [
+      {"clip": "c3354", "stills": 3}, {"clip": "c3355", "stills": 3}, {"clip": "c3356", "stills": 2},
+      {"clip": "c3357", "stills": 3}, {"clip": "c3358", "stills": 3}, {"clip": "c3359", "stills": 2}]},
+    {"title": "Towards the south wall", "clips": [
+      {"clip": "c3362", "stills": 5}, {"clip": "c3363", "stills": 4}, {"clip": "c3364", "stills": 4}, {"clip": "c3365", "stills": 3}]},
+    {"title": "Outbuilding and shed", "clips": [
+      {"clip": "c3375", "stills": 3}, {"clip": "c3376", "stills": 3}, {"clip": "c3377", "stills": 2}, {"clip": "c3378", "stills": 3},
+      {"clip": "c3379", "stills": 3}, {"clip": "c3380", "stills": 3}, {"clip": "c3384", "stills": 3}]},
+    {"title": "Behind the shed and outbuilding", "clips": [
+      {"clip": "c3385", "stills": 3}, {"clip": "c3386", "stills": 3}, {"clip": "c3387", "stills": 3}, {"clip": "c3390", "stills": 2},
+      {"clip": "c3391", "stills": 3}, {"clip": "c3392", "stills": 2}, {"clip": "c3393", "stills": 3, "skip": [[45, 170]]},
+      {"clip": "c3399", "stills": 2, "first": 110}, {"clip": "c3400", "stills": 3}, {"clip": "c3401", "stills": 3}]},
+    {"title": "Front garden", "clips": [
+      {"clip": "c3402", "stills": 1, "last": 15}, {"clip": "c3403", "stills": 3}, {"clip": "c3404", "stills": 2, "last": 140},
+      {"clip": "c3405", "stills": 4}, {"clip": "c3406", "stills": 3}, {"clip": "c3407", "stills": 3}, {"clip": "c3408", "stills": 2, "last": 125},
+      {"clip": "c3410", "stills": 3, "first": 105}, {"clip": "c3411", "stills": 3}, {"clip": "c3412", "stills": 2}, {"clip": "c3413", "stills": 3}]},
+    {"title": "Kitchen garden and the path to the gate", "clips": [
+      {"clip": "c3416", "stills": 2, "first": 225}, {"clip": "c3417", "stills": 3, "skip": [[75, 140]]}, {"clip": "c3425", "stills": 3}, {"clip": "c3426", "stills": 4},
+      {"clip": "c3427", "stills": 2}, {"clip": "c3428", "stills": 3}]},
+    {"title": "Patio and back door", "clips": [
+      {"clip": "c3421", "stills": 4}, {"clip": "c3422", "stills": 3}, {"clip": "c3423", "stills": 3}, {"clip": "c3424", "stills": 3}]}
+  ],
+
+  "blur": [
+    {"what": "name board on the garden gate, gate shut", "at": [-11.45, 9.85, 0.9], "size": 1.6},
+    {"what": "name board on the garden gate, gate open", "at": [-12.3, 9.5, 0.9], "size": 1.4},
+    {"what": "rear number plate of the car on the drive", "at": [9.7, 5.1, 0.9], "size": 0.8},
+    {"what": "front number plate of the car on the drive", "at": [14.15, 3.2, 0.43], "size": 0.9},
+    {"what": "sign board on the verge", "at": [-1.9, 11.64, 2.61], "size": 1.3},
+    {"what": "supplier's name and telephone number printed on the bulk bags by the south border", "at": [12.8, -2.0, 0.35], "size": 2.6},
+    {"what": "supplier's name and telephone number printed on the bulk bag by the low wall", "at": [14.4, 6.2, 0.3], "size": 2.2}
+  ]
+}

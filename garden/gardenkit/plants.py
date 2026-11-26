@@ -11,7 +11,7 @@ import math
 
 import numpy as np
 
-from .core import Mesh, frame_from_axis, rot_z, translate
+from .core import Mesh, frame_from_axis, rot_z, tessellate, translate
 from .structures import path_length, point_along
 
 UP = np.array([0.0, 0.0, 1.0])
@@ -511,9 +511,9 @@ def border(outline, seed=13, plants=None, soil=True):
     """A planted bed: soil patch plus an informal mix of mounds inside the outline.
     plants: list of dicts {kind, x, y, ...} placed explicitly; anything else is filler."""
     m = Mesh()
-    if soil:
-        P = [(x, y, 0.025) for x, y in outline]
-        m.add(P, [tuple(range(len(P)))], [[(p[0], p[1]) for p in P]], "soil")
+    if soil:                                            # in small triangles, so that it can follow uneven ground
+        V, T = tessellate(outline)
+        m.add([(x, y, 0.025) for x, y in V], T, [[V[i] for i in t] for t in T], "soil", smooth=True)
     for i, p in enumerate(plants or []):
         kind = p.get("kind", "shrub")
         kw = {k: v for k, v in p.items() if k not in ("kind", "x", "y", "rot")}

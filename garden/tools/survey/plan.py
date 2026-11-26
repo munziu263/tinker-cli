@@ -8,6 +8,15 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 
+def clip_of(name):
+    """'h_0045.jpg' -> 'h', 'c3353_0120.jpg' -> 'c3353': frames are named <clip>_<number>.jpg"""
+    return str(name).rsplit("_", 1)[0]
+
+
+def frame_no(name):
+    return int(str(name).rsplit("_", 1)[1].split(".")[0])
+
+
 class Survey:
     def __init__(self, npz_path, frames_dir=None):
         d = np.load(npz_path, allow_pickle=False)
@@ -41,20 +50,28 @@ class Survey:
         return (np.asarray(p) - self.shift) @ self.T
 
     def idx(self, name_or_num):
-        """Index of a frame: 126 (first clip), "g120" / "h_0045.jpg" (later clips)."""
+        """Index of a frame: 126 (first clip), "g120" or "h_0045.jpg" or "c3353_0120" (later clips)."""
         if isinstance(name_or_num, (int, np.integer)):
             name_or_num = f"f_{int(name_or_num):04d}.jpg"
         elif not name_or_num.endswith(".jpg"):
-            name_or_num = f"{name_or_num[0]}_{int(name_or_num[1:].lstrip('_')):04d}.jpg"
+            if "_" in name_or_num:
+                name_or_num = name_or_num + ".jpg"
+            else:
+                name_or_num = f"{name_or_num[0]}_{int(name_or_num[1:]):04d}.jpg"
         return self.names.index(name_or_num)
 
-    def clip(self, prefix):
-        """Indices of the registered frames of one clip, in time order."""
-        return [i for i, n in enumerate(self.names) if n.startswith(prefix)]
+    def clips(self):
+        """Names of the clips in the survey, in order."""
+        return sorted({clip_of(n) for n in self.names})
 
-    def nearest(self, frame_num, prefix="f"):
-        ids = self.clip(prefix)
-        nums = np.array([int(self.names[i][2:6]) for i in ids])
+    def clip(self, clip):
+        """Indices of the registered frames of one clip, in time order."""
+        return [i for i, n in enumerate(self.names) if clip_of(n) == clip]
+
+    def nearest(self, frame_num, clip="f"):
+        """The registered frame of a clip closest in time to a frame number."""
+        ids = self.clip(clip)
+        nums = np.array([frame_no(self.names[i]) for i in ids])
         return ids[int(np.argmin(np.abs(nums - frame_num)))]
 
     # -- camera model (COLMAP SIMPLE_RADIAL)
@@ -232,13 +249,17 @@ class Survey:
     def mosaic(self, extent=(-20, 20, -20, 20), res=0.02, every=3, z=0.0, max_range=40.0,
                min_depress_deg=2.0, frames=None, near_power=0.0):
         """Project the frames onto the plane at height z: an 'aerial photo' of the lawn.
-        Things standing up smear radially away from the camera; their feet are true."""
+        Things standing up smear radially away from the camera; their feet are true.
+        z may also be a surface, z(x, y) -> height (see terrain.py): where the ground is not
+        level, a flat plane puts things in the wrong place by their height error times the
+        slope of the line of sight, which is a lot at the shallow angles of a hand-held clip."""
         x0, x1, y0, y1 = extent
         nx, ny = int(round((x1 - x0) / res)), int(round((y1 - y0) / res))
         xs = x0 + (np.arange(nx) + 0.5) * res
         ys = y1 - (np.arange(ny) + 0.5) * res      # image row 0 = max y (north-up style)
         X, Y = np.meshgrid(xs, ys)
-        G = np.stack([X, Y, np.full_like(X, z)], -1).reshape(-1, 3)
+        Z = z(X, Y) if callable(z) else np.full_like(X, z)
+        G = np.stack([X, Y, Z], -1).reshape(-1, 3)
         acc = np.zeros((nx * ny, 3), np.float32)
         wsum = np.zeros(nx * ny, np.float32)
         for i in (frames if frames is not None else range(0, len(self.names), every)):
@@ -246,7 +267,7 @@ class Survey:
             W, H = self.frame_size(i)
             dist = np.hypot(G[:, 0] - c[0], G[:, 1] - c[1])
             u, v, zc = self.project(i, G)
-            dep = np.degrees(np.arctan2(c[2] - z, np.maximum(dist, 1e-6)))
+            dep = np.degrees(np.arctan2(c[2] - G[:, 2], np.maximum(dist, 1e-6)))
             ok = (zc > 0.1) & (u >= 1) & (u < W - 2) & (v >= 1) & (v < H - 2) \
                 & (dist < max_range) & (dep > min_depress_deg)
             if not ok.any():

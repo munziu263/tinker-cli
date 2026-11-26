@@ -145,8 +145,9 @@ def main():
     d["cam_h"] = np.array(float(d["cam_h"]) * s)
     d["calibration"] = np.array([s, delta, t[0], t[1], dz])
     yaw = np.degrees(np.arctan2(d["R"][:, 2, 1], d["R"][:, 2, 0]))
-    for prefix in sorted({str(n)[:2] for n in d["names"]}):         # continuous within each clip
-        m = np.array([str(n).startswith(prefix) for n in d["names"]])
+    clip_names = np.array([str(n).rsplit("_", 1)[0] for n in d["names"]])
+    for prefix in sorted(set(clip_names)):                          # continuous within each clip
+        m = clip_names == prefix
         yaw[m] = np.degrees(np.unwrap(np.radians(yaw[m])))
     d["yaw"] = yaw
     np.savez(out, **d)

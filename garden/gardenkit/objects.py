@@ -664,3 +664,50 @@ def mushroom(h=0.5, cap_r=0.2, mat="wood_grey"):
     m.lathe([(cap_r * 0.42, 0.0), (cap_r * 0.3, h * 0.55), (cap_r * 0.34, h * 0.6)], mat, seg=10)
     m.lathe([(cap_r, h * 0.56), (cap_r * 0.96, h * 0.68), (cap_r * 0.7, h * 0.88), (cap_r * 0.3, h * 0.99), (0.01, h)], mat, seg=14)
     return m
+
+
+def tile_scatter(n=70, area=(1.9, 2.1), seed=17, tile=(0.265, 0.165, 0.014), mat="clay_tiles", ridges=2):
+    """Old roof tiles dumped on the ground: plain tiles lying flat or propped on one another
+    over an oval patch, with a ridge tile or two among them."""
+    m = Mesh()
+    rng = np.random.default_rng(seed)
+    for _ in range(n):
+        while True:
+            x, y = rng.uniform(-0.5, 0.5, 2)
+            if x * x + y * y < 0.25:
+                break
+        t = Mesh()
+        t.box(tile, mat, origin="base", ts=(0.5, 0.5))
+        tilt = rng.uniform(0, 8) if rng.random() < 0.75 else rng.uniform(12, 35)
+        m.merge(t, translate(x * area[0], y * area[1], rng.uniform(0.0, 0.05)) @ rot_z(rng.uniform(0, 360)) @ rot_x(tilt))
+    for k in range(ridges):
+        x, y = rng.uniform(-0.3, 0.3) * area[0], rng.uniform(-0.3, 0.3) * area[1]
+        a = math.radians(rng.uniform(0, 180))
+        L = 0.42
+        dx, dy = math.cos(a) * L / 2, math.sin(a) * L / 2
+        m.tube([(x - dx, y - dy, 0.02), (x + dx, y + dy, 0.02)], 0.11, "terracotta", seg=10, caps=(False, False))
+    return m
+
+
+def wheelie_bin(h=1.07, w=0.58, d=0.72, body="plastic_black", lid=None):
+    """Council wheeled bin. The handle and wheels are at the back (+Y)."""
+    m = Mesh()
+    lid = lid or body
+    bot = [(-w * 0.42, -d * 0.4), (w * 0.42, -d * 0.4), (w * 0.42, d * 0.42), (-w * 0.42, d * 0.42)]
+    top = [(-w / 2, -d / 2), (w / 2, -d / 2), (w / 2, d / 2), (-w / 2, d / 2)]
+    zb, zt = 0.06, h - 0.07
+    V = [(x, y, zb) for x, y in bot] + [(x, y, zt) for x, y in top]
+    m.add(V, [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (3, 2, 1, 0)], [[(0, 0), (1, 0), (1, 1), (0, 1)]] * 5, body)
+    m.box((w + 0.04, d + 0.05, 0.07), lid, M=translate(0, -0.01, zt))
+    m.tube([(-w * 0.4, d / 2 + 0.04, zt + 0.02), (w * 0.4, d / 2 + 0.04, zt + 0.02)], 0.018, body, seg=6)
+    for sx in (-1, 1):
+        m.cylinder(0.1, 0.05, "plastic_black", seg=12, M=translate(sx * (w * 0.42), d * 0.36, 0.1) @ rot_y(90) @ translate(0, 0, -0.025))
+    return m
+
+
+def round_log_stack(r=0.8, h=1.1, seed=7, end="log_end", bark="bark_willow"):
+    """A round wood stack (holzhausen): split logs laid radially, ends outward, heaped in the middle."""
+    m = Mesh()
+    m.lathe([(r * 1.02, 0.0), (r, h * 0.55), (r * 0.94, h * 0.86)], end, seg=28, cap_bottom=False)
+    m.lathe([(r * 0.94, h * 0.86), (r * 0.6, h * 0.96), (r * 0.2, h), (0.01, h)], bark, seg=28, cap_bottom=False)
+    return m

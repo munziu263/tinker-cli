@@ -55,7 +55,7 @@ MATERIAL_DEFS = {
     "paint_brown": dict(colour=(0.22, 0.13, 0.09), rough=0.6),
     "paint_slate": dict(colour=(0.17, 0.19, 0.21), rough=0.5),
     "steel_black": dict(colour=(0.04, 0.04, 0.045), rough=0.45, metal=0.7),
-    "galvanised": dict(colour=(0.55, 0.57, 0.58), rough=0.4, metal=0.85),
+    "galvanised": dict(colour=(0.55, 0.57, 0.58), rough=0.45, metal=0.25),     # more metal than this and it goes black without a sky to reflect
     "roof_felt": dict(colour=(0.07, 0.07, 0.075), rough=0.9),
     "plastic_teal": dict(colour=(0.07, 0.24, 0.24), rough=0.45),
     "plastic_green": dict(colour=(0.10, 0.19, 0.12), rough=0.5),
@@ -108,6 +108,10 @@ MATERIAL_DEFS = {
     "limewash": dict(colour=(0.86, 0.84, 0.78), rough=0.95),
     "rooflight_glass": dict(colour=(0.16, 0.20, 0.23), rough=0.08),
     "roof_sheet_green": dict(colour=(0.33, 0.45, 0.42), rough=0.7),
+    "tarp_cream": dict(colour=(0.80, 0.76, 0.66), rough=0.7),
+    "fascia_black": dict(colour=(0.03, 0.03, 0.032), rough=0.55),      # as paint_black, but its own name: roofs can be lifted off
+    "roof_under": dict(colour=(0.10, 0.08, 0.07), rough=0.9),
+    "plastic_brown": dict(colour=(0.36, 0.20, 0.14), rough=0.5),
 }
 
 
@@ -219,6 +223,53 @@ def frame_from_axis(origin, direction, up=(0, 0, 1)):
 # --------------------------------------------------------------------------- mesh builder
 
 
+def tessellate(outline, max_edge=0.35):
+    """Cut a plan outline (any simple polygon, convex or not) into small triangles: ear
+    clipping, then every triangle split in four until no edge is longer than max_edge.
+    Returns (points, triangles). A flat patch built this way can be laid on uneven ground
+    (Mesh.drape) and follow it; one big polygon would bridge the dips and bury the bumps."""
+    V = [(float(p[0]), float(p[1])) for p in outline]
+    n = len(V)
+    idx = list(range(n))
+    if sum(V[i][0] * V[(i + 1) % n][1] - V[(i + 1) % n][0] * V[i][1] for i in range(n)) < 0:
+        idx.reverse()                                   # work counter-clockwise
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    T = []
+    while len(idx) > 3:
+        for k in range(len(idx)):
+            i0, i1, i2 = idx[k - 1], idx[k], idx[(k + 1) % len(idx)]
+            a, b, c = V[i0], V[i1], V[i2]
+            if cross(a, b, c) <= 1e-12:                 # a reflex corner is not an ear
+                continue
+            if any(cross(a, b, V[j]) >= 0 and cross(b, c, V[j]) >= 0 and cross(c, a, V[j]) >= 0
+                   for j in idx if j not in (i0, i1, i2)):
+                continue
+            T.append((i0, i1, i2))
+            idx.pop(k)
+            break
+        else:
+            break                                       # degenerate outline: keep what there is
+    if len(idx) == 3:
+        T.append(tuple(idx))
+    while T and len(T) < 40000:
+        if max(math.dist(V[a], V[b]) for t in T for a, b in ((t[0], t[1]), (t[1], t[2]), (t[2], t[0]))) <= max_edge:
+            break
+        mid = {}
+
+        def m(i, j):
+            key = (min(i, j), max(i, j))
+            if key not in mid:
+                V.append(((V[i][0] + V[j][0]) / 2, (V[i][1] + V[j][1]) / 2))
+                mid[key] = len(V) - 1
+            return mid[key]
+
+        T = [t for a, b, c in T for t in ((a, m(a, b), m(c, a)), (m(a, b), b, m(b, c)), (m(c, a), m(b, c), c), (m(a, b), m(b, c), m(c, a)))]
+    return V, T
+
+
 class Mesh:
     """Accumulates polygons with per-corner UVs and per-face material slots."""
 
@@ -266,6 +317,18 @@ class Mesh:
 
     def transformed(self, M):
         return Mesh().merge(self, M)
+
+    def drape(self, height, at=(0.0, 0.0), rot_deg=0.0):
+        """Stand the mesh on a ground surface: every vertex is raised by the height of the
+        ground under it, so a wall follows a slope and a heap lies on it. height(x, y) -> z
+        takes site coordinates; at and rot_deg say where this mesh will be placed."""
+        v = np.asarray(self.v, float).reshape(-1, 3)
+        if len(v):
+            a = math.radians(rot_deg)
+            c, s = math.cos(a), math.sin(a)
+            v[:, 2] += height(at[0] + c * v[:, 0] - s * v[:, 1], at[1] + s * v[:, 0] + c * v[:, 1])
+            self.v = list(map(tuple, v))
+        return self
 
     @property
     def tri_count(self):

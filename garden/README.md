@@ -1,12 +1,13 @@
 # Garden survey model
 
-A 3D model of the house and garden as they stand (late November 2026), rebuilt from three
+A 3D model of the house and garden as they stand (late November 2026), rebuilt from sixty-one
 short phone clips and tied to a measured building survey. It is the "before" picture:
 the base for trying out new layouts, and something to hand to an architect or a
 landscaper.
 
 - `garden.json` is the site. Every wall, building, tree and object is one entry with a
   position in metres, a size, and a note on how it was measured and how far to trust it.
+  `levels.json` is the shape of the ground under it.
 - `build.py` turns that file into a Blender scene (`out/garden.blend`), a one-file
   `out/garden.glb`, and the web model the viewer loads (`viewer/model/`).
 - `viewer/` is the three.js page: orbit, a north-up plan, layer toggles, a tape measure,
@@ -41,6 +42,21 @@ All coordinates are metres in one grid:
   about 20 degrees west of south. The viewer's plan view is drawn north-up.
 - `rot` is degrees anticlockwise seen from above, measured from +X.
 
+**Ground levels.** The ground is not drawn flat. `levels.json` holds its height above
+the datum on a quarter-metre grid (made by `tools/survey/terrain.py`), and `build.py`
+gives the ground mesh that shape and stands everything on it. A feature is placed in plan
+only; how it meets the ground follows from what it is, and `"seat"` in its entry
+overrides that:
+
+- `drape`: every point of it is raised by the ground beneath that point. Walls, hedges,
+  edgings, beds and anything else drawn from a path or an outline, and soft things that
+  lie on the ground (a tarpaulin, a heap of tiles).
+- `rigid`: lifted as a whole by the ground under its position, staying upright and
+  level. Furniture, pots, trees, sheds.
+- `none`: it states its own level. The house and everything inside it (the datum is
+  their floor) and anything given a third coordinate in `at` (a spot level, a ball
+  sitting on a stump).
+
 Edit `garden.json` and run `build.py` again to change the model. Remove an entry to
 remove the thing; copy one to add another. The available `type`s are the keys of
 `BUILDERS` in `build.py`, and their parameters are the arguments of the functions in
@@ -73,8 +89,8 @@ finishes and fittings from a set of interior clips.
 
 ## How it was measured
 
-1. **Reconstruction.** COLMAP structure-from-motion on a pan from the lawn and five short
-   walks: 719 frames, 310,000 points, every camera position and direction.
+1. **Reconstruction.** COLMAP structure-from-motion on a pan from the lawn and 60 short
+   walks: 1,910 frames, 900,000 points, every camera position and direction.
    `sfm.py` does one clip, `sfm_add.py` registers further clips into it (landscape or
    upright, same day or not), `sfm_refine.py` lets everything settle together.
 2. **Vertical** from brick coursing (`gravity.py`). Brick walls are laid level, so the
@@ -98,6 +114,25 @@ finishes and fittings from a set of interior clips.
    The check that the method works is built in: the two directions must come out square
    to each other, and here they are 89.7 degrees apart.
 
+7. **Walks that leave the survey and come back** (`sfm_part.py`, `place.py`). Hanging new
+   frames one at a time on a survey that is held fixed works while they overlap it. A
+   walk round the back of the outbuilding does not: each frame is placed from points made
+   by the frames just before, its scale is free to creep, and nothing can spread the
+   error. The first attempt put the 5.2 m back wall of the outbuilding at 40% of its
+   length. Such a walk is reconstructed by itself, free, together with the sound clips at
+   either end of it, and the result is laid over the survey through the cameras the two
+   share (156 of them here, agreeing to 1.8 cm). A piece that shares no cameras can be
+   placed from sightings instead: frames already in the survey that recognise its points
+   give lines of sight they must lie on, and its size comes from something in it of known
+   length (`brickscale.py` reads it off the coursing of a brick wall).
+8. **Walls** (`elevation.py`). The points on a rendered wall lie within a centimetre or two
+   of a straight line, which fixes the wall in plan. Every frame that faces it is then
+   projected onto that plane to make a straightened photograph to scale, and the doors
+   and windows are read off it.
+9. **Ground levels** (`terrain.py`). The lowest survey points in each quarter-metre cell,
+   with buildings cut out and shrubs planed off, tied to the 22 spot levels of the
+   measured survey. Before tying, the surface agreed with them to 6 cm.
+
 The first version of this model sized itself on "standard" objects (brick courses, a
 door, paving flags) and came out 27% too big near the house. Guessing a scale is not
 good enough; control is.
@@ -106,23 +141,28 @@ good enough; control is.
 
 | Where | Roughly |
 | --- | --- |
-| House, shed, apple tree, drains, levels (measured survey) | a few centimetres |
-| Patio and east garden (filmed on foot, things triangulated from two frames) | 0.05 to 0.2 m |
-| West wall, stock wall, log stack (seen from two viewpoints) | 0.3 m |
-| Other things in the south and west garden (one viewpoint, corrected) | 0.5 m along the line of sight, less across it |
-| Outbuilding | front wall 0.3 m; east wall and depth 0.4 m (attic window); west and north walls inferred |
+| House, old shed, apple tree, drains, spot levels (measured survey) | a few centimetres |
+| Outbuilding (walked all round) | walls 2 cm, openings 2 to 3 cm; the partition inside is a judgement |
+| Patio, east lawn, kitchen garden, gate path, drive, front garden, passage by the shed (filmed on foot) | 0.1 to 0.2 m |
+| East end of the south wall and the shrubs by the bench | 0.1 to 0.2 m |
+| West wall, stock wall, log pile, picnic table and the rest of the far south-west corner (first clips, seen from two viewpoints) | 0.3 to 0.5 m |
+| Ground levels on open ground that was filmed on foot | a few centimetres |
+| Ground levels under shrubs and behind buildings; the lane beyond the hedge | interpolated; the lane was seen only at the gate |
 | Plot boundary from the block plan | about 1 m |
 | Inside the house (measured floor plans) | a few centimetres |
-| Front garden, drive, behind the shed and outbuilding, inside the outbuildings | not surveyed |
+| West side of the outbuilding, the small shed, the north boundary, inside the old shed | glimpsed or not surveyed |
 
 Every feature carries `confidence`: `measured` (drawings, or two viewpoints),
 `estimated` (one viewpoint, or partly hidden) or `assumed` (not seen). The viewer can
 colour the model by it. Tree crowns are generic; species are mostly not identified.
 
-Two disagreements between sources are left visible rather than papered over: the west
-wall runs about 1.2 m outside the block-plan boundary, and the outbuilding the camera
-saw is 1 to 2 m further west, and a metre wider, than the one drawn on the block plan
-(the two agree on how deep it is).
+Disagreements between sources are left visible rather than papered over. The west wall
+runs about 1.2 m outside the block-plan boundary. The outbuilding, now measured on all
+four sides, is 5.47 m wide where the block plan draws 5.0, and stands 1 to 2 m further
+west (the two agree on how deep it is). The paved strip that ends the drive lies 0.5 to
+0.8 m outside the mapped boundary. And a small shed stands 2 to 3 m beyond the mapped
+line at the edge of the field. A 1:500 map is good to about a metre, so only the last of
+these is more than the map's own tolerance: it wants checking on the ground.
 
 ### Making it better
 
@@ -135,6 +175,9 @@ usefulness; its numbers match the markers in the viewer. In general:
 - **Walk, do not pan.** Distances come from moving the camera sideways. Slow loops with
   the ground in frame, overlapping what has already been filmed, beat any amount of
   turning on the spot.
+- **Keep more than one thing in the picture.** Three clips filmed close against a brick
+  wall could not be joined to anything: a frame full of bricks could be anywhere along the
+  wall. Stand back and film along a wall, not at it.
 - **Sight things twice.** Anything that matters can be fixed by picking it in two frames
   taken a few metres apart and adding it to `sightings.json`. It is worth doing even for
   things that look settled: a second set of clips, filmed close to a tree stump that the
@@ -163,20 +206,109 @@ python $S/align.py work3/sparse refined.npz --like first.npz
 python $S/gravity.py refined.npz level.npz --courses $S/control/walls.json frames walk1 walk2
 python $S/calibrate.py level.npz survey.npz $S/control/control.json frames walk1 walk2
 python $S/triangulate.py survey.npz $S/control/sightings.json frames walk1 walk2
-python $S/export_frames.py survey.npz viewer 0 frames walk1 walk2
 ```
 
 Clips filmed later join the same grid without redoing any of that. They can be upright
-or landscape, and from another day in different light:
+or landscape, and from another day in different light. Frames are named
+`<clip>_<number>.jpg`, one directory per clip:
 
 ```
-ffmpeg -i east1.mov -q:v 2 -start_number 0 east1/i_%04d.jpg       # one letter per clip
+ffmpeg -i east1.mov -q:v 2 -start_number 0 east1/i_%04d.jpg
 python $S/sfm_add.py work3 work4 east1 east2 east3                  # existing cameras stay put
 python $S/align.py work4/sparse survey2.npz --like survey.npz       # lands straight in the site grid
 python $S/window_view.py attic_frame.jpg $S/control/attic_window.json
 ```
 
-`plan.py` is the library the others share (pixel to ray, ray to ground or wall, plan
-mosaics); `measure.py` is a small command line on top of it, and `gridcrop.py` cuts a
-piece out of a frame with a pixel grid over it, for reading off the positions that
-`control.json`, `sightings.json` and `attic_window.json` need.
+A big batch goes in the same way. `dir:10` takes the sharpest frame of every ten, which
+is plenty for a walk; with more than four clips the frames to compare are found by
+image retrieval instead of trying everything against everything; and `--then` splits
+the job into stages, each held fixed for the next, so the run time grows with the
+footage and not with its square. `--standing f` deals with the first clip, the pan: what
+only it saw, at any distance, is dropped before the new clips are placed, because a new
+frame placed against points that are 10 to 30% too close ends up in the wrong place:
+
+```
+python $S/sfm_add.py work4 work5 --standing f c3350:10 c3351:10 ... --then c3354:10 ... --then c3375:10 ...
+python $S/align.py work5/sparse survey3.npz --like survey2.npz
+python $S/export_frames.py survey3.npz viewer $S/control/clips.json frames walk1 walk2 east1 ... c3350 ...
+```
+
+Not every clip latches on at the first attempt. A walk breaks off where the camera turns
+a corner faster than one frame in ten can follow, and a clip that looks back across the
+garden from the far wall may recognise nothing but the pan, whose far points have just
+been thrown away. A second pass mends both: give the clips that are missing again with a
+smaller step (the frames already placed stay, the new ones fill the gaps), and name the
+pairs of clips that you know show the same place, which are then compared in full:
+
+```
+python $S/sfm_add.py work5 work6 --link c3362:c3363 --link c3385:c3386 ... c3362:4 c3363:4 c3386:5 ...
+```
+
+`--resume N` carries on a run that was stopped, from stage N, without extracting or
+matching again.
+
+A walk that leaves the surveyed part and comes back is better reconstructed by itself
+and laid over the survey afterwards (see "How it was measured", 7). Give the sound clips
+at either end of it as well, so that the piece and the survey share cameras:
+
+```
+python $S/sfm_part.py work6 back c3375 c3376 ... c3385 c3386 c3387 c3390 ... c3401
+python $S/place.py back/0 survey3.npz survey4.npz --shared c3375,c3376,...,c3385 --add c3386,c3387,...,c3401
+```
+
+A piece that shares nothing with the survey is placed from sightings: frames already in
+the survey that recognise its points. Sightings from one spot (the pan) say which way the
+piece lies, and how far only once its size is known. `brickscale.py` reads the size off
+the coursing of a brick wall when a clip shows one squarely. Failing that, try a few
+sizes: at the right one the piece's own ground comes out level with the survey's. Here
+the bricks gave 0.79 m per unit for one clip of a piece and the ground 0.76 for the clip
+next to it, which is as well as two clips of a walk that later proved to be bent could
+be expected to agree:
+
+```
+python $S/sfm_part.py work6 south c3362 c3363 c3364 c3365
+python $S/brickscale.py south/0 c3363 --frames 0:60 --out wall.png -- c3363
+python $S/place.py south/0 survey4.npz survey5.npz --db work6/db.db --clips c3362 --scale 0.76
+```
+
+`place.py` reports how well the sightings fit. A piece that fits some sighting frames to
+a pixel and others not at all is not rigid: it has a weak hinge where two clips barely
+overlap, and each length has to be placed by itself (`--clips`). That is what happened to
+the walk along the south wall: its first clip went in (sightings within 1.4 px), the
+other three, filmed close against the brickwork, came out bent and were left out.
+
+Then the surface and the checks:
+
+```
+python $S/terrain.py survey5.npz terrain.npz --levels $S/control/levels.json --buildings garden.json --json levels.json
+python $S/elevation.py survey5.npz front.png -3.00,-18.38 -2.89,-12.91 --z -0.2,2.8 --res 0.005 --clips c3375,c3376 -- c3375 c3376
+python $S/overlay.py survey5.npz garden.json c3376_0118 check.jpg -- c3376
+```
+
+`export_frames.py` writes the stills and camera poses behind the viewer's "Compare with
+video". `control/clips.json` lists the walks to show, the frames to leave out (someone
+in shot) and the things to blur wherever they appear (a number plate, a name board).
+
+The reading tools: `plan.py` is the library the others share (pixel to ray, ray to
+ground or wall, plan mosaics) and `measure.py` a small command line on top of it.
+`gridcrop.py` cuts a piece out of a frame with a pixel grid over it, for the pixel
+positions that `control.json`, `sightings.json` and `attic_window.json` need.
+`groundgrid.py` goes the other way: it draws the site grid on the ground in a frame, so
+anything lying on the ground (an edging, a path, the foot of a post) can be placed by
+eye to a quarter of a metre or better. Give it the ground surface (below) rather than a
+height: on the drive, a grid drawn a quarter of a metre too high reads a metre out.
+
+Three more work on the survey as a whole:
+
+- `terrain.py` makes the **ground surface** from the survey's own points: the lowest
+  points in each quarter-metre cell, with buildings cut out and shrubs planed off, tied
+  to the spot levels of the measured survey (`control/levels.json`; the surface agreed
+  with them to 6 cm before it was tied). It writes `levels.json`, which `build.py` reads.
+- `elevation.py` makes a **straightened photograph of a wall**, to scale, by projecting
+  every frame that faces the wall onto its plane. Whatever lies in the plane comes out
+  sharp; window and door openings are then read straight off a ruled picture, to a
+  centimetre or two. The plane itself comes from fitting a line to the points on the
+  wall, which for a rendered wall lie within 2 cm of it.
+- `overlay.py` draws the model as lines over any frame: the check that needs no
+  rendering. If the house's wireframe sits on the house, the camera is right; if a wall
+  is then drawn off its picture, the wall is wrong in the model.

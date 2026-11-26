@@ -155,8 +155,9 @@ def main():
     yaw = np.degrees(np.arctan2(Rw[:, 2, 1], Rw[:, 2, 0]))
     pitch = np.degrees(np.arcsin(np.clip(Rw[:, 2, 2], -1, 1)))
     roll = np.degrees(np.arctan2(-Rw[:, 0, 2], -Rw[:, 1, 2]))
-    for prefix in sorted({n[:2] for n in names}):
-        m = np.array([n.startswith(prefix) for n in names])
+    clip_names = np.array([str(n).rsplit("_", 1)[0] for n in names])
+    for prefix in sorted(set(clip_names)):
+        m = clip_names == prefix
         c = Cw[m]
         path = float(np.linalg.norm(np.diff(c, axis=0), axis=1).sum())
         print(f"clip {prefix}: {int(m.sum())} frames, camera height {c[:, 2].mean():.2f} m "

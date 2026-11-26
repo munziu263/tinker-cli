@@ -118,7 +118,8 @@
   #comparebar label { font-family: var(--font-label); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
   #comparebar .data { font-size: 11.5px; text-align: right; color: var(--muted); }
   #comparebar p { margin: 0; font-size: 12px; color: var(--muted); }
-  .clips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .clips { display: flex; flex-wrap: wrap; gap: 4px; max-height: 5.4em; overflow-y: auto; }
+  .clips button { flex: none; white-space: nowrap; }
   .clips button { border: 1px solid var(--line); background: transparent; border-radius: 3px; padding: 3px 9px; font-size: 12.5px; color: var(--muted); }
   .clips button:hover { color: var(--ink); }
   .clips button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
@@ -142,6 +143,7 @@
     #card { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: auto; }
     .seg button { padding: 6px 9px; }
     #comparebar .row { grid-template-columns: 62px 1fr 48px; }
+    .clips { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; max-height: none; padding-bottom: 4px; scrollbar-width: thin; }
     #hint { top: calc(104px + env(safe-area-inset-top, 0px)); }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -186,7 +188,7 @@
   <div id="titleblock" class="panel">
     <span class="eyebrow">Existing house and garden &middot; surveyed 26 Nov 2026</span>
     <h1>Garden Survey Model</h1>
-    <p class="long">Rebuilt from phone clips and tied to the measured building survey. House and shed are good to a few centimetres, the far side of the garden to about half a metre.</p>
+    <p class="long">Rebuilt from phone clips and tied to the measured building survey. House and outbuildings are good to a few centimetres, most of the garden to 0.1 to 0.2 m, the far south-west corner to about half a metre.</p>
     <div class="keyrow">
       <div id="scalebar"><div class="bar" style="width: 80px"></div><span class="data">5 m</span></div>
       <div id="north" title="North"><svg id="north-arrow" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 2 L17 20 L12 16.2 L7 20 Z" fill="currentColor"/></svg><span class="data">N</span></div>
@@ -266,10 +268,26 @@ sun.shadow.normalBias = 0.05;
 sun.shadow.radius = 5;
 scene.add(sun, sun.target);
 
-// soft green apron so the world does not end at the edge of the survey
+// soft green apron so the world does not end at the edge of the survey. The modelled ground
+// has relief and dips below the datum in places, so once the model is in, the apron is
+// re-cut with a hole where the modelled ground is (see fitApron).
 const apron = new THREE.Mesh(new THREE.CircleGeometry(520, 48), new THREE.MeshStandardMaterial({ color: 0x6a8246, roughness: 1, metalness: 0 }));
 apron.rotation.x = -Math.PI / 2; apron.position.y = -0.03;
 scene.add(apron);
+function fitApron(ground) {
+  const b = new THREE.Box3().setFromObject(ground), inset = 0.2;
+  const shape = new THREE.Shape();
+  shape.absarc(0, 0, 520, 0, Math.PI * 2, false);
+  const hole = new THREE.Path();           // the plane is turned flat afterwards: its y is world -z
+  hole.moveTo(b.min.x + inset, -(b.max.z - inset));
+  hole.lineTo(b.min.x + inset, -(b.min.z + inset));
+  hole.lineTo(b.max.x - inset, -(b.min.z + inset));
+  hole.lineTo(b.max.x - inset, -(b.max.z - inset));
+  hole.closePath();
+  shape.holes.push(hole);
+  apron.geometry.dispose();
+  apron.geometry = new THREE.ShapeGeometry(shape, 48);
+}
 
 const persp = new THREE.PerspectiveCamera(50, 1, 0.1, 900);
 const ortho = new THREE.OrthographicCamera(-20, 20, 20, -20, 0.1, 400);
@@ -307,6 +325,9 @@ const STOREYS = { all: { cut: 1e6 }, at: { cut: 1e6, roof: 4.72, layer: 'inside_
 // The attic is opened differently: nothing is sliced, but the house's own roof is taken off above the attic floor.
 const roofPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6);
 const ROOF_MATS = /^(clay_tiles|paint_black|terracotta|rooflight_glass)$/;
+// On the ground floor the cut is at 2.16 m, but low roofs come down below that: these parts are taken off as well.
+const ROOF_OFF = { cottage: /^(clay_tiles|polycarbonate|paint_black|terracotta)$/, outbuilding: /^(roof_sheet_green|roof_felt|fascia_black)$/,
+  timber_shed: /^(mossy_roof|roof_felt|roof_under)$/ };
 const cutPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), STOREYS.all.cut);
 renderer.localClippingEnabled = true;
 const clipped = (mat) => { mat.clippingPlanes = [cutPlane]; mat.clipShadows = true; return mat; };
@@ -354,6 +375,8 @@ function onModel(gltf) {
     });
   }
   scene.add(root);
+  const lawn = root.getObjectByName('lawn');
+  if (lawn) { root.updateMatrixWorld(true); fitApron(lawn); }
   buildLayerList();
   setupInside();
   setupBackdrop();
@@ -487,6 +510,9 @@ const PRESETS = [
   { name: 'Bench and tables', pos: P(4.6, -4.6, 1.9), target: P(9.6, -7.6, 0.8) },
   { name: 'Outbuilding and shed', pos: P(5.6, -8.4, 2.1), target: P(-2.6, -14.0, 1.2) },
   { name: 'East lawn', pos: P(4.4, -1.6, 2.4), target: P(-2.4, 6.4, 0.5) },
+  { name: 'Kitchen garden and gate', pos: P(-13.4, 2.6, 2.3), target: P(-10.6, 8.6, 0.1) },
+  { name: 'Front of the house', pos: P(-19.5, -5.2, 3.2), target: P(-9.9, -2.4, 2.1) },
+  { name: 'Drive', pos: P(8.6, 9.6, 3.2), target: P(13.6, 1.4, 0.2) },
   { name: 'Where you stood', pos: P(5.26, -6.14, 1.65), target: P(7.6, -14, 1.0) },
 ];
 PRESETS.forEach((p, i) => {
@@ -569,8 +595,10 @@ function setStorey(key) {
   select(null);
   const s = STOREYS[key];
   // on the ground floor the long rear roof and the lean-to's roof sheet come down below the cut: take them off as well
-  const house = features.find((f) => f.name === 'house');
-  if (house) house.traverse((o) => { if (o.isMesh) o.visible = !(key === 'gf' && /^(clay_tiles|polycarbonate|paint_black|terracotta)$/.test(original.get(o)?.name || '')); });
+  for (const f of features) {
+    const re = ROOF_OFF[f.userData.kind];
+    if (re) f.traverse((o) => { if (o.isMesh) o.visible = !(key === 'gf' && re.test(original.get(o)?.name || '')); });
+  }
   if (key !== 'all') {
     for (const k of ['buildings', s.layer]) { const boxEl = $('layer-' + k); if (boxEl && !boxEl.checked) { boxEl.checked = true; syncLayers(); } }
     if (state.mode === 'explore') {
@@ -647,14 +675,18 @@ function applyFrame(v) {
   const a = fr[i], b = fr[i + 1], near = fr[Math.round(v)];
   // Glide between neighbouring stills of one clip. Snap to the still when the scrubber is nearly
   // on it, so the overlay is exact, and jump rather than fly where one clip ends and the next begins.
-  if (a.clip !== b.clip || Math.abs(v - Math.round(v)) < 0.12) { persp.position.copy(near.p); persp.quaternion.copy(near.q); }
+  if (a.clip !== b.clip || a.seq !== b.seq || Math.abs(v - Math.round(v)) < 0.12) { persp.position.copy(near.p); persp.quaternion.copy(near.q); }
   else { persp.position.lerpVectors(a.p, b.p, t); persp.quaternion.slerpQuaternions(a.q, b.q, t); }
   const asp = near.aspect || state.frames.aspect;          // clips filmed upright have their own shape
   if (asp !== state.aspect) { state.aspect = asp; layout(); }
   persp.fov = near.vfov || state.frames.vfov; persp.updateProjectionMatrix();
   if (photo.dataset.src !== near.file) { photo.dataset.src = near.file; photo.src = near.file; }
   $('scrub-val').textContent = near.t.toFixed(1) + ' s';
-  [...$('clip-list').children].forEach((el, k) => el.setAttribute('aria-pressed', String(k === (near.clip || 0))));
+  [...$('clip-list').children].forEach((el, k) => {
+    const on = k === (near.clip || 0);
+    if (on && el.getAttribute('aria-pressed') !== 'true') el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    el.setAttribute('aria-pressed', String(on));
+  });
   invalidate();
 }
 $('scrub').addEventListener('input', (e) => applyFrame(parseFloat(e.target.value)));
