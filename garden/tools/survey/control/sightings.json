@@ -1,0 +1,13 @@
+{
+  "_about": "Things sighted in more than one clip, for triangulate.py. Frames: plain numbers are the pan (f_NNNN), g_ and h_ are the two walks. Pixels are in the 1920 x 1440 frames.",
+
+  "outbuilding, west corner at the eaves": [[220, 1003, 352], ["h_0040.jpg", 1633, 352]],
+  "outbuilding, window west jamb at the head": [[220, 1087, 357], ["h_0040.jpg", 1666, 357]],
+  "football by the stock wall": [[100, 820, 618], ["h_0040.jpg", 385, 485]],
+  "stock wall, coping where the ivy starts": [[100, 1035, 432], ["h_0040.jpg", 524, 345]],
+  "picnic table top, south end": [[100, 1410, 615], ["h_0040.jpg", 798, 456]],
+  "picnic table top, north end": [[100, 1762, 655], ["h_0040.jpg", 992, 461]],
+  "hardboard sheet, foot (west side)": [[100, 1790, 690], ["h_0040.jpg", 1013, 497]],
+  "green pot at the patio corner, rim": [["h_0198.jpg", 1635, 1185], ["h_0231.jpg", 1345, 1290], ["g_0034.jpg", 745, 545]],
+  "green pot at the patio corner, foot": [["h_0198.jpg", 1650, 1340], ["h_0231.jpg", 1350, 1410], ["g_0034.jpg", 745, 600]]
+}

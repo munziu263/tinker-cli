@@ -1,0 +1,11 @@
+{
+  "about": "Brick walls whose mortar courses are used as a level. Rectangles are in the uncalibrated survey plan frame (plan_rot degrees from the raw survey), sized generously: only edges that run along the wall are kept.",
+  "plan_rot": -5.3,
+  "compare_edges": true,
+  "walls": [
+    {"name": "stock brick wall", "frames": [104, 150, 2], "a": [8.15, -8.78], "b": [5.7, -14.75], "z": [0.35, 1.72]},
+    {"name": "old red brick wall", "frames": [146, 186, 2], "a": [2.1, -15.0], "b": [-0.6, -15.17], "z": [0.3, 1.75]},
+    {"name": "dark brick wall, far part", "frames": [64, 104, 2], "a": [10.0, -1.6], "b": [8.15, -8.78], "z": [0.3, 1.75]},
+    {"name": "dark brick wall, near part", "frames": [0, 60, 2], "a": [11.0, 2.4], "b": [10.0, -1.6], "z": [0.3, 1.75]}
+  ]
+}

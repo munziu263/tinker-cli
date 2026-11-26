@@ -29,6 +29,8 @@ LAYERS = {
     "planting": "Planting",
     "objects": "Furniture and objects",
     "context": "Surroundings",
+    "survey": "Survey data",
+    "gaps": "Still to survey",
 }
 
 BUILDERS = {
@@ -44,6 +46,15 @@ BUILDERS = {
     "timber_shed": structures.timber_shed,
     "weatherboard_block": structures.weatherboard_block,
     "catslide_wing": structures.catslide_wing,
+    "cottage": structures.cottage,
+    "ground_line": structures.ground_line,
+    "ground_patch": structures.ground_patch,
+    "marker_post": structures.marker_post,
+    "manhole": structures.manhole,
+    "stump": objects.stump,
+    "compost_bin": objects.compost_bin,
+    "raised_bed": objects.raised_bed,
+    "toys": objects.toys,
     "flag_patio": lambda **kw: structures.patio(ground.flag_paving(**kw)),
     # planting
     "willow_pollard": plants.willow_pollard,
@@ -122,7 +133,7 @@ def build_scene(spec, tex_dir):
     gm = ground.ground(tuple(g["extent"]), g["zones"], tex_dir, g.get("px_per_m", 64))
     core.add_object("lawn", gm, cols["ground"], parents["ground"],
                     props={"label": "Lawn and ground", "layer": "ground", "kind": "ground", "confidence": "measured",
-                           "notes": "Painted from the survey: grass, bare soil under the willow, leaf litter along the walls."})
+                           "notes": "Painted from the survey: grass, bare soil under the pollarded tree, leaf litter along the walls, gravel, the road. Drawn flat: the measured levels put the whole garden within 0.3 m of level."})
     stats["ground"][0] += 1
     stats["ground"][1] += gm.tri_count
 
@@ -158,7 +169,7 @@ def build_scene(spec, tex_dir):
     cam_data.lens = 36.0 / (2 * math.tan(math.radians(62.7) / 2))   # 62.7 deg across, as filmed
     cam = bpy.data.objects.new("Video viewpoint", cam_data)
     cam.location = (vp["x"], vp["y"], vp["eye"])
-    cam.rotation_euler = (math.radians(90 - 12), 0.0, math.radians(-90 - 90))  # facing the south wall
+    cam.rotation_euler = (math.radians(90 - 12), 0.0, math.radians(vp.get("heading_deg", -90.0) - 90))  # heading: plan angle from +X
     root.objects.link(cam)
     scene.camera = cam
     sun_data = bpy.data.lights.new("Sun", "SUN")

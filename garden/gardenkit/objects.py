@@ -509,10 +509,11 @@ def massing(size=(8.0, 7.0), eaves=2.6, ridge=5.2, wall="brick_red_old", roof="c
     return m
 
 
-def pot_row(length=4.4, seed=8, start=0.7):
+def pot_row(length=4.4, seed=8, start=0.7, big=True):
     """The jumble of pots along the house wall: local +X runs along the wall, the pots
     stand on the -Y side of it. Mixed terracotta, black plastic and glazed pots, a low
-    white table of jars, and a long blue-green trough of bedding."""
+    white table of jars, and a long blue-green trough of bedding. big: end the row with a
+    large black tub of evergreen (leave it out where a separate feature stands there)."""
     m = Mesh()
     rng = np.random.default_rng(seed)
     kinds = [("terracotta", "standard", 0.12, 0.2, None), ("plastic_black", "bucket", 0.1, 0.17, None),
@@ -538,6 +539,72 @@ def pot_row(length=4.4, seed=8, start=0.7):
     # trough and a couple of pots beyond it
     m.merge(trough(length=1.05, w=0.3, h=0.2, seed=seed + 20), translate(length * 0.57 + 0.3, -0.8, 0) @ rot_z(-2))
     m.merge(pot(r=0.1, h=0.16, mat="terracotta", seed=seed + 30), translate(length * 0.57 + 1.15, -0.6, 0))
-    m.merge(pot(r=0.3, h=0.4, mat="plastic_black", style="bucket", plant="shrub", seed=seed + 31,
-                plant_kw=dict(leaf="leaf_green", rx=0.42, h=0.5, card=0.2)), translate(length * 0.57 + 1.75, -0.75, 0))
+    if big:
+        m.merge(pot(r=0.3, h=0.4, mat="plastic_black", style="bucket", plant="shrub", seed=seed + 31,
+                    plant_kw=dict(leaf="leaf_green", rx=0.42, h=0.5, card=0.2)), translate(length * 0.57 + 1.75, -0.75, 0))
+    return m
+
+
+def stump(r=0.75, h=0.5, flare=1.7, seed=11, roots=7):
+    """Sawn-off stump of a big tree, with root flares spreading into the lawn."""
+    m = Mesh()
+    rng = np.random.default_rng(seed)
+    seg = 28
+    lobes = [(rng.uniform(0, 2 * math.pi), rng.uniform(0.5, 1.0)) for _ in range(roots)]
+
+    def radius(a, t):       # t = 0 at the ground, 1 at the cut
+        bump = sum(amp * max(0.0, math.cos(a - a0)) ** 6 for a0, amp in lobes)
+        return r * (1 + (flare - 1) * (1 - t) ** 2 * (0.35 + 0.65 * min(1.0, bump)))
+    rings = 5
+    verts, faces, uvs = [], [], []
+    for i in range(rings + 1):
+        t = i / rings
+        for k in range(seg):
+            a = 2 * math.pi * k / seg
+            rr = radius(a, t)
+            verts.append((rr * math.cos(a), rr * math.sin(a), h * t ** 0.7))
+    for i in range(rings):
+        for k in range(seg):
+            k2 = (k + 1) % seg
+            faces.append((i * seg + k, i * seg + k2, (i + 1) * seg + k2, (i + 1) * seg + k))
+            uvs.append([(k / seg * 3, i / rings), ((k + 1) / seg * 3, i / rings), ((k + 1) / seg * 3, (i + 1) / rings), (k / seg * 3, (i + 1) / rings)])
+    m.add(verts, faces, uvs, "bark_willow", smooth=True)
+    top = verts[rings * seg:]
+    m.add(top, [tuple(range(seg))], [[(0.5 + 0.5 * math.cos(2 * math.pi * k / seg), 0.5 + 0.5 * math.sin(2 * math.pi * k / seg)) for k in range(seg)]], "stump_wood")
+    return m
+
+
+def compost_bin(r=0.4, h=0.95, mat="plastic_teal"):
+    """Conical plastic compost bin with a lid."""
+    m = Mesh()
+    m.lathe([(r, 0.0), (r * 0.72, h * 0.93), (r * 0.74, h)], mat, seg=16, ts=(1, 1), cap_top=mat)
+    m.cylinder(r * 0.5, 0.05, mat, seg=14, M=translate(0, 0, h))
+    return m
+
+
+def raised_bed(size=(3.0, 1.2), h=0.2, board=0.04, mat="wood_grey", planted=None, seed=5):
+    """Timber-edged vegetable bed. planted: leaf material for a low crop, or None for bare soil."""
+    m = Mesh()
+    L, W = size
+    for sy in (-1, 1):
+        m.box((L, board, h), mat, M=translate(0, sy * (W / 2 - board / 2), 0), grain=True)
+    for sx in (-1, 1):
+        m.box((board, W - 2 * board, h), mat, M=translate(sx * (L / 2 - board / 2), 0, 0), grain=True)
+    m.box((L - 2 * board, W - 2 * board, 0.01), "soil", M=translate(0, 0, h * 0.75))
+    if planted:
+        rng = np.random.default_rng(seed)
+        P = [(rng.uniform(-L / 2 + 0.15, L / 2 - 0.15), rng.uniform(-W / 2 + 0.15, W / 2 - 0.15), h * 0.75 + rng.uniform(0.05, 0.22)) for _ in range(int(L * W * 14))]
+        cards(m, P, [(0, 0, 1)] * len(P), planted, size=0.22, rng=rng, jitter=0.7)
+    return m
+
+
+def toys(seed=3):
+    """A child's balance bike and ride-on left on the grass (small, bright shapes)."""
+    m = Mesh()
+    for (x, col) in ((0.0, "paint_white"), (0.55, "tarp_yellow")):
+        m.tube([(x - 0.28, 0, 0.16), (x, 0.02, 0.36), (x + 0.3, 0, 0.16)], 0.02, col, seg=5)
+        for dx in (-0.28, 0.3):
+            c = Mesh()
+            c.cylinder(0.15, 0.04, "plastic_black", seg=12)
+            m.merge(c, translate(x + dx, -0.02, 0.15) @ rot_x(90))
     return m

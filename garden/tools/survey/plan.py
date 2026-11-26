@@ -18,7 +18,11 @@ class Survey:
         self.k1 = float(d["k1"])
         self.W, self.H = (int(v) for v in d["size"])
         self.yaw, self.pitch, self.roll = d["yaw"], d["pitch"], d["roll"]
+        # per-frame intrinsics (f, cx, cy, k1): clips added later have their own calibration
+        n = len(self.names)
+        self.intr = d["intr"] if "intr" in d.files else np.tile([self.f, self.cx, self.cy, self.k1], (n, 1))
         self.frames_dir = frames_dir
+        self.frames_dirs = [frames_dir] if isinstance(frames_dir, str) else list(frames_dir or [])
         self.T = np.eye(3)           # extra plan transform (rotation about Z + shift), see set_plan_frame
         self.shift = np.zeros(3)
 
@@ -37,32 +41,42 @@ class Survey:
         return (np.asarray(p) - self.shift) @ self.T
 
     def idx(self, name_or_num):
+        """Index of a frame: 126 (first clip), "g120" / "h_0045.jpg" (later clips)."""
         if isinstance(name_or_num, (int, np.integer)):
             name_or_num = f"f_{int(name_or_num):04d}.jpg"
+        elif not name_or_num.endswith(".jpg"):
+            name_or_num = f"{name_or_num[0]}_{int(name_or_num[1:].lstrip('_')):04d}.jpg"
         return self.names.index(name_or_num)
 
-    def nearest(self, frame_num):
-        nums = np.array([int(n[2:6]) for n in self.names])
-        return int(np.argmin(np.abs(nums - frame_num)))
+    def clip(self, prefix):
+        """Indices of the registered frames of one clip, in time order."""
+        return [i for i, n in enumerate(self.names) if n.startswith(prefix)]
+
+    def nearest(self, frame_num, prefix="f"):
+        ids = self.clip(prefix)
+        nums = np.array([int(self.names[i][2:6]) for i in ids])
+        return ids[int(np.argmin(np.abs(nums - frame_num)))]
 
     # -- camera model (COLMAP SIMPLE_RADIAL)
     def project(self, i, Pw):
         """plan-frame points -> pixels (u, v), depth"""
+        f, cx, cy, k1 = self.intr[i]
         Ps = self.w_inv(Pw)
         pc = (Ps - self.C[i]) @ self.R[i].T
         z = pc[..., 2]
         with np.errstate(divide="ignore", invalid="ignore"):
             x, y = pc[..., 0] / z, pc[..., 1] / z
         r2 = x * x + y * y
-        k = 1 + self.k1 * r2
-        return self.f * x * k + self.cx, self.f * y * k + self.cy, z
+        k = 1 + k1 * r2
+        return f * x * k + cx, f * y * k + cy, z
 
     def ray(self, i, u, v):
         """pixel -> unit direction in the plan frame"""
-        xd, yd = (np.asarray(u, float) - self.cx) / self.f, (np.asarray(v, float) - self.cy) / self.f
+        f, cx, cy, k1 = self.intr[i]
+        xd, yd = (np.asarray(u, float) - cx) / f, (np.asarray(v, float) - cy) / f
         x, y = xd, yd
         for _ in range(8):
-            k = 1 + self.k1 * (x * x + y * y)
+            k = 1 + k1 * (x * x + y * y)
             x, y = xd / k, yd / k
         d = np.stack([x, y, np.ones_like(x)], -1)
         d = d / np.linalg.norm(d, axis=-1, keepdims=True)
@@ -90,9 +104,93 @@ class Survey:
         d = self.ray(i, u, v)
         return float(np.degrees(np.arctan2(d[1], d[0])))
 
+    # -- the sparse point cloud
+    def points_in(self, i, box, also=(), z=(0.2, 12.0), min_track=3, max_err=2.0, colour=None):
+        """Reliable 3D points (plan frame) that project inside the pixel box (u0, u1, v0, v1)
+        of frame i, and inside every (frame, box) listed in `also`. colour=("dark", 90) or
+        ("bright", 150) keeps only points whose mean RGB is below / above the threshold."""
+        P = self.w(self.P)
+        ok = (self.track >= min_track) & (self.err < max_err) & (P[:, 2] > z[0]) & (P[:, 2] < z[1])
+        for (j, (u0, u1, v0, v1)) in [(i, box)] + list(also):
+            u, v, d = self.project(j, P)
+            ok &= (d > 0) & (u > u0) & (u < u1) & (v > v0) & (v < v1)
+        if colour:
+            lum = self.col[:, :3].astype(float).mean(1)
+            ok &= (lum < colour[1]) if colour[0] == "dark" else (lum > colour[1])
+        return P[ok]
+
+    @staticmethod
+    def fit_wall(P, trim=1.8, floor=0.05):
+        """Robust vertical plane through points: returns dict(centre, heading, rms, lo, hi, n)
+        where heading is the wall's direction in plan (degrees) and lo..hi its extent along it."""
+        xy = np.asarray(P)[:, :2]
+        if len(xy) < 6:
+            return None
+        keep = np.ones(len(xy), bool)
+        for _ in range(6):
+            c = xy[keep].mean(0)
+            _, _, vt = np.linalg.svd(xy[keep] - c, full_matrices=False)
+            d = vt[0]
+            r = (xy - c) @ np.array([-d[1], d[0]])
+            keep = np.abs(r) < max(floor, trim * np.std(r[keep]))
+        if d[1] < 0:
+            d = -d
+        t = (xy[keep] - c) @ d
+        return dict(centre=c, heading=float(np.degrees(np.arctan2(d[1], d[0]))), dir=d,
+                    rms=float(np.sqrt((r[keep] ** 2).mean())), lo=float(t.min()), hi=float(t.max()),
+                    n=int(keep.sum()), z=(float(np.asarray(P)[keep][:, 2].min()), float(np.asarray(P)[keep][:, 2].max())))
+
+    def locate(self, i, u, v, radius=10.0, min_track=3, max_err=2.0, spread=0.06):
+        """3D position (plan frame) of the thing at pixel (u, v) of frame i: the direction
+        comes from the pixel, the distance from the reconstructed points that project
+        within `radius` pixels of it (bundle-adjusted from many frames, so far better
+        than triangulating two hand picks). Returns (point, n_neighbours, depth spread as
+        a fraction of the depth), or (None, 0, 0) if nothing reliable is near."""
+        i = self.idx(i)
+        P = self.w(self.P)
+        uu, vv, d = self.project(i, P)
+        ok = (d > 0) & (self.track >= min_track) & (self.err < max_err)
+        r = radius
+        for _ in range(4):
+            m = ok & (np.hypot(uu - u, vv - v) < r)
+            if m.sum() >= 3:
+                break
+            r *= 1.6
+        if m.sum() < 1:
+            return None, 0, 0.0
+        c, ray = self.centre(i), self.ray(i, u, v)
+        t = (P[m] - c) @ ray                         # distance of each neighbour along the pick's ray
+        med = np.median(t)
+        keep = np.abs(t - med) < max(spread * med, 0.05)
+        t = t[keep]
+        return c + ray * np.median(t), int(keep.sum()), float(np.std(t) / np.median(t)) if len(t) > 1 else 0.0
+
+    def triangulate(self, picks):
+        """Least-squares 3D point (plan frame) from pixel picks [(frame, u, v), ...] of the
+        same thing seen from different places. Returns (point, rms distance to the rays)."""
+        A, b, rays = np.zeros((3, 3)), np.zeros(3), []
+        for (i, u, v) in picks:
+            i = self.idx(i)            # same naming as idx(): 126, "g120", "h_0045.jpg"
+            d, c = self.ray(i, u, v), self.centre(i)
+            M = np.eye(3) - np.outer(d, d)
+            A += M
+            b += M @ c
+            rays.append((c, d))
+        p = np.linalg.solve(A, b)
+        res = [np.linalg.norm((np.eye(3) - np.outer(d, d)) @ (p - c)) for c, d in rays]
+        return p, float(np.sqrt(np.mean(np.square(res))))
+
     # -- images
+    def image_path(self, i):
+        import os
+        for d in self.frames_dirs:
+            p = os.path.join(d, self.names[i])
+            if os.path.exists(p):
+                return p
+        raise FileNotFoundError(self.names[i])
+
     def image(self, i):
-        return Image.open(f"{self.frames_dir}/{self.names[i]}").convert("RGB")
+        return Image.open(self.image_path(i)).convert("RGB")
 
     def gridded(self, i, step=100, scale=1.0, box=None):
         """Frame with a labelled pixel grid, for reading off coordinates by eye."""
@@ -127,7 +225,7 @@ class Survey:
 
     # -- ortho mosaic of the ground plane
     def mosaic(self, extent=(-20, 20, -20, 20), res=0.02, every=3, z=0.0, max_range=40.0,
-               min_depress_deg=2.0):
+               min_depress_deg=2.0, frames=None, near_power=0.0):
         """Project the frames onto the plane at height z: an 'aerial photo' of the lawn.
         Things standing up smear radially away from the camera; their feet are true."""
         x0, x1, y0, y1 = extent
@@ -138,7 +236,7 @@ class Survey:
         G = np.stack([X, Y, np.full_like(X, z)], -1).reshape(-1, 3)
         acc = np.zeros((nx * ny, 3), np.float32)
         wsum = np.zeros(nx * ny, np.float32)
-        for i in range(0, len(self.names), every):
+        for i in (frames if frames is not None else range(0, len(self.names), every)):
             c = self.centre(i)
             dist = np.hypot(G[:, 0] - c[0], G[:, 1] - c[1])
             u, v, zc = self.project(i, G)
@@ -155,6 +253,8 @@ class Survey:
                  + img[iv + 1, iu] * (1 - fu) * fv + img[iv + 1, iu + 1] * fu * fv)
             wgt = (1 - ((uu - self.cx) / (self.W / 2)) ** 2) * (1 - ((vv - self.cy) / (self.H / 2)) ** 2)
             wgt = np.clip(wgt, 0.02, 1) ** 2
+            if near_power:      # with several viewpoints, trust the camera that is closest to the spot
+                wgt = wgt / np.maximum(dist[ok], 0.5) ** near_power
             acc[ok] += s * wgt[:, None]
             wsum[ok] += wgt
         out = np.where(wsum[:, None] > 0, acc / np.maximum(wsum[:, None], 1e-6), 40)

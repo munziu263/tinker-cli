@@ -1,0 +1,47 @@
+{
+  "about": "Survey control. Positions are read off the measured building survey of the house (1:50 floor plans and 1:100 elevations, March 2025); the pixel picks say where the same places are in the footage. Add tape measurements under 'distances' as they are taken.",
+  "frame": "Site grid, metres. Origin: the outer south-east corner of the rear outshot at ground level (where the low eaves end, by the back door). X runs south, away from the back of the house; Y runs east. z = 0 is level 20.00 m on the measured survey's datum.",
+  "survey_plan_rot": -5.3,
+  "z_datum_level": 20.0,
+
+  "planes": {
+    "outshot south face": {"frame": "h289", "box": [200, 1180, 1050, 1190], "range": [6, 12.5], "z": [0.15, 1.2], "colour": ["bright", 140]},
+    "main south face": {"frame": "h289", "box": [1250, 1565, 500, 1050], "range": [11, 16.5], "z": [0.3, 5.5], "colour": ["bright", 140]},
+    "shed gable": {"frame": 282, "box": [575, 1080, 60, 470], "range": [6, 11], "z": [0.7, 3.2], "colour": ["dark", 100]}
+  },
+
+  "points": [
+    {"name": "outshot SW corner", "real": [0.051, -4.381], "sigma": 0.05, "pick": {"frame": "h223", "pixel": [290, 640], "on": "outshot south face"}},
+    {"name": "post in the low wall", "real": [0.025, -2.17], "sigma": 0.08, "pick": {"frame": "h223", "pixel": [705, 650], "on": "outshot south face"}},
+    {"name": "outshot SE corner", "real": [0.0, 0.0], "sigma": 0.05, "pick": {"frame": "h223", "pixel": [1199, 650], "on": "outshot south face"}},
+    {"name": "back door, west jamb", "real": [-4.363, -0.104], "sigma": 0.06, "pick": {"frame": "h289", "pixel": [1277, 900], "on": "main south face"}},
+    {"name": "back door, east jamb", "real": [-4.312, 0.797], "sigma": 0.06, "pick": {"frame": "h289", "pixel": [1412, 900], "on": "main south face"}},
+    {"name": "main range SE corner", "real": [-4.257, 1.792], "sigma": 0.06, "pick": {"frame": "h289", "pixel": [1572, 900], "on": "main south face"}},
+    {"name": "shed SW corner", "real": [-0.991, -10.883], "sigma": 0.08, "pick": {"frame": 282, "pixel": [558, 400], "on": "shed gable"}},
+    {"name": "shed SE corner", "real": [-0.991, -8.307], "sigma": 0.08, "pick": {"frame": 282, "pixel": [1092, 400], "on": "shed gable"}}
+  ],
+
+  "distances": [],
+
+  "levels": [
+    {"name": "patio, 2.6 m south of the corner", "at": [2.58, 0.24], "level": 19.99},
+    {"name": "patio, south-west", "at": [2.3, -4.1], "level": 19.99},
+    {"name": "by the outshot SE corner", "at": [-0.18, 1.12], "level": 20.01},
+    {"name": "path east of the outshot", "at": [-2.6, 1.56], "level": 20.12},
+    {"name": "east of the back door", "at": [-4.51, 3.13], "level": 20.19}
+  ],
+
+  "far_field": {
+    "about": "The first clip was a pan from one spot, so everything seen only in it (the south and west of the garden) has good directions and weak distances. The first model's distances there turned out 9 to 30% short, by different amounts in different directions. They were corrected against a second viewpoint: the first seconds of clip h look back across the same ground from 7 m to the side (see sightings.json and triangulate.py).",
+    "pan_position": [5.26, -6.14],
+    "checks": [
+      {"what": "west wall", "how": "231 reconstructed points seen in both clips: a straight line, flat to 0.27 m", "first_model_short_by": "28%"},
+      {"what": "stock wall and its coping", "how": "points seen in both clips, and a two-view sighting of the coping (top 1.76 m above datum)", "first_model_short_by": "about 25%"},
+      {"what": "outbuilding front", "how": "two-view sightings of its west corner and window jamb, rays meeting within 5 cm", "first_model_short_by": "29%"},
+      {"what": "log stack, firewood bags, football", "how": "points seen in both clips; one two-view sighting", "first_model_short_by": "25 to 32%"},
+      {"what": "dark south wall", "how": "not seen from the second viewpoint: placed on the block-plan boundary, which agrees with its 75 mm brick courses (8.9 m from the pan position)", "first_model_short_by": "9%"},
+      {"what": "bench, tables and chair (3 to 5 m away)", "how": "sizes and positions checked by projecting them into the footage with the calibrated camera", "first_model_short_by": "0 to 7%"}
+    ],
+    "uncertainty": "about half a metre along the line of sight from the pan position, much less across it, until this part of the garden is filmed on foot"
+  }
+}

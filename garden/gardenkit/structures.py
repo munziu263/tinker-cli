@@ -287,7 +287,7 @@ def timber_shed(width=2.6, depth=3.4, eaves=1.75, ridge=2.75, wall="boards_dark"
         a = (sgn * half_w, -half_d * sgn, 0)
         b = (sgn * half_w, half_d * sgn, 0)
         m.quad(a, b, (b[0], b[1], eaves), (a[0], a[1], eaves), wall, ts=ts)
-    gable_roof(m, width, depth, eaves, ridge, roof, overhang=0.22, verge=0.16)
+    gable_roof(m, width, depth, eaves, ridge, roof, overhang=0.22, verge=0.16, ridge_mat=roof)
     # corner trims and a plinth board
     for sx in (-1, 1):
         for sy in (-1, 1):
@@ -369,7 +369,7 @@ def outbuilding(width=6.2, depth=3.6, front_h=2.15, back_h=2.15, rise=0.0, windo
 
 def weatherboard_block(width=3.2, depth=3.0, eaves=2.5, ridge=3.5, window=None, canopy=True,
                        chimney=True, wall="weatherboard_dark", roof="clay_tiles",
-                       canopy_z=None, canopy_out=1.1, canopy_w=None):
+                       canopy_z=None, canopy_out=1.1, canopy_w=None, mono=False):
     """Dark weather-boarded part of the house. Front (garden side) is local -Y; origin at
     the front-left corner. The roof ridge runs along X (parallel to the front)."""
     m = Mesh()
@@ -381,12 +381,27 @@ def weatherboard_block(width=3.2, depth=3.0, eaves=2.5, ridge=3.5, window=None, 
     m.quad((width, 0, 0), (width, depth, 0), (width, depth, eaves), (width, 0, eaves), wall, ts=ts)
     m.quad((width, depth, 0), (0, depth, 0), (0, depth, eaves), (width, depth, eaves), wall, ts=ts)
     m.quad((0, depth, 0), (0, 0, 0), (0, 0, eaves), (0, depth, eaves), wall, ts=ts)
-    # roof: build a gable roof with ridge along local Y, then turn it so the ridge runs along X
-    r = Mesh()
-    gable_wall(r, depth, eaves, ridge, wall, -width / 2, facing=-1, ts=ts)
-    gable_wall(r, depth, eaves, ridge, wall, width / 2, facing=1, ts=ts)
-    gable_roof(r, depth, width, eaves, ridge, roof, overhang=0.25, verge=0.1, soffit="paint_black")
-    m.merge(r, translate(width / 2, depth / 2, 0) @ rot_z(90))
+    if mono:   # lean-to: one sheet roof rising from the front eaves to the back wall
+        oh = 0.2
+        m.add([(-oh, -oh, eaves + 0.06), (width + oh, -oh, eaves + 0.06), (width + oh, depth, ridge + 0.06),
+               (-oh, depth, ridge + 0.06)], [(0, 1, 2, 3)], [[(0, 0), (4, 0), (4, 4), (0, 4)]], "roof_felt")
+        m.add([(-oh, depth, ridge - 0.04), (width + oh, depth, ridge - 0.04), (width + oh, -oh, eaves - 0.04),
+               (-oh, -oh, eaves - 0.04)], [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "paint_black")
+        m.box((width + 2 * oh, 0.03, 0.14), "wood_grey", M=translate(-oh, -oh - 0.03, eaves - 0.08), origin="corner")
+        for x, flip in ((0.0, False), (width, True)):      # wedge of wall under the slope
+            tri = [(x, 0, eaves), (x, depth, ridge), (x, depth, eaves)]
+            uv = [(p[1] / ts[0], p[2] / ts[1]) for p in tri]
+            if flip:
+                tri, uv = tri[::-1], uv[::-1]
+            m.add(tri, [(0, 1, 2)], [uv], wall)
+        m.quad((width, depth, eaves), (0, depth, eaves), (0, depth, ridge), (width, depth, ridge), wall, ts=ts)
+    else:
+        # roof: build a gable roof with ridge along local Y, then turn it so the ridge runs along X
+        r = Mesh()
+        gable_wall(r, depth, eaves, ridge, wall, -width / 2, facing=-1, ts=ts)
+        gable_wall(r, depth, eaves, ridge, wall, width / 2, facing=1, ts=ts)
+        gable_roof(r, depth, width, eaves, ridge, roof, overhang=0.25, verge=0.1, soffit="paint_black")
+        m.merge(r, translate(width / 2, depth / 2, 0) @ rot_z(90))
     if canopy:  # small lean-to roof against the wall, with a gutter and downpipe
         z_lo = (eaves - 0.75) if canopy_z is None else canopy_z
         z_hi, out = z_lo + 0.42, canopy_out
@@ -475,6 +490,262 @@ def catslide_wing(length=7.5, eaves=1.05, depth=3.6, ridge=3.9, wall="render_whi
         m.beam((x, 0.06, eaves * 0.98), (x, depth * 0.9, eaves * 0.98), 0.1, 0.03, "paint_black", roll=90)
         m.beam((x, 0.1, eaves + 0.05), (x, depth * 0.45, zt(depth * 0.45) - 0.1), 0.1, 0.03, "paint_black", roll=90)
         m.tube([(-0.09, 0.9, 0.05), (-0.09, 0.9, zt(0.9) - 0.1)], 0.04, "paint_black", seg=6)
+    return m
+
+
+def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=(), openings=(),
+            rooflights=(), posts=(), wall="render_white", roof="clay_tiles"):
+    """The house, from the measured building survey. Everything is in site-grid metres
+    relative to the feature's origin: X south, Y east, Z up.
+
+      main      [x_north, x_south, y_west, y_east]  the two-storey range
+      outshot   [x_north, x_south, y_west, y_east]  the rear room under the catslide
+      leanto    dict(box=[x_n, x_s, y_w, y_e], z_low, z_high) timber-clad lean-to, roof
+                rising from its west side to its east side
+      ridge     dict(x, z, y_west, y_east)           ridge line (shorter than the house:
+                the roof is half-hipped at both ends)
+      profile   [(x, z), ...] the south roof slope from the ridge down to the low eaves
+                over the outshot, as drawn on the section (it steepens towards the top)
+      hip_z     height at which the half-hips start, at the gables
+      north_eaves dict(x, z) edge of the north slope
+      chimneys  dicts(box=[x_n, x_s, y_w, y_e], top, z0, pots)
+      openings  dicts(face="south"|"north"|"east"|"outshot_east"|"leanto_south",
+                at=[lo, hi] along the face, z=[sill, head], kind="window"|"door", bars)
+      rooflights dicts(y=[west, east], z=[low, high]) on the south slope
+    """
+    m = Mesh()
+    ts, rts = tex_size(wall), tex_size(roof)
+    xn, xs, yw, ye = main
+    oxn, oxs, oyw, oye = outshot
+    prof = sorted([tuple(p) for p in profile], key=lambda p: -p[1])     # ridge first
+    rx, rz, ryw, rye = ridge["x"], ridge["z"], ridge["y_west"], ridge["y_east"]
+
+    def south_x(z):
+        """X of the south roof slope at height z (interpolating the drawn profile)."""
+        for (xa, za), (xb, zb) in zip(prof[:-1], prof[1:]):
+            if zb <= z <= za:
+                return xa + (xb - xa) * (za - z) / (za - zb)
+        return prof[-1][0]
+
+    def north_x(z):
+        return rx + (north_eaves["x"] - rx) * (rz - z) / (rz - north_eaves["z"])
+
+    main_eaves = max(z for x, z in prof if x >= xs - 0.25)       # where the slope crosses the south wall line
+    for (xa, za), (xb, zb) in zip(prof[:-1], prof[1:]):
+        if xa <= xs <= xb:
+            main_eaves = za + (zb - za) * (xs - xa) / (xb - xa)
+
+    def hole(face, o):
+        return dict(x=o["at"][0], w=o["at"][1] - o["at"][0], z=o["z"][0], h=o["z"][1] - o["z"][0])
+
+    def face_wall(a, b, height, face, mat=wall, frame="paint_slate"):
+        """Wall from plan point a to b (outside is on the right of a->b), with openings."""
+        a, b = np.asarray(a, float), np.asarray(b, float)
+        L = float(np.linalg.norm(b - a))
+        M = translate(a[0], a[1], 0) @ rot_z(math.degrees(math.atan2(b[1] - a[1], b[0] - a[0])))
+        ops = [o for o in openings if o["face"] == face]
+        _wall_with_openings(m, L, height, mat, [dict(hole(face, o), reveal=0.08) for o in ops], M=M, ts=tex_size(mat))
+        for o in ops:
+            h = hole(face, o)
+            if o.get("kind") == "door":
+                _glazing(m, h["x"], h["z"], h["w"], h["h"], M=M, frame=frame, bars=o.get("bars", (3, 6)),
+                         frame_w=0.09, depth=0.07, bar_w=0.03)
+                m.box((h["w"] - 0.16, 0.03, h["h"] * 0.48), frame, M=M @ translate(h["x"] + 0.08, 0.035, h["z"] + 0.05), origin="corner")
+            else:
+                _glazing(m, h["x"], h["z"], h["w"], h["h"], M=M, frame=frame, bars=o.get("bars", (2, 3)),
+                         frame_w=0.06, depth=0.07, bar_w=0.025)
+        return M
+
+    # --- main range walls. A wall panel faces the right-hand side of its direction of travel.
+    face_wall((xs, yw), (xs, ye), main_eaves, "south")               # south wall (east and west parts show)
+    face_wall((xn, ye), (xn, yw), north_eaves["z"] - 0.05, "north")  # the front
+    for y, a, b, face in ((ye, (xs, ye), (xn, ye), "east"), (yw, (xn, yw), (xs, yw), "west")):
+        face_wall(a, b, min(main_eaves, north_eaves["z"]) - 0.05, face)
+        # gable above the eaves, cut off at the half-hip
+        zb = min(main_eaves, north_eaves["z"]) - 0.05
+        pts = [(xs, y, zb), (xs, y, main_eaves - 0.05), (south_x(hip_z), y, hip_z), (north_x(hip_z), y, hip_z),
+               (xn, y, north_eaves["z"] - 0.1), (xn, y, zb)]
+        uv = [(q[0] / ts[0], q[2] / ts[1]) for q in pts]
+        if face == "east":
+            pts, uv = pts[::-1], uv[::-1]
+        m.add(pts, [tuple(range(len(pts)))], [uv], wall)
+
+    # --- outshot walls (low south wall, both ends up to the roof)
+    face_wall((oxs, oyw), (oxs, oye), prof[-1][1] - 0.12, "outshot_south")
+    for y, flip, face in ((oye, False, "outshot_east"), (oyw, True, "outshot_west")):
+        n = 7
+        xs_ = np.linspace(oxs, oxn, n)
+        top = []
+        for x in xs_:                                               # wall top follows the underside of the roof
+            zt = prof[-1][1]
+            for (xa, za), (xb, zb) in zip(prof[:-1], prof[1:]):
+                if xa <= x <= xb:
+                    zt = za + (zb - za) * (x - xa) / (xb - xa)
+            top.append(zt - 0.12)
+        pts = [(x, y, 0.0) for x in xs_] + [(x, y, z) for x, z in zip(xs_[::-1], top[::-1])]
+        uv = [(q[0] / ts[0], q[2] / ts[1]) for q in pts]
+        if flip:
+            pts, uv = pts[::-1], uv[::-1]
+        m.add(pts, [tuple(range(len(pts)))], [uv], wall)
+        for o in openings:
+            if o["face"] == face:
+                x0, x1 = oxs - o["at"][1], oxs - o["at"][0]
+                sgn = 1 if face == "outshot_east" else -1
+                m.box((x1 - x0, 0.05, o["z"][1] - o["z"][0]), "glass_dark", M=translate(x0, y + sgn * 0.01 - 0.025, o["z"][0]), origin="corner")
+                for k in range(o.get("lights", 3) + 1):
+                    xx = x0 + (x1 - x0) * k / o.get("lights", 3)
+                    m.box((0.05, 0.07, o["z"][1] - o["z"][0] + 0.08), "paint_slate", M=translate(xx - 0.025, y + sgn * 0.02 - 0.035, o["z"][0] - 0.04), origin="corner")
+    for y in posts:                                                 # studs showing in the low wall
+        m.box((0.03, 0.1, prof[-1][1] - 0.14), "paint_black", M=translate(oxs + 0.0, y - 0.05, 0), origin="corner")
+
+    # --- roof. Each strip of the south slope spans the house (above the main eaves) or just
+    #     the outshot (the catslide below them); the top narrows to the ridge between the hips.
+    lift = 0.07
+
+    def span(z, low):
+        if z >= hip_z:
+            t = (z - hip_z) / (rz - hip_z)
+            return yw - 0.12 + (ryw - yw + 0.12) * t, ye + 0.12 + (rye - ye - 0.12) * t
+        if z >= main_eaves - 1e-6 and not low:
+            return yw - 0.12, ye + 0.12
+        return oyw - 0.1, oye + 0.1
+
+    def strip(pa, pb, north=False):
+        """One band of tiles between two (x, z) profile points, pa above pb."""
+        (xa, za), (xb, zb) = pa, pb
+        low = (zb < main_eaves - 0.02) and not north
+        y0a, y1a = span(za, low and za <= main_eaves + 1e-6)
+        y0b, y1b = span(zb, low)
+        if not north and za > main_eaves and zb < main_eaves:      # split at the main eaves line
+            xm = xa + (xb - xa) * (za - main_eaves) / (za - zb)
+            strip(pa, (xm, main_eaves))
+            strip((xm, main_eaves), pb)
+            return
+        if za > hip_z > zb:
+            xm = xa + (xb - xa) * (za - hip_z) / (za - zb)
+            strip(pa, (xm, hip_z), north)
+            strip((xm, hip_z), pb, north)
+            return
+        L = math.hypot(xb - xa, za - zb)
+        v0 = strip.run / rts[1]
+        strip.run += L
+        v1 = strip.run / rts[1]
+        quad = [(xb, y0b, zb + lift), (xb, y1b, zb + lift), (xa, y1a, za + lift), (xa, y0a, za + lift)]
+        uv = [(y0b / rts[0], v1), (y1b / rts[0], v1), (y1a / rts[0], v0), (y0a / rts[0], v0)]
+        if north:           # as listed the quad faces up-and-south; the north slope needs the other winding
+            quad, uv = quad[::-1], uv[::-1]
+        m.add(quad, [(0, 1, 2, 3)], [uv], roof)
+        m.add([(q[0], q[1], q[2] - 0.09) for q in quad][::-1], [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "paint_black")
+
+    strip.run = 0.0
+    for pa, pb in zip(prof[:-1], prof[1:]):
+        strip(pa, pb)
+    strip.run = 0.0
+    strip((rx, rz), (north_eaves["x"], north_eaves["z"]), north=True)
+    for y, ry_, sgn in ((ye + 0.12, rye, 1), (yw - 0.12, ryw, -1)):      # the two half-hips
+        tri = [(south_x(hip_z), y, hip_z + lift), (north_x(hip_z), y, hip_z + lift), (rx, ry_, rz + lift)]
+        uv = [(q[0] / rts[0], q[2] / rts[1]) for q in tri]
+        if sgn < 0:
+            tri, uv = tri[::-1], uv[::-1]
+        m.add(tri, [(0, 1, 2)], [uv], roof)
+        m.tube([(south_x(hip_z), y, hip_z + lift + 0.03), (rx, ry_, rz + lift + 0.03)], 0.07, "terracotta", seg=6)
+        m.tube([(north_x(hip_z), y, hip_z + lift + 0.03), (rx, ry_, rz + lift + 0.03)], 0.07, "terracotta", seg=6)
+    m.tube([(rx, ryw, rz + lift + 0.04), (rx, rye, rz + lift + 0.04)], 0.1, "terracotta", seg=8)
+    # verges of the catslide, gutters and downpipes
+    for y in (oyw - 0.1, oye + 0.1):
+        pts = [(x, y, z + lift - 0.05) for x, z in prof if z <= main_eaves + 0.3]
+        for a, b in zip(pts[:-1], pts[1:]):
+            m.beam(a, b, 0.03, 0.15, "paint_black")
+    ex, ez = prof[-1]
+    m.tube([(ex + 0.06, oyw - 0.12, ez + lift - 0.08), (ex + 0.06, oye + 0.12, ez + lift - 0.08)], 0.055, "paint_black", seg=8)
+    m.tube([(ex + 0.02, oye - 0.15, ez), (oxs + 0.07, oye - 0.15, ez - 0.25), (oxs + 0.07, oye - 0.15, 0.05)], 0.04, "paint_black", seg=6)
+    gx = south_x(main_eaves) + 0.1
+    for ya, yb in ((oye + 0.1, ye + 0.14), (yw - 0.14, oyw - 0.1)):
+        m.tube([(gx, ya, main_eaves + lift - 0.1), (gx, yb, main_eaves + lift - 0.1)], 0.055, "paint_black", seg=8)
+    m.tube([(xs + 0.07, ye - 0.06, main_eaves - 0.1), (xs + 0.07, ye - 0.06, 0.05)], 0.04, "paint_black", seg=6)
+    m.tube([(north_eaves["x"] - 0.06, yw - 0.14, north_eaves["z"] + lift - 0.1), (north_eaves["x"] - 0.06, ye + 0.14, north_eaves["z"] + lift - 0.1)],
+           0.055, "paint_black", seg=8)
+    for r in rooflights:
+        (ya, yb), (za, zb) = r["y"], r["z"]
+        q = [(south_x(za), ya, za + lift + 0.05), (south_x(za), yb, za + lift + 0.05), (south_x(zb), yb, zb + lift + 0.05), (south_x(zb), ya, zb + lift + 0.05)]
+        m.add(q, [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "glass_dark")
+        for a, b in ((q[0], q[1]), (q[1], q[2]), (q[2], q[3]), (q[3], q[0])):
+            m.tube([a, b], 0.03, "paint_black", seg=4, caps=(False, False))
+
+    # --- lean-to (timber-clad, clear roof sheet)
+    if leanto:
+        lxn, lxs, lyw, lye = leanto["box"]
+        zl, zh = leanto["z_low"], leanto["z_high"]
+        wts = tex_size("weatherboard_dark")
+        face_wall((lxs, lyw), (lxs, lye), zl, "leanto_south", mat="weatherboard_dark", frame="wood_grey")
+        m.add([(lxs, lyw, zl), (lxs, lye, zl), (lxs, lye, zh)], [(0, 1, 2)], [[(0, 0), (1, 0), (1, 1)]], "weatherboard_dark")
+        m.quad((lxn, lyw, 0), (lxs, lyw, 0), (lxs, lyw, zl), (lxn, lyw, zl), "weatherboard_dark", ts=wts)
+        m.add([(lxn, lyw - 0.15, zl + 0.05), (lxs + 0.2, lyw - 0.15, zl + 0.05), (lxs + 0.2, lye, zh + 0.05), (lxn, lye, zh + 0.05)],
+              [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "polycarbonate")
+        m.beam((lxs + 0.2, lyw - 0.15, zl), (lxs + 0.2, lye, zh), 0.04, 0.12, "wood_grey", roll=90)
+
+    cts = tex_size("brick_red_old")
+    for c in chimneys:
+        cxn, cxs, cyw, cye = c["box"]
+        z0 = c.get("z0", 0.0)
+        cM = translate((cxn + cxs) / 2, (cyw + cye) / 2, z0)
+        m.box((cxs - cxn, cye - cyw, c["top"] - z0), "brick_red_old", M=cM, ts=cts)
+        if c.get("base"):                                           # wider foot of an external stack
+            bxn, bxs, byw, bye = c["base"]["box"]
+            m.box((bxs - bxn, bye - byw, c["base"]["top"]), "brick_red_old", M=translate((bxn + bxs) / 2, (byw + bye) / 2, 0), ts=cts)
+        m.box((cxs - cxn + 0.1, cye - cyw + 0.1, 0.1), "brick_red_old", M=cM @ translate(0, 0, c["top"] - z0 - 0.28), ts=cts)
+        for k in range(c.get("pots", 1)):
+            off = (k - (c.get("pots", 1) - 1) / 2) * 0.32
+            m.cylinder(0.1, 0.45, "terracotta", seg=10, M=cM @ translate(off if (cxs - cxn) > (cye - cyw) else 0,
+                                                                     0 if (cxs - cxn) > (cye - cyw) else off, c["top"] - z0), r_top=0.085)
+    return m
+
+
+def ground_line(path, width=0.12, mat="marker", z=0.06, closed=False, dash=None):
+    """A flat band on the ground along a path: a boundary or a buried pipe run.
+    dash=(on, off) breaks it into dashes."""
+    m = Mesh()
+    P = [np.asarray(p, float) for p in path]
+    if closed:
+        P = P + [P[0]]
+    for a, b in zip(P[:-1], P[1:]):
+        L = float(np.linalg.norm(b - a))
+        if L < 1e-6:
+            continue
+        d = (b - a) / L
+        n = np.array([-d[1], d[0]]) * width / 2
+        segs = [(0.0, L)] if not dash else [(s0, min(L, s0 + dash[0])) for s0 in np.arange(0.0, L, dash[0] + dash[1])]
+        for s0, s1 in segs:
+            p0, p1 = a + d * s0, a + d * s1
+            m.add([(p0[0] - n[0], p0[1] - n[1], z), (p1[0] - n[0], p1[1] - n[1], z), (p1[0] + n[0], p1[1] + n[1], z), (p0[0] + n[0], p0[1] + n[1], z)],
+                  [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], mat)
+    return m
+
+
+def ground_patch(outline, mat="hatch", z=0.05):
+    """A flat tinted area on the ground (for marking a zone)."""
+    m = Mesh()
+    P = [(p[0], p[1], z) for p in outline]
+    m.add(P, [tuple(range(len(P)))], [[(p[0] * 0.5, p[1] * 0.5) for p in P]], mat)
+    return m
+
+
+def marker_post(h=1.2, r=0.035, mat="marker", disc=0.22):
+    """Survey marker: a thin post with a disc on the ground."""
+    m = Mesh()
+    m.cylinder(disc, 0.03, mat, seg=18)
+    m.cylinder(r, h, mat, seg=8)
+    m.cylinder(r * 2.6, 0.1, mat, seg=10, M=translate(0, 0, h))
+    return m
+
+
+def manhole(r=0.25, square=False, rot=0.0):
+    """Inspection chamber cover, flush with the ground."""
+    m = Mesh()
+    if square:
+        m.box((2 * r, 2 * r, 0.04), "cast_iron", M=rot_z(rot))
+    else:
+        m.cylinder(r, 0.04, "cast_iron", seg=20)
     return m
 
 

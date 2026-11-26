@@ -53,6 +53,7 @@ MATERIAL_DEFS = {
     "paint_black": dict(colour=(0.03, 0.03, 0.032), rough=0.55),
     "paint_white": dict(colour=(0.86, 0.86, 0.84), rough=0.6),
     "paint_brown": dict(colour=(0.22, 0.13, 0.09), rough=0.6),
+    "paint_slate": dict(colour=(0.17, 0.19, 0.21), rough=0.5),
     "steel_black": dict(colour=(0.04, 0.04, 0.045), rough=0.45, metal=0.7),
     "galvanised": dict(colour=(0.55, 0.57, 0.58), rough=0.4, metal=0.85),
     "roof_felt": dict(colour=(0.07, 0.07, 0.075), rough=0.9),
@@ -83,6 +84,14 @@ MATERIAL_DEFS = {
     "ball_white": dict(colour=(0.9, 0.9, 0.9), rough=0.4),
     "net_white": dict(colour=(0.85, 0.85, 0.85), rough=0.7),
     "marker": dict(colour=(0.95, 0.35, 0.10), rough=0.5),
+    "marker_blue": dict(colour=(0.10, 0.45, 0.85), rough=0.5),
+    "marker_boundary": dict(colour=(0.85, 0.10, 0.12), rough=0.6),
+    "marker_drain": dict(colour=(0.55, 0.30, 0.10), rough=0.6),
+    "hatch": dict(colour=(0.93, 0.78, 0.25), rough=0.9),
+    "cast_iron": dict(colour=(0.16, 0.16, 0.17), rough=0.55, metal=0.6),
+    "polycarbonate": dict(colour=(0.72, 0.76, 0.78), rough=0.25),
+    "gravel_grey": dict(colour=(0.60, 0.57, 0.52), rough=1.0),
+    "stump_wood": dict(colour=(0.62, 0.58, 0.52), rough=0.9),
 }
 
 

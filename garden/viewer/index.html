@@ -92,6 +92,10 @@
   #scalebar .bar { height: 7px; border: 1.5px solid var(--ink); border-top: 0; position: relative; min-width: 20px; }
   #scalebar .bar::after { content: ""; position: absolute; left: 50%; bottom: 0; height: 5px; border-left: 1.5px solid var(--ink); }
   #scalebar .data { font-size: 11px; line-height: 1; }
+  .keyrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
+  #north { display: flex; align-items: center; gap: 3px; color: var(--ink); }
+  #north svg { display: block; transform-origin: 50% 50%; }
+  #north .data { font-size: 11px; font-weight: 500; }
 
   /* object card */
   #card { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: min(320px, calc(100vw - 32px)); padding: 12px 14px 14px; display: grid; gap: 8px; }
@@ -111,6 +115,10 @@
   #comparebar label { font-family: var(--font-label); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
   #comparebar .data { font-size: 11.5px; text-align: right; color: var(--muted); }
   #comparebar p { margin: 0; font-size: 12px; color: var(--muted); }
+  .clips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .clips button { border: 1px solid var(--line); background: transparent; border-radius: 3px; padding: 3px 9px; font-size: 12.5px; color: var(--muted); }
+  .clips button:hover { color: var(--ink); }
+  .clips button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
   input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; min-width: 0; }
 
   #tip { position: absolute; pointer-events: none; padding: 3px 8px; font-size: 12px; white-space: nowrap; transform: translate(12px, 14px); z-index: 5; }
@@ -154,9 +162,9 @@
         <div class="rule"></div>
         <label class="check"><input type="checkbox" id="opt-confidence"> Colour by how sure I am</label>
         <div class="legend" id="legend" hidden>
-          <span><i class="dot" style="background: var(--measured)"></i>Measured from the footage</span>
-          <span><i class="dot" style="background: var(--estimated)"></i>Estimated (partly hidden)</span>
-          <span><i class="dot" style="background: var(--assumed)"></i>Assumed (out of frame)</span>
+          <span><i class="dot" style="background: var(--measured)"></i>Measured (drawings, or two viewpoints)</span>
+          <span><i class="dot" style="background: var(--estimated)"></i>Estimated (one viewpoint, or partly hidden)</span>
+          <span><i class="dot" style="background: var(--assumed)"></i>Assumed (not seen)</span>
         </div>
       </div>
     </details>
@@ -166,10 +174,13 @@
   <div id="hint" class="panel" hidden></div>
 
   <div id="titleblock" class="panel">
-    <span class="eyebrow">Existing garden &middot; surveyed 26 Nov 2026</span>
+    <span class="eyebrow">Existing house and garden &middot; surveyed 26 Nov 2026</span>
     <h1>Garden Survey Model</h1>
-    <p class="long">Rebuilt from a 15-second phone pan. Good to about &plusmn;0.2&nbsp;m near where you stood, looser further away.</p>
-    <div id="scalebar"><div class="bar" style="width: 80px"></div><span class="data">5 m</span></div>
+    <p class="long">Rebuilt from three phone clips and tied to the measured building survey. House and shed are good to a few centimetres, the far side of the garden to about half a metre.</p>
+    <div class="keyrow">
+      <div id="scalebar"><div class="bar" style="width: 80px"></div><span class="data">5 m</span></div>
+      <div id="north" title="North"><svg id="north-arrow" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 2 L17 20 L12 16.2 L7 20 Z" fill="currentColor"/></svg><span class="data">N</span></div>
+    </div>
   </div>
 
   <div id="card" class="panel" hidden>
@@ -181,7 +192,8 @@
   </div>
 
   <div id="comparebar" class="panel" hidden>
-    <div class="row"><label for="scrub">Pan</label><input type="range" id="scrub" min="0" max="43" step="0.01" value="14"><span class="data" id="scrub-val">0.0 s</span></div>
+    <div class="clips" id="clip-list" role="group" aria-label="Clips" hidden></div>
+    <div class="row"><label for="scrub">Footage</label><input type="range" id="scrub" min="0" max="43" step="0.01" value="14"><span class="data" id="scrub-val">0.0 s</span></div>
     <div class="row"><label for="blend">Model / video</label><input type="range" id="blend" min="0" max="1" step="0.01" value="0.5"><span class="data" id="blend-val">50%</span></div>
     <p>The 3D camera sits exactly where the phone was for each frame. Slide <b>Model / video</b> to fade between them and judge the fit.</p>
   </div>
@@ -200,8 +212,10 @@ const $ = (id) => document.getElementById(id);
 const app = $('app'), stage = $('stage'), photo = $('photo');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const small = matchMedia('(max-width: 700px)').matches;
-// model coordinates are metres: +X east wall, +Y up the lawn, +Z up. three.js is Y-up.
+// model coordinates are the site grid, in metres: +X south (away from the back of the house),
+// +Y east (towards the road), +Z up; the origin is the outshot corner by the back door. three.js is Y-up.
 const P = (x, y, z = 0) => new THREE.Vector3(x, z, -y);
+const NORTH = P(-0.943, -0.334).normalize();   // grid north, from the block plan
 
 // ---------------------------------------------------------------- renderer + scene
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -232,8 +246,8 @@ scene.add(sky);
 // flat, bright overcast: a strong sky dome and only a weak sun for soft grounding shadows
 scene.add(new THREE.HemisphereLight(0xf1f4f8, 0x8d8a76, 2.5));
 const sun = new THREE.DirectionalLight(0xfff6ea, 1.0);
-sun.position.copy(P(-26, 20, 36));
-sun.target.position.copy(P(-2, 0, 0));
+sun.position.copy(P(26, 6, 38));               // from the south, as it is for most of the day
+sun.target.position.copy(P(-2, -4, 0));
 sun.castShadow = true;
 sun.shadow.mapSize.set(small ? 2048 : 4096, small ? 2048 : 4096);
 Object.assign(sun.shadow.camera, { left: -34, right: 34, top: 40, bottom: -40, near: 1, far: 140 });
@@ -271,8 +285,10 @@ const features = [];            // feature root objects (have userData.label)
 const layerRoots = {};          // layer key -> root object
 const pickables = [];
 const original = new Map();     // mesh -> original material(s)
-const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'planting', 'objects', 'context'];
-const LAYER_NAMES = { ground: 'Ground', boundaries: 'Walls and hedges', buildings: 'Buildings', planting: 'Trees and planting', objects: 'Furniture and objects', context: 'Surroundings' };
+const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'planting', 'objects', 'context', 'survey', 'gaps'];
+const LAYER_NAMES = { ground: 'Ground', boundaries: 'Walls and hedges', buildings: 'Buildings', planting: 'Trees and planting', objects: 'Furniture and objects', context: 'Surroundings',
+  survey: 'Boundary, levels, drains', gaps: 'Still to survey' };
+const OVERLAY_LAYERS = new Set(['survey', 'gaps']);   // drawn-on information, not physical things
 const CONF_TEXT = { measured: 'Measured', estimated: 'Estimated', assumed: 'Assumed' };
 const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
@@ -297,10 +313,12 @@ function onModel(gltf) {
       if (!m.isMesh) return;
       m.userData.feature = f;
       m.receiveShadow = true;
-      m.castShadow = layer !== 'ground' || f.name !== 'lawn';
+      m.castShadow = !OVERLAY_LAYERS.has(layer) && (layer !== 'ground' || f.name !== 'lawn');
       pickables.push(m);
       const mats = Array.isArray(m.material) ? m.material : [m.material];
       for (const mat of mats) {
+        if (mat.name === 'hatch') { mat.transparent = true; mat.opacity = 0.42; mat.depthWrite = false; mat.polygonOffset = true; mat.polygonOffsetFactor = -2; }
+        if (/^marker/.test(mat.name)) { mat.polygonOffset = true; mat.polygonOffsetFactor = -3; mat.emissive = mat.color.clone().multiplyScalar(0.25); }
         for (const key of ['map', 'normalMap']) if (mat[key]) mat[key].anisotropy = key === 'map' ? maxAniso : 4;
         if (/^(leaf_|twigs_)/.test(mat.name)) {
           mat.alphaTest = 0.4; mat.transparent = false; mat.alphaToCoverage = true;
@@ -364,9 +382,26 @@ fetch('frames.json').then((r) => r.ok ? r.json() : null).then((j) => {
   state.frames = j;
   for (const f of j.frames) { f.p = new THREE.Vector3(...f.pos); f.q = new THREE.Quaternion(...f.quat); }
   $('scrub').max = String(j.frames.length - 1);
+  if (j.clips && j.clips.length > 1) {
+    const host = $('clip-list');
+    j.clips.forEach((c, k) => {
+      const b = document.createElement('button');
+      b.textContent = c.title; b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => { $('scrub').value = c.start + Math.floor(c.count / 3); applyFrame(parseFloat($('scrub').value)); });
+      host.appendChild(b);
+    });
+    host.hidden = false;
+  }
 }).catch(() => { $('mode-compare').hidden = true; });
 
 // ---------------------------------------------------------------- layers + confidence
+// A layer shows when its box is ticked; the drawn-on layers also step aside while comparing with the footage.
+function syncLayers() {
+  for (const key of LAYER_ORDER) {
+    const boxEl = $('layer-' + key);
+    if (layerRoots[key] && boxEl) layerRoots[key].visible = boxEl.checked && !(state.mode === 'compare' && OVERLAY_LAYERS.has(key));
+  }
+}
 function buildLayerList() {
   const host = $('layer-list');
   for (const key of LAYER_ORDER) {
@@ -375,14 +410,14 @@ function buildLayerList() {
     const row = document.createElement('label');
     row.className = 'check';
     row.innerHTML = `<input type="checkbox" id="layer-${key}" checked> ${LAYER_NAMES[key]} <span class="count data">${n}</span>`;
-    row.querySelector('input').addEventListener('change', (e) => { layerRoots[key].visible = e.target.checked; select(null); invalidate(); });
+    row.querySelector('input').addEventListener('change', () => { syncLayers(); select(null); invalidate(); });
     host.appendChild(row);
   }
 }
 // Trees beyond the boundary are a backdrop. Hide a belt once the camera has moved out to it,
 // so it never stands between you and the garden; in plan view they are all hidden.
 const backdrop = [];
-const GARDEN_CENTRE = P(-1, -2, 0);
+const GARDEN_CENTRE = P(-2, -5, 0);
 function setupBackdrop() {
   const b = new THREE.Box3(), c = new THREE.Vector3();
   for (const f of features) {
@@ -405,7 +440,7 @@ function applyConfidence(on) {
   $('legend').hidden = !on;
   for (const [mesh, mat] of original) {
     const f = mesh.userData.feature;
-    if (!on || f.name === 'lawn') { mesh.material = mat; continue; }
+    if (!on || f.name === 'lawn' || OVERLAY_LAYERS.has(f.userData.layer)) { mesh.material = mat; continue; }
     const c = f.userData.confidence || 'estimated';
     if (!confMats[c]) confMats[c] = new THREE.MeshLambertMaterial({ color: new THREE.Color(cssVar('--' + c)), side: THREE.DoubleSide });
     mesh.material = confMats[c];
@@ -417,12 +452,13 @@ if (!small) $('layers').open = true;
 
 // ---------------------------------------------------------------- views
 const PRESETS = [
-  { name: 'Overview', pos: P(5.5, 24, 17), target: P(-1.2, -3.2, 0.4) },
-  { name: 'Willow corner', pos: P(-3.2, -3.8, 2.3), target: P(2.4, -11.4, 1.1) },
-  { name: 'Bench and tables', pos: P(-0.6, 0.9, 1.9), target: P(5.2, -1.4, 0.9) },
-  { name: 'Outbuilding and shed', pos: P(-0.8, -2.6, 2.1), target: P(-8.8, -7.6, 1.3) },
-  { name: 'Patio', pos: P(2.6, 9.4, 2.6), target: P(-5.2, 4.6, 0.6) },
-  { name: 'Where you stood', pos: P(0.0, 0.0, 1.65), target: P(2.5, -7, 1.0) },
+  { name: 'Overview', pos: P(25, 12, 21), target: P(-1.5, -5.5, 0.5) },
+  { name: 'House from the lawn', pos: P(9.5, 4.5, 2.4), target: P(-3.6, -2.4, 2.4) },
+  { name: 'South-west corner', pos: P(2.4, -8.6, 2.0), target: P(9.6, -18.2, 1.1) },
+  { name: 'Bench and tables', pos: P(4.6, -4.6, 1.9), target: P(9.6, -7.6, 0.8) },
+  { name: 'Outbuilding and shed', pos: P(5.6, -8.4, 2.1), target: P(-2.6, -14.0, 1.2) },
+  { name: 'East lawn', pos: P(4.4, -1.6, 2.4), target: P(-2.4, 6.4, 0.5) },
+  { name: 'Where you stood', pos: P(5.26, -6.14, 1.65), target: P(7.6, -14, 1.0) },
 ];
 PRESETS.forEach((p, i) => {
   const b = document.createElement('button');
@@ -454,10 +490,11 @@ function setMode(mode, force = false) {
   camera = mode === 'plan' ? ortho : persp;
   persp.fov = 50;
   if (mode === 'plan') {
-    ortho.position.copy(P(-2, 2, 120)); ortho.up.set(0, 0, -1); ortho.lookAt(P(-2, 2, 0));
-    planControls.target.copy(P(-2, 2, 0)); ortho.zoom = 1; planControls.update();
+    ortho.position.copy(P(-2, -5, 120)); ortho.up.copy(NORTH); ortho.lookAt(P(-2, -5, 0));   // north up, like a map
+    planControls.target.copy(P(-2, -5, 0)); ortho.zoom = 1; planControls.update();
   }
   sky.visible = mode !== 'plan';
+  syncLayers();
   scene.fog.near = mode === 'plan' ? 1e5 : 70; scene.fog.far = mode === 'plan' ? 1e6 : 320;
   layout();
   if (mode === 'compare') applyFrame(state.scrub);
@@ -511,6 +548,10 @@ function updateScaleBar() {
   const bar = document.querySelector('#scalebar .bar'), lab = document.querySelector('#scalebar .data');
   bar.style.width = Math.max(20, Math.round(m * pxPerM)) + 'px';
   lab.textContent = (camera === ortho ? '' : '≈ ') + (m < 1 ? '50 cm' : m + ' m') + (camera === ortho ? '' : ' at the centre');
+  // north arrow: where a step north from the middle of the view lands on screen
+  const a = (camera === ortho ? planControls.target : controls.target).clone(), b = a.clone().add(NORTH);
+  a.project(camera); b.project(camera);
+  $('north-arrow').style.transform = `rotate(${Math.atan2((b.x - a.x) * box.w, (b.y - a.y) * box.h)}rad)`;
 }
 
 // ---------------------------------------------------------------- compare with the video
@@ -519,15 +560,15 @@ function applyFrame(v) {
   v = Math.min(n - 1, Math.max(0, v));
   state.scrub = v;
   const i = Math.min(n - 2, Math.floor(v)), t = v - i;
-  const a = fr[i], b = fr[i + 1];
-  persp.position.lerpVectors(a.p, b.p, t);
-  persp.quaternion.slerpQuaternions(a.q, b.q, t);
-  persp.fov = state.frames.vfov; persp.updateProjectionMatrix();
-  const near = fr[Math.round(v)];
+  const a = fr[i], b = fr[i + 1], near = fr[Math.round(v)];
+  // Glide between neighbouring stills of one clip. Snap to the still when the scrubber is nearly
+  // on it, so the overlay is exact, and jump rather than fly where one clip ends and the next begins.
+  if (a.clip !== b.clip || Math.abs(v - Math.round(v)) < 0.12) { persp.position.copy(near.p); persp.quaternion.copy(near.q); }
+  else { persp.position.lerpVectors(a.p, b.p, t); persp.quaternion.slerpQuaternions(a.q, b.q, t); }
+  persp.fov = near.vfov || state.frames.vfov; persp.updateProjectionMatrix();
   if (photo.dataset.src !== near.file) { photo.dataset.src = near.file; photo.src = near.file; }
-  // snap the 3D camera to the shown frame when the scrubber is nearly on it, so the overlay is exact
-  if (Math.abs(v - Math.round(v)) < 0.12) { persp.position.copy(near.p); persp.quaternion.copy(near.q); }
   $('scrub-val').textContent = near.t.toFixed(1) + ' s';
+  [...$('clip-list').children].forEach((el, k) => el.setAttribute('aria-pressed', String(k === (near.clip || 0))));
   invalidate();
 }
 $('scrub').addEventListener('input', (e) => applyFrame(parseFloat(e.target.value)));

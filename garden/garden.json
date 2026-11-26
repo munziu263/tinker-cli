@@ -1,46 +1,66 @@
 {
  "meta": {
-  "name": "Garden as surveyed",
+  "name": "House and garden as surveyed",
   "surveyed": "2026-11-26",
   "units": "metres",
-  "origin": "The spot on the lawn where the phone pan was filmed. +X = towards the long east wall, +Y = up the lawn towards the road hedge. Compass north is not known yet.",
-  "source": "15 s phone pan (IMG_3314.mov) -> COLMAP structure-from-motion (228 frames, 76k points) -> ground-plane metrology. Scale fixed from brick coursing, door, bench, bistro table and paving flags: phone was about 1.96 m above the lawn.",
-  "accuracy": "Within about 8 m of the viewpoint: roughly +-0.2 m. South and west buildings (10-15 m): +-0.5 m. Far lawn and road hedge (20-30 m): +-2 m or worse. Overall scale +-3%.",
-  "viewpoint": {
-   "x": 0.0,
-   "y": 0.0,
-   "eye": 1.96
+  "grid": "Site grid. Origin: the outer south-east corner of the rear outshot at ground level, by the back door. +X runs south, away from the back of the house; +Y runs east, towards the road. z = 0 is level 20.00 m on the measured survey.",
+  "north": [-0.943, -0.334],
+  "north_note": "Grid north, as a direction in (X, Y). The back of the house faces 20 degrees west of south.",
+  "source": "Three phone clips (a pan from the lawn and two short walks) reconstructed with COLMAP: 472 frames, 174,000 points. Vertical from brick coursing. Scale, position and height datum from eight control points read off the measured building survey (1:50 plans, 1:100 elevations). Plot boundary and north from the 1:500 block plan.",
+  "accuracy": "House and shed: a few centimetres (measured survey). Patio and east garden, filmed on foot: about 0.1 to 0.2 m. South and west garden, filmed from one spot: checked against a second viewpoint and good to about half a metre along the line of sight, better across it. Outbuilding: front wall within 0.3 m, the rest assumed. Drive, front garden and everything behind the shed: not surveyed.",
+  "calibration": {
+   "control_points": 8,
+   "rms_m": 0.058,
+   "scale_vs_first_model": 0.786,
+   "levels_checked": 5,
+   "worst_level_error_m": 0.04
   },
-  "north_deg": null
+  "plot_area_m2": 1035,
+  "viewpoint": {
+   "x": 5.26,
+   "y": -6.14,
+   "eye": 1.65,
+   "heading_deg": -90
+  }
  },
  "ground": {
-  "extent": [-24, -22, 13, 33],
-  "px_per_m": 64,
+  "extent": [-26, -29, 21, 24],
+  "px_per_m": 56,
   "zones": [
    {
     "kind": "field",
-    "shape": "rect",
-    "box": [-40, -40, 40, 60],
-    "soft": 0.1,
-    "rough": 0,
-    "strength": 0.0
+    "shape": "poly",
+    "pts": [
+     [-40, -45],
+     [30, -45],
+     [30, -24.5],
+     [11.6, -22.5],
+     [0.0, -21.1],
+     [-9.0, -20.0],
+     [-17.5, -18.4],
+     [-19.6, -15.5],
+     [-20.2, -12.6],
+     [-40, -10]
+    ],
+    "soft": 0.3,
+    "rough": 0.2
    },
    {
     "kind": "soil",
     "shape": "ellipse",
-    "c": [1.2, -10.6],
-    "r": [5.2, 3.3],
-    "rot": -8,
-    "soft": 1.2,
+    "c": [6.94, -16.84],
+    "r": [5.25, 3.33],
+    "rot": -5.6,
+    "soft": 1.02,
     "rough": 1.0
    },
    {
     "kind": "soil",
     "shape": "ellipse",
-    "c": [3.6, -7.2],
-    "r": [2.6, 1.6],
-    "rot": 20,
-    "soft": 1.2,
+    "c": [8.97, -12.87],
+    "r": [2.47, 1.52],
+    "rot": 22.4,
+    "soft": 1.02,
     "rough": 1.0,
     "strength": 0.8
    },
@@ -48,74 +68,77 @@
     "kind": "litter",
     "shape": "band",
     "path": [
-     [9.6, 4.0],
-     [8.9, -3.0],
-     [7.2, -9.5],
-     [5.6, -13.6]
+     [13.28, -2.45],
+     [13.05, -8.45],
+     [12.35, -14.76],
+     [11.45, -19.56]
     ],
-    "w": 2.4,
-    "soft": 1.4,
+    "w": 2.19,
+    "soft": 1.19,
     "rough": 0.9
    },
    {
     "kind": "litter",
     "shape": "ellipse",
-    "c": [6.4, -1.6],
-    "r": [2.6, 3.0],
-    "soft": 1.6,
+    "c": [10.51, -7.26],
+    "r": [2.11, 2.43],
+    "soft": 1.36,
     "rough": 0.9,
-    "strength": 0.9
+    "strength": 0.9,
+    "rot": 2.4
    },
    {
     "kind": "litter",
     "shape": "band",
     "path": [
-     [5.2, -14.2],
-     [-1.0, -14.6],
-     [-6.5, -15.0]
+     [11.07, -20.16],
+     [4.9, -20.59],
+     [-0.37, -20.88]
     ],
-    "w": 1.2,
-    "soft": 1.0,
+    "w": 1.18,
+    "soft": 0.85,
     "rough": 0.7
    },
    {
     "kind": "litter",
     "shape": "ellipse",
-    "c": [-6.3, -12.0],
-    "r": [3.6, 3.6],
-    "soft": 1.8,
+    "c": [-0.39, -18.19],
+    "r": [3.52, 3.52],
+    "soft": 1.53,
     "rough": 0.9,
-    "strength": 0.85
+    "strength": 0.85,
+    "rot": 2.4
    },
    {
     "kind": "litter",
     "shape": "band",
     "path": [
-     [-6.6, -11.2],
-     [-8.2, -6.6],
-     [-7.2, -4.6]
+     [-0.79, -17.55],
+     [-1.97, -12.54],
+     [-0.65, -10.34]
     ],
-    "w": 1.6,
-    "soft": 1.2,
+    "w": 1.47,
+    "soft": 1.02,
     "rough": 0.8,
     "strength": 0.8
    },
    {
     "kind": "soil",
     "shape": "ellipse",
-    "c": [-4.6, -8.7],
-    "r": [1.8, 1.4],
-    "soft": 0.9,
+    "c": [1.14, -14.89],
+    "r": [1.76, 1.37],
+    "soft": 0.77,
     "rough": 0.8,
-    "strength": 0.8
+    "strength": 0.8,
+    "rot": 2.4
    },
    {
     "kind": "rough",
     "shape": "ellipse",
-    "c": [-3.4, -6.2],
-    "r": [2.6, 1.8],
-    "rot": 30,
-    "soft": 1.2,
+    "c": [2.53, -11.73],
+    "r": [2.27, 1.57],
+    "rot": 32.4,
+    "soft": 1.02,
     "rough": 0.9,
     "strength": 0.7
    },
@@ -123,25 +146,25 @@
     "kind": "soil",
     "shape": "band",
     "path": [
-     [-1.5, 2.2],
-     [-1.4, 0.2],
-     [-1.9, -2.4],
-     [-3.4, -4.6]
+     [4.02, -4.51],
+     [4.16, -6.08],
+     [3.86, -8.13],
+     [2.66, -10.05]
     ],
-    "w": 0.55,
-    "soft": 0.5,
+    "w": 0.44,
+    "soft": 0.42,
     "rough": 0.7
    },
    {
     "kind": "soil",
     "shape": "band",
     "path": [
-     [-1.2, 2.9],
-     [-1.2, 6.5],
-     [-1.0, 9.6]
+     [4.23, -3.95],
+     [4.11, -1.12],
+     [4.16, 1.32]
     ],
-    "w": 0.3,
-    "soft": 0.5,
+    "w": 0.24,
+    "soft": 0.42,
     "rough": 0.8,
     "strength": 0.7
    },
@@ -149,131 +172,215 @@
     "kind": "gravel",
     "shape": "band",
     "path": [
-     [-8.6, -2.2],
-     [-11.5, -1.6],
-     [-17.5, -2.6]
+     [-1.6, -7.6],
+     [-5.0, -7.5],
+     [-9.6, -7.6]
     ],
-    "w": 1.4,
-    "soft": 0.5,
+    "w": 0.75,
+    "soft": 0.4,
     "rough": 0.5
    },
    {
-    "kind": "litter",
-    "shape": "ellipse",
-    "c": [-5.8, -1.6],
-    "r": [2.2, 2.2],
-    "soft": 1.2,
+    "kind": "gravel",
+    "shape": "band",
+    "path": [
+     [-0.4, 2.7],
+     [-2.4, 1.7],
+     [-4.15, 0.6]
+    ],
+    "w": 0.5,
+    "soft": 0.35,
+    "rough": 0.5
+   },
+   {
+    "kind": "gravel",
+    "shape": "poly",
+    "pts": [
+     [9.9, -1.0],
+     [14.9, -1.6],
+     [15.7, 3.0],
+     [17.1, 11.0],
+     [10.6, 11.3],
+     [10.4, 9.6],
+     [10.0, 3.4]
+    ],
+    "soft": 0.6,
+    "rough": 0.4
+   },
+   {
+    "kind": "soil",
+    "shape": "rect",
+    "box": [-11.5, 2.9, -6.4, 8.4],
+    "soft": 0.4,
     "rough": 0.8,
-    "strength": 0.6
+    "strength": 0.9
+   },
+   {
+    "kind": "soil",
+    "shape": "ellipse",
+    "c": [4.45, 3.25],
+    "r": [1.25, 1.1],
+    "soft": 0.4,
+    "rough": 0.8,
+    "strength": 0.85
+   },
+   {
+    "kind": "litter",
+    "shape": "band",
+    "path": [
+     [-17.0, 9.0],
+     [-9.0, 9.6],
+     [-2.0, 9.8],
+     [9.0, 9.4]
+    ],
+    "w": 0.9,
+    "soft": 0.7,
+    "rough": 0.8,
+    "strength": 0.7
+   },
+   {
+    "kind": "mulch",
+    "shape": "poly",
+    "pts": [
+     [7.4, -1.7],
+     [9.2, -1.6],
+     [9.4, 3.4],
+     [7.6, 3.5]
+    ],
+    "soft": 0.4,
+    "rough": 0.5
+   },
+   {
+    "kind": "rough",
+    "shape": "band",
+    "path": [
+     [-28, 9.6],
+     [-19.5, 12.4],
+     [-9.0, 12.8],
+     [3.0, 12.9],
+     [16.0, 12.6],
+     [29.0, 10.6]
+    ],
+    "w": 1.3,
+    "soft": 0.3,
+    "rough": 0.5
    },
    {
     "kind": "tarmac",
-    "shape": "rect",
-    "box": [-40, 31.6, 40, 60],
-    "soft": 0.3,
+    "shape": "band",
+    "path": [
+     [-29, 13.0],
+     [-19.5, 16.3],
+     [-9.0, 16.5],
+     [3.0, 16.2],
+     [12.0, 16.0],
+     [21.0, 15.0],
+     [30.0, 13.2]
+    ],
+    "w": 2.75,
+    "soft": 0.25,
     "rough": 0.2
    },
    {
     "kind": "mulch",
     "shape": "poly",
     "pts": [
-     [-1.95, 1.9],
-     [-1.7, -0.3],
-     [-2.2, -2.7],
-     [-3.6, -4.4],
-     [-5.9, -4.2],
-     [-7.0, -2.4],
-     [-6.9, 0.2],
-     [-5.6, 1.9],
-     [-3.9, 1.6]
+     [3.67, -4.76],
+     [3.94, -6.48],
+     [3.63, -8.38],
+     [2.5, -9.88],
+     [0.49, -9.9],
+     [-0.16, -8.31],
+     [-0.16, -6.26],
+     [0.81, -4.88],
+     [2.15, -5.06]
     ],
-    "soft": 0.5,
+    "soft": 0.4,
     "rough": 0.5
    },
    {
     "kind": "mulch",
     "shape": "poly",
     "pts": [
-     [1.1, 1.6],
-     [2.9, 1.3],
-     [5.0, 1.9],
-     [5.3, 3.1],
-     [3.3, 4.3],
-     [1.2, 3.9]
+     [6.08, -4.89],
+     [7.5, -5.07],
+     [9.15, -4.52],
+     [9.38, -3.54],
+     [7.71, -2.7],
+     [6.08, -3.08]
     ],
-    "soft": 0.5,
+    "soft": 0.4,
     "rough": 0.5
    }
   ]
  },
  "features": [
   {
-   "id": "wall_east_dark",
-   "label": "East wall (dark brick)",
+   "id": "wall_south_dark",
+   "label": "South wall (dark modern brick)",
    "layer": "boundaries",
    "type": "brick_wall",
    "params": {
     "path": [
-     [11.8, 5.6],
-     [10.61, 0.81],
-     [8.15, -8.78]
+     [15.21, -1.0],
+     [14.46, -5.11],
+     [12.89, -13.61]
     ],
-    "height": 1.83,
+    "height": 1.75,
     "mat": "brick_dark",
-    "piers": [6.2, 11.5],
+    "piers": [5.3, 9.85],
     "pier_side": 1
    },
-   "confidence": "measured",
-   "notes": "Modern dark stretcher-bond brick with a red plinth. Seen behind the big shrub and bench. Its north end was outside the pan, so it stops where the footage stops."
+   "confidence": "estimated",
+   "notes": "Modern dark stretcher-bond brick with a red plinth, behind the big shrub and the bench. Its line is the plot boundary on the block plan, which agrees with the brick coursing seen in the footage (75 mm courses put it 8.9 m from the camera). The top is hidden by the shrubs: height 1.6 to 1.85 m. Its east end was outside the pan, so it stops where the footage stops."
   },
   {
-   "id": "wall_east_stock",
-   "label": "East wall (old stock brick)",
+   "id": "wall_south_stock",
+   "label": "South wall, west end (old stock brick)",
    "layer": "boundaries",
    "type": "brick_wall",
    "params": {
     "path": [
-     [8.15, -8.78],
-     [5.7, -14.75]
+     [12.89, -13.61],
+     [12.28, -18.66],
+     [11.4, -22.22]
     ],
-    "height": 1.83,
+    "height": 1.8,
     "mat": "brick_stock",
-    "piers": [
-     3.4
-    ],
+    "piers": [3.3],
     "pier_side": 1
    },
    "confidence": "measured",
-   "notes": "Yellow stock brick in Flemish bond, about 22 courses at 81 mm plus a coping: a 6 ft wall. Fitted from brick-course spacing in six frames."
+   "notes": "Yellow stock brick in Flemish bond with a coping: a 6 ft wall. Position and height triangulated from two clips (top of coping 1.76 m above datum, ground here about 0.08 m below it). Within about 0.3 m."
   },
   {
-   "id": "wall_south",
-   "label": "South wall (old red brick)",
+   "id": "wall_west",
+   "label": "West wall (old red brick)",
    "layer": "boundaries",
    "type": "brick_wall",
    "params": {
     "path": [
-     [5.7, -14.75],
-     [-6.5, -15.56]
+     [11.4, -22.22],
+     [0.1, -20.91]
     ],
-    "height": 1.84,
+    "height": 1.8,
     "mat": "brick_red_old",
     "piers": []
    },
    "confidence": "measured",
-   "notes": "Soft red brick, exposed for about 2.7 m behind the picnic table, ivy-covered either side."
+   "notes": "Soft red brick, exposed for about 2 m behind the picnic table and ivy-covered either side. Triangulated from two clips (231 points, flat to 0.27 m). It runs about 1.2 m outside the boundary drawn on the 1:500 block plan, which is within that map's tolerance."
   },
   {
    "id": "ivy_corner",
-   "label": "Ivy in the south-east corner",
+   "label": "Ivy in the south-west corner",
    "layer": "planting",
    "type": "ivy",
    "params": {
     "path": [
-     [5.55, -14.76],
-     [2.6, -14.96]
+     [11.3, -22.21],
+     [7.7, -21.79]
     ],
-    "wall_h": 1.84,
+    "wall_h": 1.8,
     "side": -1,
     "thickness": 0.3,
     "over_top": 0.2,
@@ -282,16 +389,16 @@
    "confidence": "measured"
   },
   {
-   "id": "ivy_corner_east",
+   "id": "ivy_corner_south",
    "label": "Ivy on the stock wall",
    "layer": "planting",
    "type": "ivy",
    "params": {
     "path": [
-     [6.25, -13.4],
-     [5.75, -14.62]
+     [11.98, -20.4],
+     [11.52, -21.9]
     ],
-    "wall_h": 1.83,
+    "wall_h": 1.8,
     "side": -1,
     "thickness": 0.28,
     "over_top": 0.22,
@@ -301,39 +408,40 @@
    "confidence": "estimated"
   },
   {
-   "id": "ivy_south",
-   "label": "Ivy on the south wall",
+   "id": "ivy_west",
+   "label": "Ivy on the west wall",
    "layer": "planting",
    "type": "ivy",
    "params": {
     "path": [
-     [-0.25, -15.14],
-     [-6.45, -15.55]
+     [5.4, -21.53],
+     [0.2, -20.92]
     ],
-    "wall_h": 1.84,
+    "wall_h": 1.8,
     "side": -1,
     "thickness": 0.4,
-    "over_top": 0.33,
+    "over_top": 0.3,
     "z_min": 0.25,
     "seed": 33
    },
    "confidence": "measured",
-   "notes": "Dense ivy standing about 2.1 m, running from the red brick to the hazel."
+   "notes": "Dense ivy standing about 2.1 m, from the exposed brick to the hazel."
   },
   {
-   "id": "fence_sw",
-   "label": "Low fence to the playing field",
+   "id": "fence_west",
+   "label": "Fence to the playing field",
    "layer": "boundaries",
    "type": "board_fence",
    "params": {
     "path": [
-     [-6.5, -15.56],
-     [-9.9, -13.3]
+     [0.1, -20.91],
+     [-2.9, -20.56],
+     [-8.6, -19.9]
     ],
-    "height": 1.2
+    "height": 1.3
    },
-   "confidence": "estimated",
-   "notes": "Its base is hidden in the footage; line and height (about 1.2 m) are estimates."
+   "confidence": "assumed",
+   "notes": "Dark boarded fence seen between the hazel and the outbuilding. Only a glimpse in the footage: its line is the wall's line carried on, and its height is a guess."
   },
   {
    "id": "hedge_road",
@@ -342,229 +450,348 @@
    "type": "hedge",
    "params": {
     "path": [
-     [-23.5, 28.6],
-     [-6.0, 29.8],
-     [12.5, 29.4]
+     [-18.0, 9.6],
+     [-16.6, 10.0],
+     [-9.0, 10.6],
+     [-2.0, 10.8],
+     [4.0, 10.7],
+     [9.5, 10.4]
     ],
-    "height": 2.3,
-    "width": 1.1
+    "height": 1.9,
+    "width": 1.8
    },
    "confidence": "estimated",
-   "notes": "About 30 m from the viewpoint, where the footage is least reliable. Distance could be out by a few metres."
+   "notes": "Clipped beech about 1.9 m tall. Its garden face is measured from the walking clip, 9.0 to 9.6 m east of the grid origin; the road side is not seen, so the thickness is assumed. Taller trees stand in it towards the north end."
   },
   {
-   "id": "fence_road",
-   "label": "Post and wire fence",
+   "id": "gate_posts",
+   "label": "Gate posts between the house and the shed",
    "layer": "boundaries",
-   "type": "post_and_wire",
+   "type": "gate_posts",
+   "at": [-3.4, -7.5],
+   "rot": 90.0,
    "params": {
-    "path": [
-     [-23.5, 27.6],
-     [-6.0, 28.8],
-     [12.5, 28.4]
-    ],
-    "height": 1.15
+    "gap": 0.9,
+    "height": 1.55
    },
-   "confidence": "estimated"
+   "confidence": "assumed",
+   "notes": "Glimpsed at the edge of the pan. Position within a metre or so."
   },
   {
-   "id": "outbuilding",
-   "label": "White outbuilding",
+   "id": "house",
+   "label": "The house",
    "layer": "buildings",
-   "type": "outbuilding",
-   "at": [-8.25, -11.3],
-   "rot": 109.4,
+   "type": "cottage",
+   "at": [0.0, 0.0],
+   "rot": 0.0,
    "params": {
-    "width": 5.4,
-    "depth": 3.4,
-    "front_h": 2.12,
-    "back_h": 2.12,
-    "rise": 0.28,
-    "window": {
-     "x": 0.78,
-     "w": 1.44,
-     "z": 0.84,
-     "h": 1.19
+    "main": [-9.91, -4.25, -6.76, 1.76],
+    "outshot": [-4.38, 0.0, -4.38, 0.0],
+    "leanto": {
+     "box": [-4.25, -1.25, -6.7, -4.4],
+     "z_low": 1.99,
+     "z_high": 2.35
     },
-    "door": {
-     "x": 3.2,
-     "w": 0.78,
-     "z": 0.03,
-     "h": 2.05
-    }
+    "ridge": {
+     "x": -6.8,
+     "z": 7.62,
+     "y_west": -4.85,
+     "y_east": 0.45
+    },
+    "profile": [
+     [-6.8, 7.62],
+     [-4.44, 4.73],
+     [-4.0, 4.27],
+     [-3.28, 3.63],
+     [-1.96, 2.6],
+     [-0.86, 1.84],
+     [0.12, 0.98]
+    ],
+    "hip_z": 5.76,
+    "north_eaves": {
+     "x": -10.1,
+     "z": 4.12
+    },
+    "chimneys": [
+     {
+      "box": [-1.69, -0.69, -4.88, -4.44],
+      "top": 4.83,
+      "pots": 1
+     },
+     {
+      "box": [-8.02, -7.21, -7.31, -6.76],
+      "top": 7.39,
+      "pots": 1,
+      "base": {
+       "box": [-8.6, -7.21, -7.31, -6.76],
+       "top": 2.6
+      }
+     },
+     {
+      "box": [-7.33, -6.27, 1.32, 1.79],
+      "top": 7.48,
+      "pots": 2
+     }
+    ],
+    "openings": [
+     {
+      "face": "south",
+      "at": [6.66, 7.56],
+      "z": [0.0, 1.725],
+      "kind": "door"
+     },
+     {
+      "face": "south",
+      "at": [7.72, 8.22],
+      "z": [0.83, 1.68],
+      "bars": [2, 2]
+     },
+     {
+      "face": "south",
+      "at": [7.41, 8.23],
+      "z": [3.24, 3.95],
+      "bars": [2, 2]
+     },
+     {
+      "face": "south",
+      "at": [0.63, 1.44],
+      "z": [3.26, 4.0],
+      "bars": [2, 2]
+     },
+     {
+      "face": "north",
+      "at": [4.28, 5.18],
+      "z": [0.13, 2.2],
+      "kind": "door",
+      "bars": [2, 4]
+     },
+     {
+      "face": "north",
+      "at": [1.2, 2.89],
+      "z": [0.92, 1.69],
+      "bars": [4, 2]
+     },
+     {
+      "face": "north",
+      "at": [5.65, 7.9],
+      "z": [0.92, 1.69],
+      "bars": [5, 2]
+     },
+     {
+      "face": "north",
+      "at": [1.2, 2.89],
+      "z": [3.2, 3.95],
+      "bars": [4, 2]
+     },
+     {
+      "face": "north",
+      "at": [5.65, 7.9],
+      "z": [3.2, 3.95],
+      "bars": [5, 2]
+     },
+     {
+      "face": "outshot_east",
+      "at": [1.6, 3.4],
+      "z": [1.15, 1.85],
+      "lights": 3
+     },
+     {
+      "face": "leanto_south",
+      "at": [0.12, 0.67],
+      "z": [1.25, 1.93],
+      "bars": [1, 2]
+     }
+    ],
+    "rooflights": [
+     {
+      "y": [-1.556, -0.995],
+      "z": [5.74, 6.59]
+     }
+    ],
+    "posts": [-2.17]
    },
    "confidence": "measured",
-   "notes": "Roughcast walls, black sheet roof falling towards the water-butt end. Window and door positions measured; overall length and depth are estimates because the shed hides the far end."
+   "notes": "From the measured building survey (1:50 plans, 1:100 elevations and section): main range 8.52 x 5.66 m, rear outshot 4.38 x 4.38 m under a catslide roof that comes down to 0.9 m, ridge 7.62 m, half-hipped at both ends, three chimneys, lean-to WC on the west side. Wall positions are good to a few centimetres. The north (front) and west elevations are from the drawings only; window bars and joinery are indicative."
   },
   {
    "id": "shed",
    "label": "Timber shed (mossy roof)",
    "layer": "buildings",
    "type": "timber_shed",
-   "at": [-9.83, -3.95],
-   "rot": 92.9,
+   "at": [-3.2, -9.6],
+   "rot": 90.0,
    "params": {
-    "width": 3.17,
-    "depth": 4.6,
-    "eaves": 1.86,
-    "ridge": 3.03,
-    "birdhouse_x": 0.54,
-    "birdhouse_z": 1.6
+    "width": 2.58,
+    "depth": 4.41,
+    "eaves": 1.46,
+    "ridge": 2.38,
+    "birdhouse_x": 0.42,
+    "birdhouse_z": 1.26
    },
    "confidence": "measured",
-   "notes": "Gable faces the lawn, in line with the house. Gable 3.2 m wide, eaves 1.86 m, ridge 3.0 m, fitted from 3D points on the boards. Its length (4.6 m) is an estimate: the far end is hidden."
+   "notes": "Footprint 2.58 x 4.41 m from the measured survey; the gable seen in the footage lands within 12 cm of it. Eaves 1.46 m and ridge 2.38 m from the footage."
   },
   {
-   "id": "house_block",
-   "label": "House: weather-boarded end",
+   "id": "outbuilding",
+   "label": "White outbuilding",
    "layer": "buildings",
-   "type": "weatherboard_block",
-   "at": [-9.92, -0.25],
-   "rot": 90,
+   "type": "outbuilding",
+   "at": [-2.71, -18.18],
+   "rot": 88.0,
    "params": {
-    "width": 2.8,
-    "depth": 4.6,
-    "eaves": 2.7,
-    "ridge": 4.4,
+    "width": 6.7,
+    "depth": 5.0,
+    "front_h": 2.02,
+    "back_h": 2.02,
+    "rise": 0.25,
     "window": {
-     "x": 0.3,
-     "w": 0.66,
-     "z": 1.42,
-     "h": 1.02
+     "x": 1.29,
+     "w": 1.84,
+     "z": 0.76,
+     "h": 1.17
     },
-    "canopy_z": 1.32,
-    "canopy_out": 0.9,
-    "canopy_w": 1.3
+    "door": {
+     "x": 4.26,
+     "w": 0.83,
+     "z": 0.03,
+     "h": 1.9
+    }
    },
    "confidence": "estimated",
-   "notes": "Only the lower part of this wall appears in the footage, so this is simple massing: wall line and window are measured, roof shape is a guess."
-  },
-  {
-   "id": "house_wing",
-   "label": "House: low white wing",
-   "layer": "buildings",
-   "type": "catslide_wing",
-   "at": [-6.45, 2.6],
-   "rot": 86.0,
-   "params": {
-    "length": 5.0,
-    "eaves": 1.2,
-    "depth": 3.67,
-    "ridge": 4.5,
-    "posts": [
-     2.7
-    ],
-    "end_beams": true,
-    "back_depth": 3.4,
-    "back_eaves": 2.3
-   },
-   "confidence": "estimated",
-   "notes": "Eaves line (1.2 m), length (5 m) and the black post are measured. The roof runs out of frame, so its pitch, ridge height and everything behind the ridge are assumed."
+   "notes": "Roughcast walls, black fascia and sheet roof. The front wall, its west corner, the window and the door are triangulated from two clips (rays meet within 5 cm): the front is 13 m from the middle of the lawn and at least 5.9 m long. The east end is hidden behind the shed, and nothing behind the front wall has been filmed: the 6.7 x 5.0 m footprint is an assumption. The block plan draws a 5.0 x 6.7 m building here, the other way round and 2.4 m further east, so one of the two is wrong. Walking round it will settle it."
   },
   {
    "id": "patio",
    "label": "Paved patio",
    "layer": "ground",
    "type": "flag_patio",
+   "at": [-0.16, -4.24],
+   "rot": 2.4,
    "params": {
-    "x0": -6.8,
-    "x1": -1.59,
-    "y0": 2.77,
-    "y1": 9.08,
+    "x0": 0.0,
+    "x1": 4.094,
+    "y0": 0.0,
+    "y1": 4.958,
     "clip_line": [
-     [-6.45, 2.6],
-     [0.0698, 0.9976]
+     [0.208, -0.151],
+     [0.031, 0.9995]
+    ],
+    "rows": [
+     [0.471, 0.471],
+     [0.707, 0.471],
+     [0.589, 0.589],
+     [0.589, 0.471],
+     [0.471, 0.471],
+     [0.707, 0.471],
+     [0.471, 0.589],
+     [0.589, 0.589],
+     [0.471, 0.471],
+     [0.707, 0.471]
     ],
     "extra": [
-     [-2.19, 9.08, 0.6, 0.6],
-     [-2.19, 9.68, 0.6, 0.6],
-     [-3.4, 9.08, 0.75, 0.6]
+     [3.623, 4.958, 0.471, 0.471],
+     [3.623, 5.43, 0.471, 0.471],
+     [2.672, 4.958, 0.589, 0.471]
     ]
    },
    "confidence": "measured",
-   "notes": "Old concrete flags in courses (600 x 900, 750 x 750, 600 x 750). East edge measured at 6.3 m long; about 4.5 m deep to the house wall."
+   "notes": "Old concrete flags in courses, about 0.47, 0.59 and 0.71 m (18, 24 and 28 in). The outer edge is 4.96 m long and 3.85 m from the low wall of the house. Two spot levels on the measured survey put it at 19.99 m."
+  },
+  {
+   "id": "brick_edging",
+   "label": "Brick edging",
+   "layer": "ground",
+   "type": "brick_edging",
+   "at": [4.16, -6.94],
+   "rot": 88.4,
+   "params": {
+    "n": 6,
+    "radius": 1.89
+   },
+   "confidence": "measured"
+  },
+  {
+   "id": "apple",
+   "label": "Old apple tree",
+   "layer": "planting",
+   "type": "broadleaf",
+   "at": [1.45, -7.2],
+   "rot": 40.0,
+   "params": {
+    "height": 5.6,
+    "trunk_r": 0.2,
+    "trunk_h": 2.2,
+    "limbs": 4,
+    "bark": "bark_pale",
+    "twigs": "twigs_grey",
+    "seed": 23,
+    "limb_angle": 50,
+    "levels": 2,
+    "twig_size": 1.4,
+    "lean": [-0.58, -0.02],
+    "limb_len": 2.3
+   },
+   "confidence": "measured",
+   "notes": "Marked \"Apple\" on the measured survey: trunk 0.40 m across at the base, crown 4.9 m across centred 1.3 m north of the base, because the trunk leans hard towards the house. The first model had put it 0.44 m away from here using the footage alone. Height and branch pattern are indicative."
   },
   {
    "id": "willow",
    "label": "Willow (pollarded)",
    "layer": "planting",
    "type": "willow_pollard",
-   "at": [2.83, -11.5],
-   "rot": 150,
+   "at": [8.61, -17.64],
+   "rot": 152.4,
    "params": {
     "trunk_r": 0.3,
-    "trunk_h": 3.3,
-    "leader_h": 6.4
-   },
-   "confidence": "measured",
-   "notes": "Trunk about 0.6 m across at chest height. Cut back hard: one limb sawn at about 4.4 m, the rest lopped above the frame. Strap and gym ring hang at 2.1 m."
-  },
-  {
-   "id": "pale_tree",
-   "label": "Large tree with pale trunk",
-   "layer": "planting",
-   "type": "broadleaf",
-   "at": [-5.4, -1.36],
-   "rot": 40,
-   "params": {
-    "height": 9.0,
-    "trunk_r": 0.32,
-    "trunk_h": 2.9,
-    "limbs": 3,
-    "bark": "bark_pale",
-    "twigs": "twigs_grey",
-    "seed": 23,
-    "limb_angle": 46,
-    "levels": 2,
-    "twig_size": 1.5,
-    "lean": [0.03, 0.0],
-    "pollard": 2.4
+    "trunk_h": 3.32,
+    "leader_h": 6.44
    },
    "confidence": "estimated",
-   "notes": "Trunk about 0.68 m across, pale and lichen-covered, standing in the bed. Only the trunk and the start of one big limb are in frame; the crown is a guess."
+   "notes": "Pollarded tree in front of the west wall, cut back hard: one limb sawn at about 4.4 m. Trunk about 0.6 m across. Species not confirmed. Position from the pan and one walking-clip sighting: within about a metre along the line from the middle of the lawn."
   },
   {
    "id": "hazel",
    "label": "Hazel (multi-stem)",
    "layer": "planting",
    "type": "hazel",
-   "at": [-6.0, -14.4],
-   "rot": 0,
+   "at": [0.11, -20.24],
+   "rot": 2.4,
    "params": {
-    "height": 6.3,
+    "height": 6.04,
     "stems": 15,
     "spread": 20
    },
    "confidence": "estimated",
-   "notes": "Tall coppice in front of the ivy; base hidden by the brush pile so the position is within about 1 m."
+   "notes": "Tall coppice in front of the ivy at the north end of the west wall; its base is hidden by the brush pile, so within about a metre."
   },
   {
    "id": "shrub_multistem",
    "label": "Big old shrub with the hose",
    "layer": "planting",
    "type": "multistem_shrub",
-   "at": [7.3, -1.38],
-   "rot": 180,
+   "at": [11.35, -7.07],
+   "rot": 182.4,
    "params": {
-    "height": 4.8,
+    "height": 3.97,
     "stems": 10,
     "spread": 36,
     "lean": [-0.33, 0.0],
     "seed": 12,
-    "twig_size": 1.5
+    "twig_size": 1.24
    },
    "confidence": "measured",
-   "notes": "Pale multi-stemmed shrub leaning out from the wall over the bench and tables."
+   "notes": "Pale multi-stemmed shrub leaning out over the bench and tables, between the lawn and the south wall."
   },
   {
    "id": "hose_coil",
    "label": "Coiled hose",
    "layer": "objects",
    "type": "hose_coil",
-   "at": [6.2, -1.05],
-   "rot": 100,
+   "at": [10.29, -6.82],
+   "rot": 102.4,
    "params": {
-    "z": 1.6
+    "z": 1.4,
+    "r": 0.2
    },
    "confidence": "measured"
   },
@@ -573,28 +800,29 @@
    "label": "Small twisted tree",
    "layer": "planting",
    "type": "small_tree",
-   "at": [-8.72, -9.22],
-   "rot": 20,
+   "at": [-2.2, -15.45],
+   "rot": 22.4,
    "params": {
-    "height": 4.6,
-    "trunk_r": 0.085,
-    "fork_h": 1.5,
+    "height": 4.45,
+    "trunk_r": 0.08,
+    "fork_h": 1.45,
     "twist": 0.4,
     "lean": [0.18, 0.1]
    },
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "Stands just in front of the outbuilding window."
   },
   {
    "id": "eucalyptus",
    "label": "Young eucalyptus",
    "layer": "planting",
    "type": "sapling",
-   "at": [-2.1, -7.45],
-   "rot": 0,
+   "at": [3.67, -12.97],
+   "rot": 2.4,
    "params": {
-    "height": 2.3,
+    "height": 2.07,
     "leaves": 34,
-    "leaf_size": 0.2
+    "leaf_size": 0.18
    },
    "confidence": "measured"
   },
@@ -603,253 +831,356 @@
    "label": "Evergreen shrub",
    "layer": "planting",
    "type": "shrub",
-   "at": [7.3, 2.9],
-   "rot": 0,
+   "at": [11.2, -3.54],
+   "rot": 2.4,
    "params": {
-    "rx": 1.7,
-    "ry": 1.5,
-    "h": 2.7,
+    "rx": 1.41,
+    "ry": 1.24,
+    "h": 2.23,
     "leaf": "leaf_green",
     "seed": 41,
     "density": 24,
-    "card": 0.3,
+    "card": 0.25,
     "twiggy": "twigs_brown"
    },
-   "confidence": "estimated"
+   "confidence": "estimated",
+   "notes": "At the east end of the south border."
   },
   {
    "id": "shrub_east_2",
-   "label": "Shrubs along the east wall",
+   "label": "Shrubs along the south wall",
    "layer": "planting",
    "type": "shrub",
-   "at": [9.3, 4.6],
-   "rot": 0,
+   "at": [12.98, -1.96],
+   "rot": 2.4,
    "params": {
-    "rx": 1.5,
-    "ry": 1.7,
-    "h": 3.0,
+    "rx": 1.27,
+    "ry": 1.44,
+    "h": 2.54,
     "leaf": "leaf_green",
     "body": "foliage_green",
     "seed": 43,
     "density": 18,
-    "card": 0.32,
+    "card": 0.27,
     "twiggy": "twigs_brown"
    },
    "confidence": "assumed",
-   "notes": "This side was only just in frame. Shown as a continuous shrub border; treat as a placeholder."
+   "notes": "Only just in frame. Shown as part of the border; treat as a placeholder."
   },
   {
-   "id": "shrub_east_3",
-   "label": "Grey-leaved shrub",
+   "id": "hazel_east",
+   "label": "Yellow-leaved coppice by the south wall",
    "layer": "planting",
-   "type": "shrub",
-   "at": [9.4, 9.6],
-   "rot": 0,
+   "type": "hazel",
+   "at": [12.73, -11.18],
+   "rot": 2.4,
    "params": {
-    "rx": 2.0,
-    "ry": 2.4,
-    "h": 3.2,
-    "leaf": "leaf_silver",
-    "body": "foliage_green",
-    "seed": 45,
-    "density": 18,
-    "card": 0.34,
-    "twiggy": "twigs_brown"
+    "height": 4.9,
+    "stems": 9,
+    "spread": 22,
+    "seed": 71
    },
-   "confidence": "assumed"
-  },
-  {
-   "id": "shrub_east_4",
-   "label": "Shrubs along the east side",
-   "layer": "planting",
-   "type": "shrub",
-   "at": [9.8, 15.5],
-   "rot": 0,
-   "params": {
-    "rx": 1.9,
-    "ry": 2.8,
-    "h": 2.8,
-    "leaf": "leaf_green",
-    "seed": 47,
-    "density": 16,
-    "card": 0.34,
-    "twiggy": "twigs_brown"
-   },
-   "confidence": "assumed"
+   "confidence": "estimated",
+   "notes": "Tall twiggy growth in front of the dark wall behind the log rounds. Species not identified."
   },
   {
    "id": "shrub_lawn",
-   "label": "Shrub in the far lawn",
+   "label": "Shrub in the east lawn",
+   "layer": "planting",
+   "type": "multistem_shrub",
+   "at": [4.45, 3.25],
+   "rot": 0.0,
+   "params": {
+    "height": 1.8,
+    "stems": 9,
+    "spread": 34,
+    "stool": 0.35,
+    "seed": 49,
+    "twigs": "twigs_hazel",
+    "stem_r": [0.012, 0.025],
+    "twig_size": 0.7
+   },
+   "confidence": "measured",
+   "notes": "Bushy deciduous shrub in a ring of bare soil, 1.9 m across and 1.75 m tall. Measured from the walking clip."
+  },
+  {
+   "id": "shrub_grey",
+   "label": "Grey-leaved shrub",
    "layer": "planting",
    "type": "shrub",
-   "at": [-0.1, 16.3],
-   "rot": 0,
+   "at": [8.35, 1.6],
+   "rot": 0.0,
+   "params": {
+    "rx": 0.75,
+    "ry": 1.5,
+    "h": 1.8,
+    "leaf": "leaf_silver",
+    "body": "foliage_green",
+    "seed": 45,
+    "density": 26,
+    "card": 0.26,
+    "twiggy": "twigs_brown"
+   },
+   "confidence": "measured",
+   "notes": "Large silvery evergreen at the edge of the lawn; the drive is behind it."
+  },
+  {
+   "id": "shrub_dome",
+   "label": "Clipped evergreen dome",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [8.2, -0.6],
+   "rot": 0.0,
+   "params": {
+    "rx": 0.75,
+    "ry": 0.8,
+    "h": 1.5,
+    "leaf": "leaf_green",
+    "body": "foliage_green",
+    "seed": 46,
+    "density": 30,
+    "card": 0.22
+   },
+   "confidence": "measured"
+  },
+  {
+   "id": "shrub_se",
+   "label": "Shrubs by the drive",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [8.5, 8.5],
+   "rot": 0.0,
    "params": {
     "rx": 1.3,
-    "ry": 1.3,
-    "h": 2.6,
-    "leaf": "leaf_lime",
-    "seed": 49,
-    "density": 22,
+    "ry": 1.0,
+    "h": 1.75,
+    "leaf": "leaf_green",
+    "body": "foliage_green",
+    "seed": 47,
+    "density": 20,
     "card": 0.3,
-    "stems": 10,
-    "body": null,
-    "twiggy": "twigs_grey"
+    "twiggy": "twigs_brown"
    },
    "confidence": "estimated"
   },
   {
-   "id": "bush_twiggy",
-   "label": "Bare twiggy bush",
+   "id": "shrub_small",
+   "label": "Small shrub",
    "layer": "planting",
-   "type": "bare_stems",
-   "at": [-1.9, 14.9],
-   "rot": 0,
+   "type": "shrub",
+   "at": [7.46, 5.57],
+   "rot": 0.0,
    "params": {
-    "height": 1.6,
-    "n": 16,
-    "radius": 0.5,
-    "twig_size": 0.7
+    "rx": 0.5,
+    "ry": 0.5,
+    "h": 0.9,
+    "leaf": "leaf_lime",
+    "seed": 48,
+    "density": 30,
+    "card": 0.2
+   },
+   "confidence": "measured"
+  },
+  {
+   "id": "shrub_gold",
+   "label": "Yellow-leaved shrub",
+   "layer": "planting",
+   "type": "shrub",
+   "at": [-13.2, 7.4],
+   "rot": 0.0,
+   "params": {
+    "rx": 0.9,
+    "ry": 0.9,
+    "h": 2.4,
+    "leaf": "leaf_lime",
+    "body": "foliage_green",
+    "seed": 52,
+    "density": 26,
+    "card": 0.26
+   },
+   "confidence": "estimated",
+   "notes": "Seen from a distance at the north end of the east garden."
+  },
+  {
+   "id": "conifer_ne",
+   "label": "Conifers in the north-east corner",
+   "layer": "planting",
+   "type": "conifer",
+   "at": [-17.5, 5.6],
+   "rot": 0.0,
+   "params": {
+    "height": 9.5,
+    "r": 1.9,
+    "seed": 31
+   },
+   "confidence": "estimated",
+   "notes": "Dark evergreens 8 to 10 m tall, seen over the vegetable plots. Position within a couple of metres."
+  },
+  {
+   "id": "conifer_ne2",
+   "label": "Conifer",
+   "layer": "planting",
+   "type": "conifer",
+   "at": [-15.2, 3.4],
+   "rot": 0.0,
+   "params": {
+    "height": 8.5,
+    "r": 1.6,
+    "seed": 37
    },
    "confidence": "estimated"
+  },
+  {
+   "id": "olive",
+   "label": "Olive tree in a tub",
+   "layer": "planting",
+   "type": "olive_pot",
+   "at": [0.98, -1.43],
+   "rot": 0.0,
+   "params": {
+    "height": 2.1,
+    "pot_r": 0.26,
+    "pot_h": 0.36
+   },
+   "confidence": "measured"
   },
   {
    "id": "bed_west",
-   "label": "Sage bed",
+   "label": "Sage bed under the apple tree",
    "layer": "planting",
    "type": "border",
-   "at": [0, 0],
-   "rot": 0,
+   "at": [0.0, 0.0],
+   "rot": 0.0,
    "params": {
     "outline": [
-     [-1.95, 1.9],
-     [-1.7, -0.3],
-     [-2.2, -2.7],
-     [-3.6, -4.4],
-     [-5.9, -4.2],
-     [-7.0, -2.4],
-     [-6.9, 0.2],
-     [-5.6, 1.9],
-     [-3.9, 1.6]
+     [3.67, -4.76],
+     [3.94, -6.48],
+     [3.63, -8.38],
+     [2.5, -9.88],
+     [0.49, -9.9],
+     [-0.16, -8.31],
+     [-0.16, -6.26],
+     [0.81, -4.88],
+     [2.15, -5.06]
     ],
     "plants": [
      {
       "kind": "clump",
-      "x": -3.5,
-      "y": 0.3,
-      "radius": 1.1,
-      "h": 0.6,
+      "x": 2.51,
+      "y": -6.07,
+      "radius": 0.86,
+      "h": 0.47,
       "leaf": "leaf_sage",
       "density": 70,
-      "card": 0.24
+      "card": 0.19
      },
      {
       "kind": "clump",
-      "x": -4.5,
-      "y": 1.1,
-      "radius": 0.8,
-      "h": 0.5,
+      "x": 1.7,
+      "y": -5.47,
+      "radius": 0.63,
+      "h": 0.39,
       "leaf": "leaf_sage",
       "density": 70,
-      "card": 0.24
+      "card": 0.19
      },
      {
       "kind": "shrub",
-      "x": -4.3,
-      "y": -1.5,
-      "rx": 0.9,
-      "h": 0.95,
+      "x": 1.94,
+      "y": -7.51,
+      "rx": 0.71,
+      "h": 0.75,
       "leaf": "leaf_green",
-      "card": 0.2,
+      "card": 0.16,
       "density": 30,
       "stems": 5,
       "twiggy": "twigs_brown"
      },
      {
       "kind": "shrub",
-      "x": -4.9,
-      "y": -0.1,
-      "rx": 1.0,
-      "h": 1.1,
+      "x": 1.42,
+      "y": -6.43,
+      "rx": 0.79,
+      "h": 0.86,
       "leaf": "leaf_green",
-      "card": 0.2,
+      "card": 0.16,
       "density": 28,
       "stems": 7,
       "twiggy": "twigs_brown"
      },
      {
       "kind": "shrub",
-      "x": -6.0,
-      "y": -3.3,
-      "rx": 0.5,
-      "ry": 0.5,
-      "h": 1.3,
+      "x": 0.58,
+      "y": -9.03,
+      "rx": 0.4,
+      "ry": 0.4,
+      "h": 1.04,
       "leaf": "leaf_green",
-      "card": 0.24,
+      "card": 0.19,
       "density": 26
      },
      {
       "kind": "shrub",
-      "x": -3.0,
-      "y": -2.0,
-      "rx": 0.6,
-      "h": 0.75,
+      "x": 2.98,
+      "y": -7.86,
+      "rx": 0.47,
+      "h": 0.59,
       "leaf": "leaf_lime",
-      "card": 0.2,
+      "card": 0.16,
       "density": 30
      },
      {
       "kind": "stems",
-      "x": -3.7,
-      "y": -2.9,
+      "x": 2.46,
+      "y": -8.59,
       "height": 0.8,
       "n": 8,
-      "radius": 0.45,
+      "radius": 0.35,
       "twig_size": 0.35
      },
      {
       "kind": "stems",
-      "x": -2.8,
-      "y": -3.5,
+      "x": 3.19,
+      "y": -9.03,
       "height": 0.6,
       "n": 6,
-      "radius": 0.4,
+      "radius": 0.31,
       "twig_size": 0.3
      },
      {
       "kind": "clump",
-      "x": -2.3,
-      "y": -1.5,
-      "radius": 0.45,
-      "h": 0.28,
+      "x": 3.51,
+      "y": -7.44,
+      "radius": 0.35,
+      "h": 0.22,
       "leaf": "leaf_green",
       "density": 45,
-      "card": 0.3
+      "card": 0.24
      },
      {
       "kind": "clump",
-      "x": -2.4,
-      "y": -2.6,
-      "radius": 0.4,
-      "h": 0.25,
+      "x": 3.47,
+      "y": -8.31,
+      "radius": 0.31,
+      "h": 0.2,
       "leaf": "leaf_green",
       "density": 45,
-      "card": 0.3
+      "card": 0.24
      },
      {
       "kind": "clump",
-      "x": -6.2,
-      "y": 0.9,
-      "radius": 0.6,
-      "h": 0.5,
+      "x": 0.37,
+      "y": -5.69,
+      "radius": 0.47,
+      "h": 0.39,
       "leaf": "leaf_sage",
       "density": 60,
-      "card": 0.24
+      "card": 0.19
      }
     ],
     "soil": false
    },
-   "confidence": "estimated",
+   "confidence": "measured",
    "notes": "Overgrown bed around the pale tree: a big sage, low evergreens, twiggy stems, foxglove rosettes. Plant positions are approximate."
   },
   {
@@ -857,135 +1188,205 @@
    "label": "Sedum bed",
    "layer": "planting",
    "type": "border",
-   "at": [0, 0],
-   "rot": 0,
+   "at": [0.0, 0.0],
+   "rot": 0.0,
    "params": {
     "outline": [
-     [1.1, 1.6],
-     [2.9, 1.3],
-     [5.0, 1.9],
-     [5.3, 3.1],
-     [3.3, 4.3],
-     [1.2, 3.9]
+     [6.08, -4.89],
+     [7.5, -5.07],
+     [9.15, -4.52],
+     [9.38, -3.54],
+     [7.71, -2.7],
+     [6.08, -3.08]
     ],
     "seed": 61,
     "plants": [
      {
       "kind": "shrub",
-      "x": 4.3,
-      "y": 2.3,
-      "rx": 0.85,
-      "h": 1.0,
+      "x": 8.57,
+      "y": -4.23,
+      "rx": 0.67,
+      "h": 0.79,
       "leaf": "leaf_lime",
-      "card": 0.2,
+      "card": 0.16,
       "density": 30
      },
      {
       "kind": "clump",
-      "x": 1.7,
-      "y": 2.1,
-      "radius": 0.5,
-      "h": 0.4,
+      "x": 6.53,
+      "y": -4.48,
+      "radius": 0.39,
+      "h": 0.31,
       "leaf": "leaf_sage",
       "density": 50,
-      "card": 0.18,
+      "card": 0.14,
       "flowers": "sedum",
       "n_flowers": 16
      },
      {
       "kind": "clump",
-      "x": 2.5,
-      "y": 2.9,
-      "radius": 0.45,
-      "h": 0.4,
+      "x": 7.13,
+      "y": -3.83,
+      "radius": 0.35,
+      "h": 0.31,
       "leaf": "leaf_sage",
       "density": 50,
-      "card": 0.18,
+      "card": 0.14,
       "flowers": "sedum",
       "n_flowers": 12
      },
      {
       "kind": "shrub",
-      "x": 2.9,
-      "y": 1.8,
-      "rx": 0.55,
-      "h": 0.6,
+      "x": 7.48,
+      "y": -4.68,
+      "rx": 0.43,
+      "h": 0.47,
       "leaf": "leaf_lime",
-      "card": 0.18,
+      "card": 0.14,
       "density": 34
      },
      {
       "kind": "stems",
-      "x": 1.2,
-      "y": 3.3,
+      "x": 6.1,
+      "y": -3.56,
       "height": 1.7,
       "n": 7,
-      "radius": 0.15,
+      "radius": 0.12,
       "twig_size": 0.6,
       "mat": "straw",
       "twigs": "twigs_stems"
      },
      {
       "kind": "stems",
-      "x": 0.95,
-      "y": 1.9,
+      "x": 5.95,
+      "y": -4.66,
       "height": 0.8,
       "n": 14,
-      "radius": 0.35,
+      "radius": 0.28,
       "mat": "twig_dry",
       "twigs": null
      },
      {
       "kind": "clump",
-      "x": 2.1,
-      "y": 3.7,
-      "radius": 0.5,
-      "h": 0.3,
+      "x": 6.79,
+      "y": -3.21,
+      "radius": 0.39,
+      "h": 0.24,
       "leaf": "leaf_green",
       "density": 45,
-      "card": 0.28
+      "card": 0.22
      }
     ],
     "soil": false
    },
-   "confidence": "estimated",
+   "confidence": "measured",
    "notes": "The bed beside the viewpoint. The pan started and ended here so only its edges were filmed; the far side of it is assumed."
   },
   {
-   "id": "brick_edging",
-   "label": "Brick edging",
-   "layer": "ground",
-   "type": "brick_edging",
-   "at": [-1.45, -0.9],
-   "rot": 86,
+   "id": "veg_a",
+   "label": "Vegetable plot",
+   "layer": "planting",
+   "type": "raised_bed",
+   "at": [-10.2, 5.6],
+   "rot": 0.0,
    "params": {
-    "n": 6,
-    "radius": 2.4
+    "size": [2.1, 5.0],
+    "h": 0.08,
+    "planted": null,
+    "seed": 5
    },
-   "confidence": "measured"
+   "confidence": "estimated",
+   "notes": "Bare dug plots with canes, seen across the lawn from 12 m. Outline within about half a metre."
+  },
+  {
+   "id": "veg_b",
+   "label": "Vegetable plot",
+   "layer": "planting",
+   "type": "raised_bed",
+   "at": [-7.7, 5.6],
+   "rot": 0.0,
+   "params": {
+    "size": [2.1, 5.0],
+    "h": 0.08,
+    "planted": null,
+    "seed": 6
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "cane_1",
+   "label": "Canes",
+   "layer": "objects",
+   "type": "stake",
+   "at": [-9.6, 4.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.7,
+    "lean": [0.03, -0.02]
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "cane_2",
+   "label": "Canes",
+   "layer": "objects",
+   "type": "stake",
+   "at": [-9.9, 6.6],
+   "rot": 70.0,
+   "params": {
+    "h": 1.7,
+    "lean": [0.03, -0.02]
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "cane_3",
+   "label": "Canes",
+   "layer": "objects",
+   "type": "stake",
+   "at": [-7.4, 5.0],
+   "rot": 140.0,
+   "params": {
+    "h": 1.7,
+    "lean": [0.03, -0.02]
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "cane_4",
+   "label": "Canes",
+   "layer": "objects",
+   "type": "stake",
+   "at": [-7.9, 7.4],
+   "rot": 210.0,
+   "params": {
+    "h": 1.7,
+    "lean": [0.03, -0.02]
+   },
+   "confidence": "estimated"
   },
   {
    "id": "picnic_table",
    "label": "Picnic table",
    "layer": "objects",
    "type": "picnic_table",
-   "at": [0.12, -10.93],
-   "rot": 171,
+   "at": [5.85, -17.01],
+   "rot": 173.4,
    "params": {
-    "length": 2.15,
-    "top_h": 0.74,
-    "span": 1.5
+    "length": 2.1,
+    "top_h": 0.72,
+    "span": 1.48
    },
    "confidence": "measured",
-   "notes": "A long one: about 2.15 m."
+   "notes": "A long one: 2.1 m. Its two ends were sighted from both clips."
   },
   {
    "id": "firewood_bag_1",
    "label": "Firewood bag",
    "layer": "objects",
    "type": "firewood_bag",
-   "at": [1.38, -10.3],
-   "rot": 20,
+   "at": [7.11, -16.57],
+   "rot": 22.4,
    "params": {
     "seed": 1
    },
@@ -996,8 +1397,8 @@
    "label": "Firewood bag",
    "layer": "objects",
    "type": "firewood_bag",
-   "at": [1.72, -10.62],
-   "rot": -35,
+   "at": [7.47, -16.86],
+   "rot": -32.6,
    "params": {
     "seed": 2,
     "lean": -5
@@ -1009,11 +1410,11 @@
    "label": "Hardboard sheet",
    "layer": "objects",
    "type": "sheet",
-   "at": [-1.7, -14.72],
-   "rot": 183.8,
+   "at": [4.22, -20.69],
+   "rot": 186.6,
    "params": {
-    "w": 0.61,
-    "h": 1.0
+    "w": 0.55,
+    "h": 0.95
    },
    "confidence": "measured"
   },
@@ -1022,25 +1423,26 @@
    "label": "Split log stack",
    "layer": "objects",
    "type": "log_stack",
-   "at": [4.85, -12.0],
-   "rot": 199,
+   "at": [10.62, -17.98],
+   "rot": 201.4,
    "params": {
-    "length": 2.15,
-    "height": 1.0,
+    "length": 1.9,
+    "height": 0.9,
     "depth": 0.34
    },
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "Position from points seen in both clips."
   },
   {
    "id": "log_rounds",
    "label": "Trunk rounds to split",
    "layer": "objects",
    "type": "log_rounds",
-   "at": [7.55, -7.7],
-   "rot": 76,
+   "at": [11.9, -12.67],
+   "rot": 78.4,
    "params": {
     "n": 16,
-    "area": [4.4, 2.0]
+    "area": [3.87, 1.76]
    },
    "confidence": "estimated"
   },
@@ -1049,8 +1451,8 @@
    "label": "Folded chair",
    "layer": "objects",
    "type": "folding_chair",
-   "at": [7.0, -11.22],
-   "rot": -111.6,
+   "at": [12.22, -16.9],
+   "rot": -109.2,
    "params": {
     "folded": true
    },
@@ -1061,35 +1463,37 @@
    "label": "Football",
    "layer": "objects",
    "type": "ball",
-   "at": [6.3, -12.0],
-   "rot": 0,
+   "at": [11.98, -18.45],
+   "rot": 0.0,
    "params": {
-    "r": 0.1
+    "r": 0.11
    },
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "Sighted from both clips: it lies at the foot of the stock wall."
   },
   {
    "id": "bench",
    "label": "Garden bench",
    "layer": "objects",
    "type": "garden_bench",
-   "at": [5.15, -2.85],
-   "rot": -59.6,
+   "at": [9.7, -8.4],
+   "rot": -57.2,
    "params": {
-    "length": 1.6,
-    "back_h": 0.89
+    "length": 1.4,
+    "back_h": 0.8
    },
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "Size checked against the footage with the calibrated camera."
   },
   {
    "id": "chair_plastic",
    "label": "Plastic chair",
    "layer": "objects",
    "type": "monobloc_chair",
-   "at": [3.62, 0.42],
-   "rot": 7,
+   "at": [8.1, -5.74],
+   "rot": 9.4,
    "params": {
-    "back_h": 0.83
+    "back_h": 0.79
    },
    "confidence": "measured"
   },
@@ -1098,22 +1502,23 @@
    "label": "Folding table",
    "layer": "objects",
    "type": "bistro_table",
-   "at": [3.86, -0.17],
-   "rot": 33,
+   "at": [8.42, -6.19],
+   "rot": 35.4,
    "params": {
-    "h": 0.69
+    "h": 0.66
    },
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "Top 0.66 m above the grass, measured."
   },
   {
    "id": "bistro_table_2",
    "label": "Folding table",
    "layer": "objects",
    "type": "bistro_table",
-   "at": [4.2, -0.72],
-   "rot": 33,
+   "at": [8.72, -6.63],
+   "rot": 35.4,
    "params": {
-    "h": 0.69
+    "h": 0.66
    },
    "confidence": "measured"
   },
@@ -1122,10 +1527,10 @@
    "label": "Small folding table",
    "layer": "objects",
    "type": "folding_table_wood",
-   "at": [-4.2, -8.6],
-   "rot": 30,
+   "at": [1.57, -14.68],
+   "rot": 32.4,
    "params": {
-    "h": 0.6
+    "h": 0.58
    },
    "confidence": "measured"
   },
@@ -1134,11 +1539,11 @@
    "label": "Brush pile",
    "layer": "objects",
    "type": "brush_pile",
-   "at": [-5.0, -8.85],
-   "rot": 0,
+   "at": [0.72, -15.12],
+   "rot": 2.4,
    "params": {
-    "radius": 1.0,
-    "height": 1.4
+    "radius": 0.99,
+    "height": 1.38
    },
    "confidence": "measured"
   },
@@ -1147,11 +1552,11 @@
    "label": "Heap of cut stems",
    "layer": "objects",
    "type": "brush_pile",
-   "at": [-3.0, -6.55],
-   "rot": 0,
+   "at": [2.89, -12.02],
+   "rot": 2.4,
    "params": {
-    "radius": 0.5,
-    "height": 0.4,
+    "radius": 0.44,
+    "height": 0.35,
     "n": 16,
     "sticks": 4,
     "seed": 22
@@ -1163,10 +1568,10 @@
    "label": "Tall stake",
    "layer": "objects",
    "type": "stake",
-   "at": [-5.25, -6.8],
-   "rot": 0,
+   "at": [0.47, -12.99],
+   "rot": 2.4,
    "params": {
-    "h": 2.35
+    "h": 2.27
    },
    "confidence": "measured"
   },
@@ -1175,8 +1580,8 @@
    "label": "Water butt",
    "layer": "objects",
    "type": "water_butt",
-   "at": [-8.5, -11.9],
-   "rot": 0,
+   "at": [-2.79, -18.57],
+   "rot": 2.4,
    "params": {},
    "confidence": "measured"
   },
@@ -1185,8 +1590,8 @@
    "label": "Folding chair",
    "layer": "objects",
    "type": "folding_chair",
-   "at": [-7.6, -11.1],
-   "rot": 200,
+   "at": [-1.89, -17.67],
+   "rot": 202.4,
    "params": {},
    "confidence": "measured"
   },
@@ -1195,8 +1600,8 @@
    "label": "Firewood bag",
    "layer": "objects",
    "type": "firewood_bag",
-   "at": [-7.7, -6.55],
-   "rot": 60,
+   "at": [-1.59, -12.55],
+   "rot": 62.4,
    "params": {
     "seed": 3,
     "lean": 10
@@ -1208,8 +1613,8 @@
    "label": "Wooden stool",
    "layer": "objects",
    "type": "step_stool",
-   "at": [-7.05, -5.55],
-   "rot": 40,
+   "at": [-0.84, -11.43],
+   "rot": 42.4,
    "params": {},
    "confidence": "measured"
   },
@@ -1218,8 +1623,8 @@
    "label": "Barbecue (covered) and wreath",
    "layer": "objects",
    "type": "bbq_covered",
-   "at": [-8.55, -7.05],
-   "rot": 0,
+   "at": [-2.1, -13.0],
+   "rot": 2.4,
    "params": {},
    "confidence": "estimated"
   },
@@ -1228,50 +1633,37 @@
    "label": "Old boards against the shed",
    "layer": "objects",
    "type": "leaning_boards",
-   "at": [-7.33, -4.3],
-   "rot": 92.9,
+   "at": [-0.65, -10.0],
+   "rot": 90.0,
    "params": {
-    "length": 2.25,
-    "height": 0.55
+    "length": 1.91,
+    "height": 0.47
    },
    "confidence": "measured"
   },
   {
-   "id": "gate_posts",
-   "label": "Gate posts",
-   "layer": "boundaries",
-   "type": "gate_posts",
-   "at": [-12.7, -0.65],
-   "rot": 82,
-   "params": {
-    "gap": 0.9,
-    "height": 1.93
-   },
-   "confidence": "estimated"
-  },
-  {
-   "id": "compost_bin",
+   "id": "green_bin",
    "label": "Green bin",
    "layer": "objects",
    "type": "water_butt",
-   "at": [-9.5, 0.42],
-   "rot": 0,
+   "at": [-0.95, -6.15],
+   "rot": 0.0,
    "params": {
-    "r": 0.36,
-    "h": 0.95,
+    "r": 0.3,
+    "h": 0.8,
     "mat": "plastic_green"
    },
-   "confidence": "measured"
+   "confidence": "estimated"
   },
   {
    "id": "tarp_heap",
    "label": "Tarp-covered heap",
    "layer": "objects",
    "type": "tarp_heap",
-   "at": [-6.95, 1.3],
-   "rot": 70,
+   "at": [0.25, -5.28],
+   "rot": 72.4,
    "params": {
-    "size": [1.25, 0.9, 0.85]
+    "size": [1.0, 0.7, 0.7]
    },
    "confidence": "measured"
   },
@@ -1280,149 +1672,174 @@
    "label": "Metal bin",
    "layer": "objects",
    "type": "metal_bin",
-   "at": [-7.72, 2.1],
-   "rot": 0,
-   "params": {},
-   "confidence": "measured"
+   "at": [-0.36, -4.7],
+   "rot": 0.0,
+   "params": {
+    "r": 0.2,
+    "h": 0.5
+   },
+   "confidence": "estimated"
   },
   {
    "id": "timber_slab_1",
    "label": "Timber slab",
    "layer": "objects",
    "type": "plank_slab",
-   "at": [-6.98, 2.52],
-   "rot": -8,
+   "at": [0.12, -4.25],
+   "rot": 90.0,
    "params": {
-    "length": 0.98,
-    "width": 0.27
+    "length": 0.8,
+    "width": 0.22
    },
-   "confidence": "measured"
+   "confidence": "estimated"
   },
   {
    "id": "timber_slab_2",
    "label": "Timber slab",
    "layer": "objects",
    "type": "plank_slab",
-   "at": [-7.3, 2.6],
-   "rot": -8,
+   "at": [0.12, -3.95],
+   "rot": 90.0,
    "params": {
-    "length": 0.9,
-    "width": 0.22,
+    "length": 0.72,
+    "width": 0.18,
     "lean": 18
    },
-   "confidence": "measured"
+   "confidence": "estimated"
   },
   {
-   "id": "pot_patio_corner",
-   "label": "Large terracotta pot",
-   "layer": "objects",
-   "type": "pot",
-   "at": [-3.6, 2.15],
-   "rot": 0,
-   "params": {
-    "r": 0.27,
-    "h": 0.47,
-    "style": "belly",
-    "mat": "terracotta_pale",
-    "plant": "grass",
-    "seed": 3
-   },
-   "confidence": "measured"
-  },
-  {
-   "id": "pot_bed_bowl",
-   "label": "Terracotta bowl",
-   "layer": "objects",
-   "type": "pot",
-   "at": [-3.6, -0.85],
-   "rot": 0,
-   "params": {
-    "r": 0.28,
-    "h": 0.25,
-    "style": "bowl",
-    "plant": "shrub",
-    "plant_kw": {
-     "leaf": "leaf_lime",
-     "rx": 0.3,
-     "h": 0.4,
-     "card": 0.14
-    },
-    "seed": 4
-   },
-   "confidence": "measured"
-  },
-  {
-   "id": "pots_wing",
+   "id": "pots_wall",
    "label": "Pots along the house wall",
    "layer": "objects",
    "type": "pot_row",
-   "at": [-6.45, 2.6],
-   "rot": 86.0,
+   "at": [0.22, -4.66],
+   "rot": 90.0,
    "params": {
-    "seed": 8
+    "length": 2.6,
+    "seed": 8,
+    "start": 0.4,
+    "big": false
    },
    "confidence": "estimated",
-   "notes": "A dozen or so assorted pots and a trough stand along the wall; individual pots are indicative."
-  },
-  {
-   "id": "olive",
-   "label": "Olive tree in a pot",
-   "layer": "planting",
-   "type": "olive_pot",
-   "at": [-4.87, 6.64],
-   "rot": 0,
-   "params": {
-    "height": 2.6
-   },
-   "confidence": "measured"
+   "notes": "A dozen or so assorted pots and a trough stand along the low wall; individual pots are indicative."
   },
   {
    "id": "barrel_blue",
    "label": "Blue barrel",
    "layer": "objects",
    "type": "barrel_lying",
-   "at": [-5.15, 6.95],
-   "rot": 60,
-   "params": {},
+   "at": [0.75, -1.19],
+   "rot": 62.0,
+   "params": {
+    "r": 0.14,
+    "length": 0.4
+   },
    "confidence": "estimated"
   },
   {
-   "id": "pot_black_slab",
-   "label": "Black glazed pot",
+   "id": "pot_patio_corner",
+   "label": "Large terracotta pot",
    "layer": "objects",
    "type": "pot",
-   "at": [-1.85, 9.95],
-   "rot": 0,
+   "at": [2.37, -4.62],
+   "rot": 0.0,
    "params": {
-    "r": 0.19,
-    "h": 0.32,
+    "r": 0.27,
+    "h": 0.4,
+    "style": "belly",
+    "mat": "terracotta_pale",
+    "plant": "grass",
+    "seed": 3
+   },
+   "confidence": "measured",
+   "notes": "Stands on the grass just off the west edge of the patio. Sighted from two clips."
+  },
+  {
+   "id": "pot_blue",
+   "label": "Blue glazed pot",
+   "layer": "objects",
+   "type": "pot",
+   "at": [1.58, -4.54],
+   "rot": 0.0,
+   "params": {
+    "r": 0.16,
+    "h": 0.22,
+    "style": "belly",
+    "mat": "glaze_teal",
+    "plant": "grass",
+    "seed": 6
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "pot_bed_bowl",
+   "label": "Terracotta bowl",
+   "layer": "objects",
+   "type": "pot",
+   "at": [2.5, -7.0],
+   "rot": 0.0,
+   "params": {
+    "r": 0.24,
+    "h": 0.2,
+    "style": "bowl",
+    "plant": "shrub",
+    "plant_kw": {
+     "leaf": "leaf_lime",
+     "rx": 0.25,
+     "h": 0.32,
+     "card": 0.12
+    },
+    "seed": 4
+   },
+   "confidence": "measured"
+  },
+  {
+   "id": "pot_green_grass",
+   "label": "Green glazed pot with grass",
+   "layer": "objects",
+   "type": "pot",
+   "at": [3.63, 0.96],
+   "rot": 0.0,
+   "params": {
+    "r": 0.2,
+    "h": 0.25,
     "style": "belly",
     "mat": "glaze_black",
     "plant": "grass",
     "seed": 5
    },
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "At the south-east corner of the patio. Triangulated from three frames: the rays meet within 3 cm."
   },
   {
-   "id": "bulk_bag",
-   "label": "White bulk bag",
+   "id": "stump",
+   "label": "Big tree stump",
    "layer": "objects",
-   "type": "lump",
-   "at": [-11.6, 16.8],
-   "rot": 20,
+   "type": "stump",
+   "at": [-3.9, 3.85],
+   "rot": 0.0,
    "params": {
-    "size": [1.5, 1.1, 0.5]
+    "r": 0.8,
+    "h": 0.55,
+    "flare": 1.8,
+    "seed": 11,
+    "roots": 7
    },
-   "confidence": "estimated"
+   "confidence": "measured",
+   "notes": "A very large stump: 1.6 m across the cut, root flares spreading to about 3 m, 0.55 m high. Measured from the walking clip."
   },
   {
-   "id": "goal_popup",
-   "label": "Pop-up goal",
+   "id": "compost_bin",
+   "label": "Blue compost bin",
    "layer": "objects",
-   "type": "pop_up_goal",
-   "at": [-5.6, 25.0],
-   "rot": 200,
-   "params": {},
+   "type": "compost_bin",
+   "at": [-5.45, 6.1],
+   "rot": 0.0,
+   "params": {
+    "r": 0.38,
+    "h": 0.9,
+    "mat": "plastic_teal"
+   },
    "confidence": "estimated"
   },
   {
@@ -1430,8 +1847,8 @@
    "label": "Blue tarp",
    "layer": "objects",
    "type": "lump",
-   "at": [-12.8, 26.6],
-   "rot": 0,
+   "at": [-2.0, 7.1],
+   "rot": 0.0,
    "params": {
     "size": [0.9, 0.7, 0.3],
     "mat": "tarp_blue",
@@ -1440,45 +1857,67 @@
    "confidence": "estimated"
   },
   {
-   "id": "ctx_neighbour_house",
-   "label": "Neighbour's house",
+   "id": "tarp_blue_2",
+   "label": "Blue tarp",
+   "layer": "objects",
+   "type": "lump",
+   "at": [-11.6, 8.3],
+   "rot": 30.0,
+   "params": {
+    "size": [1.4, 0.9, 0.25],
+    "mat": "tarp_blue",
+    "seed": 10
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "goal_popup",
+   "label": "Pop-up goal",
+   "layer": "objects",
+   "type": "pop_up_goal",
+   "at": [0.9, 8.6],
+   "rot": 200.0,
+   "params": {},
+   "confidence": "measured"
+  },
+  {
+   "id": "ctx_house_west",
+   "label": "Neighbour's house (west)",
    "layer": "context",
    "type": "massing",
-   "at": [7.0, -31.7],
-   "rot": -102.5,
+   "at": [12.1, -30.45],
+   "rot": -102.4,
    "params": {
-    "size": [9.0, 6.6],
-    "eaves": 4.9,
-    "ridge": 7.1,
+    "size": [9.0, 6.9],
+    "eaves": 3.7,
+    "ridge": 5.5,
     "roof": "tiles_grey"
    },
    "confidence": "estimated",
-   "notes": "Two-storey brick house about 28 m away, seen over the wall behind the willow. Position from bearings and roof angles; treat as a rough guide."
+   "notes": "Brick house seen over the west wall behind the pollarded tree. Footprint from the block plan (its nearest corner is 4.3 m beyond the wall); heights from the footage. Massing only."
   },
   {
-   "id": "ctx_neighbour_shed",
-   "label": "Neighbour's outbuilding",
+   "id": "ctx_house_south",
+   "label": "Neighbour's house (south)",
    "layer": "context",
    "type": "massing",
-   "at": [8.2, -19.3],
-   "rot": 10,
+   "at": [25.3, -7.3],
+   "rot": 0.8,
    "params": {
-    "size": [5.0, 4.0],
-    "eaves": 2.2,
-    "ridge": 3.2,
-    "chimney": false,
-    "wall": "fence_boards",
-    "roof": "tiles_grey"
+    "size": [14.0, 9.0],
+    "eaves": 4.8,
+    "ridge": 7.4
    },
-   "confidence": "assumed"
+   "confidence": "assumed",
+   "notes": "Footprint from the block plan, simplified to a box. Not seen in the footage: heights are a guess."
   },
   {
    "id": "ctx_goal",
    "label": "Goal on the playing field",
    "layer": "context",
    "type": "goal_posts",
-   "at": [-17.0, -21.0],
-   "rot": 30,
+   "at": [-10.8, -27.8],
+   "rot": 32.4,
    "params": {},
    "confidence": "assumed"
   },
@@ -1487,8 +1926,8 @@
    "label": "Telegraph pole",
    "layer": "context",
    "type": "telegraph_pole",
-   "at": [-16.0, 30.9],
-   "rot": 0,
+   "at": [-4.5, 12.1],
+   "rot": 0.0,
    "params": {},
    "confidence": "estimated"
   },
@@ -1497,41 +1936,23 @@
    "label": "Road sign",
    "layer": "context",
    "type": "sign_board",
-   "at": [-11.5, 31.2],
-   "rot": 10,
+   "at": [-2.0, 12.4],
+   "rot": 100.0,
    "params": {},
-   "confidence": "assumed"
+   "confidence": "estimated"
   },
   {
-   "id": "hazel_east",
-   "label": "Yellow-leaved coppice by the east wall",
-   "layer": "planting",
-   "type": "hazel",
-   "at": [9.0, -6.1],
-   "rot": 0,
-   "params": {
-    "height": 5.6,
-    "stems": 9,
-    "spread": 22,
-    "seed": 71
-   },
-   "confidence": "estimated",
-   "notes": "Tall twiggy growth in front of the dark wall behind the log rounds. Species not identified."
-  },
-  {
-   "id": "ctx_trees_east",
-   "label": "Trees beyond the east wall",
+   "id": "ctx_trees_south",
+   "label": "Trees beyond the south wall",
    "layer": "context",
    "type": "tree_belt",
    "params": {
     "path": [
-     [12.0, -12.0],
-     [12.6, -3.0],
-     [13.8, 7.0],
-     [14.2, 17.0],
-     [13.6, 27.0]
+     [16.4, -16.3],
+     [16.6, -8.3],
+     [17.4, -1.5]
     ],
-    "n": 8,
+    "n": 5,
     "height": 10.5,
     "seed": 51,
     "twigs": [
@@ -1541,24 +1962,25 @@
     ]
    },
    "confidence": "assumed",
-   "notes": "There are trees and tall shrubs beyond every boundary. These stand in for them so the skyline reads correctly; individual trees are not surveyed."
+   "notes": "Stands in for the trees beyond the boundary so the skyline reads correctly; individual trees are not surveyed."
   },
   {
-   "id": "ctx_trees_south",
-   "label": "Trees beyond the south wall",
+   "id": "ctx_trees_west",
+   "label": "Trees beyond the west wall",
    "layer": "context",
    "type": "tree_belt",
    "params": {
     "path": [
-     [-1.0, -21.0],
-     [-7.5, -20.0],
-     [-13.0, -16.5]
+     [5.2, -26.9],
+     [-1.1, -25.7],
+     [-7.0, -23.6]
     ],
     "n": 4,
     "height": 10.0,
     "seed": 53
    },
-   "confidence": "assumed"
+   "confidence": "assumed",
+   "notes": "Stands in for the trees beyond the boundary so the skyline reads correctly; individual trees are not surveyed."
   },
   {
    "id": "ctx_conifers",
@@ -1567,8 +1989,8 @@
    "type": "tree_belt",
    "params": {
     "path": [
-     [3.0, -41.0],
-     [9.0, -43.0]
+     [8.5, -38.5],
+     [15.0, -40.0]
     ],
     "n": 3,
     "height": 9.0,
@@ -1576,15 +1998,77 @@
     "evergreens": 4,
     "jitter": 0.8
    },
-   "confidence": "assumed"
+   "confidence": "assumed",
+   "notes": "Stands in for the trees beyond the boundary so the skyline reads correctly; individual trees are not surveyed."
   },
   {
-   "id": "ctx_evergreen_se",
-   "label": "Evergreen beyond the wall",
+   "id": "ctx_shrubs_west",
+   "label": "Shrubs behind the west wall",
+   "layer": "context",
+   "type": "tree_belt",
+   "params": {
+    "path": [
+     [11.0, -23.9],
+     [3.1, -24.1]
+    ],
+    "n": 4,
+    "height": 5.5,
+    "seed": 63,
+    "spread": 1.35,
+    "jitter": 0.7
+   },
+   "confidence": "assumed",
+   "notes": "Stands in for the trees beyond the boundary so the skyline reads correctly; individual trees are not surveyed."
+  },
+  {
+   "id": "ctx_trees_road",
+   "label": "Trees across the road",
+   "layer": "context",
+   "type": "tree_belt",
+   "params": {
+    "path": [
+     [-20.0, 22.5],
+     [-8.0, 23.5],
+     [4.0, 23.5],
+     [14.0, 22.0]
+    ],
+    "n": 6,
+    "height": 12.0,
+    "seed": 61,
+    "twigs": [
+     "twigs_brown",
+     "twigs_dry",
+     "twigs_grey"
+    ]
+   },
+   "confidence": "assumed",
+   "notes": "Stands in for the trees beyond the boundary so the skyline reads correctly; individual trees are not surveyed."
+  },
+  {
+   "id": "ctx_trees_north",
+   "label": "Trees along the north boundary",
+   "layer": "context",
+   "type": "tree_belt",
+   "params": {
+    "path": [
+     [-21.5, 6.0],
+     [-21.0, -3.0],
+     [-20.0, -11.0]
+    ],
+    "n": 4,
+    "height": 11.0,
+    "seed": 59
+   },
+   "confidence": "assumed",
+   "notes": "Stands in for the trees beyond the boundary so the skyline reads correctly; individual trees are not surveyed."
+  },
+  {
+   "id": "ctx_evergreen_sw",
+   "label": "Evergreen beyond the south wall",
    "layer": "context",
    "type": "shrub",
-   "at": [10.2, -12.6],
-   "rot": 0,
+   "at": [15.2, -17.3],
+   "rot": 0.0,
    "params": {
     "rx": 2.0,
     "ry": 2.2,
@@ -1599,64 +2083,615 @@
    "confidence": "assumed"
   },
   {
-   "id": "ctx_trees_west",
-   "label": "Trees to the west",
-   "layer": "context",
-   "type": "tree_belt",
+   "id": "plot_boundary",
+   "label": "Plot boundary (from the 1:500 block plan)",
+   "layer": "survey",
+   "type": "ground_line",
    "params": {
     "path": [
-     [-15.0, -13.0],
-     [-17.5, -6.0],
-     [-20.0, 3.0],
-     [-21.5, 12.0],
-     [-23.0, 21.0]
+     [11.4, -21.1],
+     [-1.4, -19.3],
+     [-3.3, -19.0],
+     [-16.1, -17.4],
+     [-17.3, -17.1],
+     [-17.8, -16.6],
+     [-18.6, -15.3],
+     [-19.0, -14.0],
+     [-19.0, -12.8],
+     [-21.7, 8.9],
+     [-18.2, 10.1],
+     [-16.6, 10.6],
+     [-9.0, 11.4],
+     [-7.6, 11.5],
+     [-1.4, 11.7],
+     [2.7, 11.7],
+     [11.1, 11.5],
+     [17.3, 11.2],
+     [14.2, -5.9]
     ],
-    "n": 6,
-    "height": 11.0,
-    "seed": 59
+    "width": 0.14,
+    "mat": "marker_boundary",
+    "closed": true,
+    "dash": [0.9, 0.5]
    },
-   "confidence": "assumed"
+   "confidence": "estimated",
+   "notes": "About 1,035 square metres. Map accuracy is about a metre: the west wall measured from the footage runs 1.2 m outside this line, the south wall sits on it."
   },
   {
-   "id": "ctx_trees_road",
-   "label": "Trees across the road",
-   "layer": "context",
-   "type": "tree_belt",
+   "id": "map_outbuilding",
+   "label": "Outbuilding as drawn on the block plan",
+   "layer": "survey",
+   "type": "ground_line",
    "params": {
     "path": [
-     [-24.0, 38.0],
-     [-10.0, 40.0],
-     [4.0, 39.0],
-     [14.0, 37.0]
+     [-9.6, -16.29],
+     [-9.86, -11.27],
+     [-3.16, -10.81],
+     [-2.87, -15.78]
     ],
-    "n": 6,
-    "height": 12.0,
-    "seed": 61,
-    "twigs": [
-     "twigs_brown",
-     "twigs_dry",
-     "twigs_grey"
-    ]
+    "width": 0.08,
+    "mat": "marker_boundary",
+    "closed": true,
+    "dash": [0.4, 0.3]
    },
-   "confidence": "assumed"
+   "confidence": "estimated",
+   "notes": "5.0 x 6.7 m on the map. The footage puts the front wall in the same east-west line but 2.4 m further west and at least 5.9 m long."
   },
   {
-   "id": "ctx_shrubs_south",
-   "label": "Shrubs behind the south wall",
-   "layer": "context",
-   "type": "tree_belt",
+   "id": "origin",
+   "label": "Grid origin",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [0.0, 0.0],
+   "rot": 0.0,
+   "params": {
+    "h": 0.6,
+    "mat": "marker_blue",
+    "disc": 0.3
+   },
+   "confidence": "measured",
+   "notes": "Outer south-east corner of the rear outshot at ground level. X runs south from here, Y runs east. Tape measurements from this corner are the easiest way to improve the model."
+  },
+  {
+   "id": "level_01",
+   "label": "Spot level 20.01 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-0.18, 1.12, 0.01],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.01 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_02",
+   "label": "Spot level 19.99 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [2.58, 0.24, -0.01],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: -0.01 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_03",
+   "label": "Spot level 19.99 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [2.3, -4.1, -0.01],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: -0.01 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_04",
+   "label": "Spot level 20.04 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [0.05, -4.38, 0.04],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.04 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_05",
+   "label": "Spot level 20.12 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-2.6, 1.56, 0.12],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.12 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_06",
+   "label": "Spot level 20.19 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-4.51, 3.13, 0.19],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.19 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_07",
+   "label": "Spot level 20.11 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-4.26, 1.79, 0.11],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.11 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_08",
+   "label": "Spot level 20.18 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-7.16, 3.31, 0.18],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.18 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_09",
+   "label": "Spot level 20.17 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-8.98, 3.31, 0.17],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.17 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_10",
+   "label": "Spot level 20.13 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-9.9, 1.7, 0.13],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.13 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_11",
+   "label": "Spot level 20.15 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-9.96, -1.98, 0.15],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.15 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_12",
+   "label": "Spot level 20.10 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-11.9, 2.99, 0.1],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.10 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_13",
+   "label": "Spot level 20.11 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-11.77, -3.08, 0.11],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.11 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_14",
+   "label": "Spot level 20.03 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-10.0, -3.83, 0.03],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.03 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_15",
+   "label": "Spot level 20.03 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-9.91, -6.73, 0.03],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.03 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_16",
+   "label": "Spot level 20.15 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-7.19, -7.35, 0.15],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.15 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_17",
+   "label": "Spot level 20.03 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-11.67, -7.67, 0.03],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.03 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_18",
+   "label": "Spot level 20.03 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-1.18, -6.73, 0.03],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.03 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "level_19",
+   "label": "Spot level 20.02 m",
+   "layer": "survey",
+   "type": "marker_post",
+   "at": [-3.35, -6.81, 0.02],
+   "rot": 0.0,
+   "params": {
+    "h": 0.25,
+    "r": 0.015,
+    "mat": "marker_blue",
+    "disc": 0.14
+   },
+   "confidence": "measured",
+   "notes": "From the measured survey: +0.02 m relative to the grid datum (20.00 m)."
+  },
+  {
+   "id": "ic_1",
+   "label": "Inspection chamber IC1",
+   "layer": "survey",
+   "type": "manhole",
+   "at": [1.18, -5.27, 0.06],
+   "rot": 0.0,
+   "params": {
+    "r": 0.25
+   },
+   "confidence": "measured",
+   "notes": "Round cover, level 20.06 m; invert 19.53 m (pipe 0.53 m down). From the measured survey."
+  },
+  {
+   "id": "ic_2",
+   "label": "Inspection chamber IC2",
+   "layer": "survey",
+   "type": "manhole",
+   "at": [-1.15, -7.21, 0.02],
+   "rot": 0.0,
+   "params": {
+    "r": 0.22,
+    "square": true,
+    "rot": 28
+   },
+   "confidence": "measured",
+   "notes": "Square cover, level 20.02 m; invert 19.67 m. From the measured survey."
+  },
+  {
+   "id": "drain_run",
+   "label": "Drain between the chambers (assumed line)",
+   "layer": "survey",
+   "type": "ground_line",
    "params": {
     "path": [
-     [5.0, -17.4],
-     [-3.0, -18.2]
+     [-1.151, -7.208],
+     [1.175, -5.27]
     ],
-    "n": 4,
-    "height": 5.5,
-    "seed": 63,
-    "spread": 1.35,
-    "jitter": 0.7
+    "width": 0.07,
+    "mat": "marker_drain",
+    "dash": [0.35, 0.25]
    },
-   "confidence": "assumed"
+   "confidence": "assumed",
+   "notes": "The inverts fall 0.14 m from IC2 to IC1, so the flow is towards the lawn. The route is drawn straight between the covers; where it goes from IC1 is not known."
+  },
+  {
+   "id": "gap_front",
+   "label": "Not yet surveyed: front garden and the front of the house",
+   "layer": "gaps",
+   "type": "ground_patch",
+   "params": {
+    "outline": [
+     [-10.3, -17.6],
+     [-10.3, 2.4],
+     [-11.6, 2.4],
+     [-11.6, 9.3],
+     [-16.6, 9.7],
+     [-18.0, 9.3],
+     [-21.3, 8.3],
+     [-18.7, -12.8],
+     [-18.7, -14.0],
+     [-18.3, -15.2],
+     [-17.6, -16.4],
+     [-16.1, -17.1]
+    ],
+    "mat": "hatch"
+   },
+   "confidence": "assumed",
+   "notes": "No footage here. The front and west elevations of the house come from the drawings; the ground is a blank."
+  },
+  {
+   "id": "gap_west",
+   "label": "Not yet surveyed: behind the shed and outbuilding",
+   "layer": "gaps",
+   "type": "ground_patch",
+   "params": {
+    "outline": [
+     [-10.3, -19.4],
+     [-8.1, -19.6],
+     [-8.1, -11.2],
+     [-5.7, -11.2],
+     [-5.7, -8.0],
+     [-10.3, -7.6]
+    ],
+    "mat": "hatch"
+   },
+   "confidence": "assumed",
+   "notes": "Nothing behind the shed or the outbuilding has been filmed."
+  },
+  {
+   "id": "gap_drive",
+   "label": "Not yet surveyed: drive and south-east corner",
+   "layer": "gaps",
+   "type": "ground_patch",
+   "params": {
+    "outline": [
+     [9.9, -1.0],
+     [14.9, -1.6],
+     [15.7, 3.0],
+     [17.1, 11.0],
+     [10.6, 11.3],
+     [10.4, 9.6],
+     [10.0, 3.4]
+    ],
+    "mat": "hatch"
+   },
+   "confidence": "assumed",
+   "notes": "Only glimpsed over the shrubs (a parked car, gravel). Entrance, gates and the boundary here are not modelled."
+  },
+  {
+   "id": "shot_1",
+   "label": "To film 1: Front garden and house front",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-14.5, -4.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "Walk a slow loop of the front garden with the camera on the house, then turn your back to the house and walk it again looking outwards. Keep the ground in frame."
+  },
+  {
+   "id": "shot_2",
+   "label": "To film 2: West side: house, shed, outbuilding",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-7.3, -7.9],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "Walk the gap between the house and the shed and on round the back of the shed and the outbuilding. All four sides of both, with corners in shot."
+  },
+  {
+   "id": "shot_3",
+   "label": "To film 3: Drive, entrance and south-east corner",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [12.8, 5.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "From the road entrance walk in along the drive, then along the inside of the south wall to the bench."
+  },
+  {
+   "id": "shot_4",
+   "label": "To film 4: South and west garden on foot",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [6.5, -13.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "This part was filmed from one spot, so its distances are the weakest in the model. Walk two loops round it: one hugging the walls looking in, one in the middle looking out."
+  },
+  {
+   "id": "shot_5",
+   "label": "To film 5: Outbuilding",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-1.6, -15.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "Outside: every wall, square on and at each corner, with the ground line visible. Inside: stand in each corner in turn and film the opposite corner, floor to ceiling."
+  },
+  {
+   "id": "shot_6",
+   "label": "To film 6: Shed",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-3.2, -7.4],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "The same as the outbuilding. Leave the door open and film from outside to inside in one go, so the two join up."
+  },
+  {
+   "id": "shot_7",
+   "label": "To film 7: Inside the house",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [-4.3, 0.9],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "Room by room, slowly, from each corner; walk through every doorway with the camera running so the rooms link together. Ground floor, then stairs, then upstairs."
+  },
+  {
+   "id": "shot_8",
+   "label": "To film 8: Roof and chimneys",
+   "layer": "gaps",
+   "type": "marker_post",
+   "at": [2.0, -2.0],
+   "rot": 0.0,
+   "params": {
+    "h": 1.8,
+    "r": 0.03,
+    "mat": "marker",
+    "disc": 0.45
+   },
+   "confidence": "assumed",
+   "notes": "From the far corners of the garden and from the road, a few still photos of each roof slope and chimney, zoomed in."
   }
  ]
 }
