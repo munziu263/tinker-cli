@@ -314,10 +314,11 @@ def timber_shed(width=2.6, depth=3.4, eaves=1.75, ridge=2.75, wall="boards_dark"
 
 
 def outbuilding(width=6.2, depth=3.6, front_h=2.15, back_h=2.15, rise=0.0, window=None,
-                door=None, extra_windows=(), wall="render_white"):
+                door=None, extra_windows=(), wall="render_white", side_windows=(), roof="roof_felt"):
     """White roughcast garden room with a low sheet roof. The front (garden side) is the
     local -Y face; x runs 0..width from its left corner as seen from the garden.
     rise: how much higher the roof is at the x = width end (it drains to the x = 0 end).
+    side_windows: dicts(y, w, z, h) in the x = width wall, y measured back from the front.
     Origin: front-left corner on the ground."""
     m = Mesh()
     ts = tex_size(wall)
@@ -331,8 +332,15 @@ def outbuilding(width=6.2, depth=3.6, front_h=2.15, back_h=2.15, rise=0.0, windo
               [[(0, front_h / ts[1]), (width / ts[0], front_h / ts[1]), (width / ts[0], hr_f / ts[1])]], wall)
         m.add([(width, depth, back_h), (0, depth, back_h), (width, depth, hr_b)], [(0, 1, 2)],
               [[(0, back_h / ts[1]), (width / ts[0], back_h / ts[1]), (0, hr_b / ts[1])]], wall)
-    m.quad((width, 0, 0), (width, depth, 0), (width, depth, hr_b), (width, 0, hr_f), wall, ts=ts,
-           uv=[(0, 0), (depth / ts[0], 0), (depth / ts[0], hr_b / ts[1]), (0, hr_f / ts[1])])
+    if side_windows and abs(hr_b - hr_f) < 1e-6:                      # the right-hand wall, with its windows
+        sM = translate(width, 0, 0) @ rot_z(90)
+        _wall_with_openings(m, depth, hr_f, wall, [dict(x=w["y"], w=w["w"], z=w["z"], h=w["h"], sill_mat="terracotta") for w in side_windows], M=sM, ts=ts)
+        for w in side_windows:
+            m.box((w["w"] + 0.12, 0.14, 0.05), "terracotta", M=sM @ translate(w["y"] - 0.06, -0.05, w["z"] - 0.05), origin="corner")
+            _glazing(m, w["y"], w["z"], w["w"], w["h"], M=sM, bars=w.get("bars", (3, 3)), depth=0.07)
+    else:
+        m.quad((width, 0, 0), (width, depth, 0), (width, depth, hr_b), (width, 0, hr_f), wall, ts=ts,
+               uv=[(0, 0), (depth / ts[0], 0), (depth / ts[0], hr_b / ts[1]), (0, hr_f / ts[1])])
     m.quad((width, depth, 0), (0, depth, 0), (0, depth, back_h), (width, depth, back_h), wall, ts=ts)
     m.quad((0, depth, 0), (0, 0, 0), (0, 0, front_h), (0, depth, back_h), wall, ts=ts,
            uv=[(0, 0), (depth / ts[0], 0), (depth / ts[0], front_h / ts[1]), (0, back_h / ts[1])])
@@ -353,7 +361,7 @@ def outbuilding(width=6.2, depth=3.6, front_h=2.15, back_h=2.15, rise=0.0, windo
 
     ring = [(-oh, -oh), (width + oh, -oh), (width + oh, depth + oh), (-oh, depth + oh)]
     T = [(x, y, top(x, y)) for x, y in ring]
-    m.add(T, [(0, 1, 2, 3)], [[(0, 0), (8, 0), (8, 4), (0, 4)]], "roof_felt")
+    m.add(T, [(0, 1, 2, 3)], [[(0, 0), (8, 0), (8, 4), (0, 4)]], roof)
     m.add([(p[0], p[1], p[2] - fas) for p in T][::-1], [(0, 1, 2, 3)],
           [[(0, 0), (1, 0), (1, 1), (0, 1)]], "paint_black")
     for a in range(4):
@@ -363,7 +371,7 @@ def outbuilding(width=6.2, depth=3.6, front_h=2.15, back_h=2.15, rise=0.0, windo
     n_rib = int((width + 2 * oh) / 0.25)
     for a in range(n_rib + 1):
         x = -oh + (width + 2 * oh) * a / n_rib
-        m.beam((x, -oh, top(x, -oh) + 0.005), (x, depth + oh, top(x, depth + oh) + 0.005), 0.03, 0.025, "roof_felt")
+        m.beam((x, -oh, top(x, -oh) + 0.005), (x, depth + oh, top(x, depth + oh) + 0.005), 0.03, 0.025, roof)
     return m
 
 
@@ -494,7 +502,8 @@ def catslide_wing(length=7.5, eaves=1.05, depth=3.6, ridge=3.9, wall="render_whi
 
 
 def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=(), openings=(),
-            rooflights=(), posts=(), wall="render_white", roof="clay_tiles", outshot_east_kink=None):
+            rooflights=(), posts=(), wall="render_white", roof="clay_tiles", outshot_east_kink=None,
+            gable_windows=(), frame=()):
     """The house, from the measured building survey. Everything is in site-grid metres
     relative to the feature's origin: X south, Y east, Z up.
 
@@ -515,6 +524,10 @@ def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=
       rooflights dicts(y=[west, east], z=[low, high]) on the south slope
       outshot_east_kink dict(x, y_north): the outshot's east wall runs straight from its
                 south end to x, then turns in to reach y_north where it meets the main range
+      gable_windows dicts(face="east"|"west", x=[north, south], z=[sill, head]) windows high
+                in a gable, above the eaves
+      frame     exposed timbers on the outshot's east end: dicts(a=[s, z], b=[s, z], w) with
+                s measured north along the wall from its south end
     """
     m = Mesh()
     ts, rts = tex_size(wall), tex_size(roof)
@@ -612,6 +625,59 @@ def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=
                     m.box((Lw, 0.05, o["z"][1] - o["z"][0]), "glass_dark", M=Mw @ translate(0, sgn * 0.01 - 0.025, o["z"][0]), origin="corner")
                     for xx in (0.0, Lw):
                         m.box((0.05, 0.07, o["z"][1] - o["z"][0] + 0.08), "paint_slate", M=Mw @ translate(xx - 0.025, sgn * 0.02 - 0.035, o["z"][0] - 0.04), origin="corner")
+    def slab(pa, pb, n, w, t, mat):
+        """A flat timber or pane lying on a wall: from pa to pb on the wall face, w wide in
+        the plane of the wall, standing t proud of it along the wall's outward normal n."""
+        pa, pb, n = np.asarray(pa, float), np.asarray(pb, float), np.asarray(n, float)
+        d = pb - pa
+        L = float(np.linalg.norm(d))
+        if L < 1e-6:
+            return
+        d /= L
+        q = np.cross(n, d)
+        q /= np.linalg.norm(q)
+        c = [pa - q * w / 2, pb - q * w / 2, pb + q * w / 2, pa + q * w / 2]
+        V = c + [v + n * t for v in c]
+        m.add(V, [(4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)],
+              [[(0, 0), (1, 0), (1, 1), (0, 1)]] * 5, mat)
+
+    def east_face(s):
+        """Point on the outshot's east wall s metres north of its south end, and the wall's
+        outward normal there."""
+        x = oxs - s
+        if kink and x < kink["x"]:
+            dx, dy = oxn - kink["x"], kink["y_north"] - oye
+            L = math.hypot(dx, dy)
+            n = (-dy / L, dx / L, 0.0) if dx / L > 0 else (dy / L, -dx / L, 0.0)
+        else:
+            n = (0.0, 1.0, 0.0)
+        return np.array([x, east_y(x), 0.0]), np.array(n)
+
+    for fr in frame:                                                # exposed timber frame, east end
+        (s0, z0), (s1, z1) = fr["a"], fr["b"]
+        cuts = [0.0, 1.0]
+        if kink and min(s0, s1) < oxs - kink["x"] < max(s0, s1):    # a timber that crosses the turn in the wall bends with it
+            cuts.insert(1, (oxs - kink["x"] - s0) / (s1 - s0))
+        for ta, tb in zip(cuts[:-1], cuts[1:]):
+            tm = (ta + tb) / 2
+            _, n = east_face(s0 + (s1 - s0) * tm)
+            pa, _ = east_face(s0 + (s1 - s0) * ta)
+            pb, _ = east_face(s0 + (s1 - s0) * tb)
+            pa[2], pb[2] = z0 + (z1 - z0) * ta, z0 + (z1 - z0) * tb
+            slab(pa, pb, n, fr.get("w", 0.12), fr.get("t", 0.035), fr.get("mat", "timber_black"))
+
+    for gw in gable_windows:                                        # a window high in a gable, above the eaves
+        east = gw["face"] == "east"
+        y, n = (ye, (0.0, 1.0, 0.0)) if east else (yw, (0.0, -1.0, 0.0))
+        (xa, xb), (za, zb) = sorted(gw["x"]), gw["z"]
+        zc = (za + zb) / 2
+        slab((xa, y, zc), (xb, y, zc), n, zb - za, 0.02, "glass_dark")
+        fm, fw = gw.get("frame", "paint_slate"), 0.06
+        for z_ in (za, zb):
+            slab((xa - fw / 2, y, z_), (xb + fw / 2, y, z_), n, fw, 0.045, fm)
+        for x_ in (xa, (xa + xb) / 2, xb):
+            slab((x_, y, za), (x_, y, zb), n, fw if x_ in (xa, xb) else 0.04, 0.045, fm)
+
     for y in posts:                                                 # studs showing in the low wall
         m.box((0.03, 0.1, prof[-1][1] - 0.14), "paint_black", M=translate(oxs + 0.0, y - 0.05, 0), origin="corner")
 
@@ -685,7 +751,7 @@ def cottage(main, outshot, leanto, ridge, profile, hip_z, north_eaves, chimneys=
     for r in rooflights:
         (ya, yb), (za, zb) = r["y"], r["z"]
         q = [(south_x(za), ya, za + lift + 0.05), (south_x(za), yb, za + lift + 0.05), (south_x(zb), yb, zb + lift + 0.05), (south_x(zb), ya, zb + lift + 0.05)]
-        m.add(q, [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "glass_dark")
+        m.add(q, [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], "rooflight_glass")
         for a, b in ((q[0], q[1]), (q[1], q[2]), (q[2], q[3]), (q[3], q[0])):
             m.tube([a, b], 0.03, "paint_black", seg=4, caps=(False, False))
 

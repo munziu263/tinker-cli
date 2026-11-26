@@ -159,6 +159,7 @@
     </div>
     <div class="panel seg" id="storey" role="group" aria-label="Open the house at a storey" hidden>
       <button data-storey="all" aria-pressed="true">Whole house</button>
+      <button data-storey="at" aria-pressed="false">Attic</button>
       <button data-storey="ff" aria-pressed="false">First floor</button>
       <button data-storey="gf" aria-pressed="false">Ground floor</button>
     </div>
@@ -185,7 +186,7 @@
   <div id="titleblock" class="panel">
     <span class="eyebrow">Existing house and garden &middot; surveyed 26 Nov 2026</span>
     <h1>Garden Survey Model</h1>
-    <p class="long">Rebuilt from three phone clips and tied to the measured building survey. House and shed are good to a few centimetres, the far side of the garden to about half a metre.</p>
+    <p class="long">Rebuilt from phone clips and tied to the measured building survey. House and shed are good to a few centimetres, the far side of the garden to about half a metre.</p>
     <div class="keyrow">
       <div id="scalebar"><div class="bar" style="width: 80px"></div><span class="data">5 m</span></div>
       <div id="north" title="North"><svg id="north-arrow" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 2 L17 20 L12 16.2 L7 20 Z" fill="currentColor"/></svg><span class="data">N</span></div>
@@ -294,14 +295,18 @@ const features = [];            // feature root objects (have userData.label)
 const layerRoots = {};          // layer key -> root object
 const pickables = [];
 const original = new Map();     // mesh -> original material(s)
-const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'inside_gf', 'inside_ff', 'planting', 'objects', 'context', 'survey', 'gaps'];
+const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'inside_at', 'inside_ff', 'inside_gf', 'planting', 'objects', 'context', 'survey', 'gaps'];
 const LAYER_NAMES = { ground: 'Ground', boundaries: 'Walls and hedges', buildings: 'Buildings', planting: 'Trees and planting', objects: 'Furniture and objects', context: 'Surroundings',
-  survey: 'Boundary, levels, drains', gaps: 'Still to survey', inside_gf: 'Inside: ground floor', inside_ff: 'Inside: first floor' };
+  survey: 'Boundary, levels, drains', gaps: 'Still to survey', inside_gf: 'Inside: ground floor', inside_ff: 'Inside: first floor', inside_at: 'Inside: attic' };
 const OVERLAY_LAYERS = new Set(['survey', 'gaps']);   // drawn-on information, not physical things
-const INSIDE_LAYERS = new Set(['inside_gf', 'inside_ff']);
+const INSIDE_LAYERS = new Set(['inside_gf', 'inside_ff', 'inside_at']);
 // Opening the house: one horizontal plane that every material is clipped by. Parked far overhead
 // it cuts nothing; lowered to just under a ceiling it lifts the storeys above clean off, shadows included.
-const STOREYS = { all: { cut: 1e6 }, ff: { cut: 4.11, layer: 'inside_ff', pos: [0.6, 5.2, 15.5], target: [-6.9, -2.4, 2.4] }, gf: { cut: 2.16, layer: 'inside_gf', pos: [2.6, 4.6, 13.5], target: [-5.2, -2.4, 0.3] } };
+const STOREYS = { all: { cut: 1e6 }, at: { cut: 1e6, roof: 4.72, layer: 'inside_at', pos: [1.2, 5.4, 16.5], target: [-7.0, -2.5, 5.0] },
+  ff: { cut: 4.11, layer: 'inside_ff', pos: [0.6, 5.2, 15.5], target: [-6.9, -2.4, 2.4] }, gf: { cut: 2.16, layer: 'inside_gf', pos: [2.6, 4.6, 13.5], target: [-5.2, -2.4, 0.3] } };
+// The attic is opened differently: nothing is sliced, but the house's own roof is taken off above the attic floor.
+const roofPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6);
+const ROOF_MATS = /^(clay_tiles|paint_black|terracotta|rooflight_glass)$/;
 const cutPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), STOREYS.all.cut);
 renderer.localClippingEnabled = true;
 const clipped = (mat) => { mat.clippingPlanes = [cutPlane]; mat.clipShadows = true; return mat; };
@@ -328,12 +333,14 @@ function onModel(gltf) {
     f.traverse((m) => {
       if (!m.isMesh) return;
       m.userData.feature = f;
+      if (f.name === 'house' && !Array.isArray(m.material) && ROOF_MATS.test(m.material.name)) { m.material = m.material.clone(); m.userData.roof = true; }
       m.receiveShadow = true;
       m.castShadow = !OVERLAY_LAYERS.has(layer) && (layer !== 'ground' || f.name !== 'lawn');
       pickables.push(m);
       const mats = Array.isArray(m.material) ? m.material : [m.material];
       for (const mat of mats) {
         clipped(mat);
+        if (m.userData.roof) mat.clippingPlanes = [cutPlane, roofPlane];
         if (mat.name === 'hatch') { mat.transparent = true; mat.opacity = 0.42; mat.depthWrite = false; mat.polygonOffset = true; mat.polygonOffsetFactor = -2; }
         if (/^marker/.test(mat.name)) { mat.polygonOffset = true; mat.polygonOffsetFactor = -3; mat.emissive = mat.color.clone().multiplyScalar(0.25); }
         for (const key of ['map', 'normalMap']) if (mat[key]) mat[key].anisotropy = key === 'map' ? maxAniso : 4;
@@ -460,8 +467,12 @@ function applyConfidence(on) {
     const f = mesh.userData.feature;
     if (!on || f.name === 'lawn' || OVERLAY_LAYERS.has(f.userData.layer)) { mesh.material = mat; continue; }
     const c = f.userData.confidence || 'estimated';
-    if (!confMats[c]) confMats[c] = clipped(new THREE.MeshLambertMaterial({ color: new THREE.Color(cssVar('--' + c)), side: THREE.DoubleSide }));
-    mesh.material = confMats[c];
+    const k = c + (mesh.userData.roof ? ':roof' : '');
+    if (!confMats[k]) {
+      confMats[k] = clipped(new THREE.MeshLambertMaterial({ color: new THREE.Color(cssVar('--' + c)), side: THREE.DoubleSide }));
+      if (mesh.userData.roof) confMats[k].clippingPlanes = [cutPlane, roofPlane];
+    }
+    mesh.material = confMats[k];
   }
   invalidate();
 }
@@ -552,6 +563,7 @@ function setStorey(key) {
   if (key !== 'all' && state.mode === 'compare') setMode('explore');
   state.storey = key;
   cutPlane.constant = STOREYS[key].cut;
+  roofPlane.constant = STOREYS[key].roof ?? 1e6;
   sun.castShadow = key === 'all';                    // walls cut at head height throw long shadows across the rooms: read better without
   for (const btn of $('storey').querySelectorAll('button')) btn.setAttribute('aria-pressed', String(btn.dataset.storey === key));
   select(null);
@@ -590,7 +602,7 @@ function layout() {
   if (state.mode === 'compare') {
     const topPad = small ? 100 : 58, botPad = ($('comparebar').offsetHeight || 120) + 28;
     const availH = Math.max(120, H - topPad - botPad), availW = W - (small ? 0 : 32);
-    const aspect = state.frames ? state.frames.aspect : 4 / 3;
+    const aspect = state.frames ? (state.aspect || state.frames.aspect) : 4 / 3;
     let w = availW, h = w / aspect;
     if (h > availH) { h = availH; w = h * aspect; }
     box = { x: Math.round((W - w) / 2), y: Math.round(topPad + (availH - h) / 2), w: Math.round(w), h: Math.round(h) };
@@ -637,6 +649,8 @@ function applyFrame(v) {
   // on it, so the overlay is exact, and jump rather than fly where one clip ends and the next begins.
   if (a.clip !== b.clip || Math.abs(v - Math.round(v)) < 0.12) { persp.position.copy(near.p); persp.quaternion.copy(near.q); }
   else { persp.position.lerpVectors(a.p, b.p, t); persp.quaternion.slerpQuaternions(a.q, b.q, t); }
+  const asp = near.aspect || state.frames.aspect;          // clips filmed upright have their own shape
+  if (asp !== state.aspect) { state.aspect = asp; layout(); }
   persp.fov = near.vfov || state.frames.vfov; persp.updateProjectionMatrix();
   if (photo.dataset.src !== near.file) { photo.dataset.src = near.file; photo.src = near.file; }
   $('scrub-val').textContent = near.t.toFixed(1) + ' s';
@@ -661,6 +675,7 @@ function hitAt(ev) {
   const hits = ray.intersectObjects(pickables, false);
   for (const h of hits) {
     if (h.point.y > cutPlane.constant) continue;       // that part of the model has been lifted off
+    if (h.object.userData.roof && h.point.y > roofPlane.constant) continue;
     let o = h.object, vis = true;
     while (o) { if (!o.visible) { vis = false; break; } o = o.parent; }
     if (vis) return h;

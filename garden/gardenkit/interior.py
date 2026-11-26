@@ -111,16 +111,22 @@ def stairs(flights, landings=(), mat="carpet_red", solid=True):
 
 
 def beams(items, mat="timber_black"):
-    """Ceiling timbers: dicts(a=[x, y], b=[x, y], w=width, z=[underside, top])."""
+    """Timbers: dicts(a=[x, y], b=[x, y], w=width, z=[underside, top]) for a level one, or
+    za=[underside, top] and zb=[underside, top] at the two ends for one that slopes (a rafter)."""
     m = Mesh()
     for it in items:
         a, b = np.asarray(it["a"], float), np.asarray(it["b"], float)
         L = float(np.linalg.norm(b - a))
+        if L < 1e-4:
+            continue
         M = translate(a[0], a[1], 0) @ rot_z(math.degrees(math.atan2(b[1] - a[1], b[0] - a[0])))
-        zb, zt = it["z"]
-        _block(m, M, 0.0, L, it.get("w", 0.2), zb, zt, zt, it.get("mat", mat))
-        m.add([(0, -it.get("w", 0.2) / 2, zb), (0, it.get("w", 0.2) / 2, zb), (L, it.get("w", 0.2) / 2, zb), (L, -it.get("w", 0.2) / 2, zb)],
-              [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], it.get("mat", mat), M=M)
+        (a0, a1), (b0, b1) = it.get("za", it.get("z")), it.get("zb", it.get("z"))
+        h, bm = it.get("w", 0.2) / 2, it.get("mat", mat)
+        lo = [(0, -h, a0), (L, -h, b0), (L, h, b0), (0, h, a0)]
+        hi = [(0, -h, a1), (L, -h, b1), (L, h, b1), (0, h, a1)]
+        quads = [hi, lo[::-1], (lo[0], lo[1], hi[1], hi[0]), (lo[1], lo[2], hi[2], hi[1]), (lo[2], lo[3], hi[3], hi[2]), (lo[3], lo[0], hi[0], hi[3])]
+        for q in quads:
+            m.add(q, [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], bm, M=M)
     return m
 
 

@@ -48,7 +48,7 @@ remove the thing; copy one to add another. The available `type`s are the keys of
 things can also be moved or hidden by hand.
 
 Layers: Ground, Boundaries, Buildings, Planting, Furniture and objects, Surroundings,
-the two storeys of the house interior (when `interior.json` is present), plus two that
+the storeys of the house interior (when `interior.json` is present), plus two that
 are information rather than things. **Survey data** holds the plot boundary
 from the block plan, the spot levels and inspection chambers from the measured survey and
 the grid origin. **Still to survey** hatches the parts nobody has filmed and plants a
@@ -58,10 +58,11 @@ numbered marker wherever more footage would help, with what to film in its note.
 
 `gardenkit/interior.py` draws the inside of a building the way a floor plan does: walls as
 solid blocks at their true thickness with openings for doors and windows, floors at their
-own levels, stairs, ceiling beams and fixed fittings. In the viewer, **First floor** and
-**Ground floor** slice the whole model at ceiling height (4.11 m and 2.16 m above datum)
-so the rooms can be looked down into, or read as a true floor plan in Plan view; each room
-has a card with its size, floor level and ceiling height.
+own levels, stairs, ceiling beams, roof timbers and fixed fittings. In the viewer,
+**First floor** and **Ground floor** slice the whole model at ceiling height (4.11 m and
+2.16 m above datum) so the rooms can be looked down into, or read as a true floor plan in
+Plan view. **Attic** slices nothing: it takes the house's own roof off above the attic
+floor. Each room has a card with its size, floor level and headroom.
 
 The description of the rooms themselves lives in `interior.json`, beside `garden.json` and
 in the same format, and is **not in this repository**: the layout of the inside of a home
@@ -72,10 +73,10 @@ finishes and fittings from a set of interior clips.
 
 ## How it was measured
 
-1. **Reconstruction.** COLMAP structure-from-motion on a pan from the lawn and two short
-   walks: 472 frames, 174,000 points, every camera position and direction.
-   `sfm.py` does one clip, `sfm_add.py` registers further clips into it, `sfm_refine.py`
-   lets everything settle together.
+1. **Reconstruction.** COLMAP structure-from-motion on a pan from the lawn and five short
+   walks: 719 frames, 310,000 points, every camera position and direction.
+   `sfm.py` does one clip, `sfm_add.py` registers further clips into it (landscape or
+   upright, same day or not), `sfm_refine.py` lets everything settle together.
 2. **Vertical** from brick coursing (`gravity.py`). Brick walls are laid level, so the
    mortar joints of two walls that are not parallel fix true vertical. Three walls agree
    to 0.2 degrees. The lawn is not level, so fitting a plane to it, as the first version
@@ -89,6 +90,13 @@ finishes and fittings from a set of interior clips.
    things from a second viewpoint (`triangulate.py`, `control/sightings.json`).
 5. **The house itself** is drawn from the measured survey, not from the footage.
    The plot boundary and north come from the 1:500 block plan.
+6. **Through a window** (`window_view.py`, `control/attic_window.json`). A clip filmed
+   from inside cannot be joined to the outdoor reconstruction, but the window is a known
+   place and its joinery gives the camera's direction: uprights point straight down,
+   level edges along the wall. One frame through the attic window fixed the east wall of
+   the outbuilding and how far back it runs, which nothing filmed in the garden can see.
+   The check that the method works is built in: the two directions must come out square
+   to each other, and here they are 89.7 degrees apart.
 
 The first version of this model sized itself on "standard" objects (brick courses, a
 door, paving flags) and came out 27% too big near the house. Guessing a scale is not
@@ -99,10 +107,10 @@ good enough; control is.
 | Where | Roughly |
 | --- | --- |
 | House, shed, apple tree, drains, levels (measured survey) | a few centimetres |
-| Patio and east garden (filmed on foot) | 0.1 to 0.2 m |
+| Patio and east garden (filmed on foot, things triangulated from two frames) | 0.05 to 0.2 m |
 | West wall, stock wall, log stack (seen from two viewpoints) | 0.3 m |
 | Other things in the south and west garden (one viewpoint, corrected) | 0.5 m along the line of sight, less across it |
-| Outbuilding | front wall 0.3 m; depth and east end assumed |
+| Outbuilding | front wall 0.3 m; east wall and depth 0.4 m (attic window); west and north walls inferred |
 | Plot boundary from the block plan | about 1 m |
 | Inside the house (measured floor plans) | a few centimetres |
 | Front garden, drive, behind the shed and outbuilding, inside the outbuildings | not surveyed |
@@ -113,7 +121,8 @@ colour the model by it. Tree crowns are generic; species are mostly not identifi
 
 Two disagreements between sources are left visible rather than papered over: the west
 wall runs about 1.2 m outside the block-plan boundary, and the outbuilding the camera
-saw is 2.4 m further west, and longer, than the one drawn on the block plan.
+saw is 1 to 2 m further west, and a metre wider, than the one drawn on the block plan
+(the two agree on how deep it is).
 
 ### Making it better
 
@@ -127,15 +136,18 @@ usefulness; its numbers match the markers in the viewer. In general:
   the ground in frame, overlapping what has already been filmed, beat any amount of
   turning on the spot.
 - **Sight things twice.** Anything that matters can be fixed by picking it in two frames
-  taken a few metres apart and adding it to `sightings.json`.
+  taken a few metres apart and adding it to `sightings.json`. It is worth doing even for
+  things that look settled: a second set of clips, filmed close to a tree stump that the
+  first set had only seen from across the garden, moved it by 1.7 m.
 
 ## What is not in the repository
 
 This repository is public, so nothing captured by the camera is committed: not the video,
 not the stills the viewer fades against (`viewer/frames/`, `viewer/frames.json`), not the
 survey point cloud. The drawings are not here either, only site-grid dimensions read off
-them, and the inside of the house (`interior.json`) is left out altogether. Without the stills the viewer simply hides "Compare with video"; the model itself
-needs none of them. To bring the survey back from the original clips
+them, and the inside of the house (`interior.json`) is left out altogether. Without the
+stills the viewer simply hides "Compare with video"; the model itself needs none of them.
+To bring the survey back from the original clips
 (`pip install pycolmap opencv-python`, and `ffmpeg` on the path):
 
 ```
@@ -154,7 +166,17 @@ python $S/triangulate.py survey.npz $S/control/sightings.json frames walk1 walk2
 python $S/export_frames.py survey.npz viewer 0 frames walk1 walk2
 ```
 
+Clips filmed later join the same grid without redoing any of that. They can be upright
+or landscape, and from another day in different light:
+
+```
+ffmpeg -i east1.mov -q:v 2 -start_number 0 east1/i_%04d.jpg       # one letter per clip
+python $S/sfm_add.py work3 work4 east1 east2 east3                  # existing cameras stay put
+python $S/align.py work4/sparse survey2.npz --like survey.npz       # lands straight in the site grid
+python $S/window_view.py attic_frame.jpg $S/control/attic_window.json
+```
+
 `plan.py` is the library the others share (pixel to ray, ray to ground or wall, plan
 mosaics); `measure.py` is a small command line on top of it, and `gridcrop.py` cuts a
 piece out of a frame with a pixel grid over it, for reading off the positions that
-`control.json` and `sightings.json` need.
+`control.json`, `sightings.json` and `attic_window.json` need.

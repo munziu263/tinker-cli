@@ -46,6 +46,9 @@ def main():
     for name, picks in json.load(open(picks_path)).items():
         if name.startswith("_"):
             continue
+        if any(f not in sv.names and not isinstance(f, int) for f, _, _ in picks):
+            print(f"{name:40s} (frames not in this survey)")
+            continue
         p, miss, spread = intersect(sv, [tuple(q) for q in picks])
         flag = "" if spread >= 4 else "   (rays nearly parallel: distance is weak)"
         print(f"{name:40s} X {p[0]:7.2f}  Y {p[1]:7.2f}  z {p[2]:5.2f}   rays miss by {miss * 100:5.1f} cm, {spread:4.1f} deg apart{flag}")

@@ -33,6 +33,7 @@ LAYERS = {
     "gaps": "Still to survey",
     "inside_gf": "Inside: ground floor",
     "inside_ff": "Inside: first floor",
+    "inside_at": "Inside: attic",
 }
 
 BUILDERS = {
@@ -101,6 +102,10 @@ BUILDERS = {
     "pop_up_goal": objects.pop_up_goal,
     "stake": objects.stake,
     "brick_edging": objects.brick_edging,
+    "brick_row": objects.brick_row,
+    "cane_wigwam": objects.cane_wigwam,
+    "leaning_poles": objects.leaning_poles,
+    "mushroom": objects.mushroom,
     # surroundings
     "telegraph_pole": objects.telegraph_pole,
     "sign_board": objects.sign_board,

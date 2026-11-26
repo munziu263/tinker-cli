@@ -26,15 +26,18 @@ once its footage has been worked into the model, and moved to the log at the bot
   the model (about half a metre). Walking it brings them to 0.1 to 0.2 m.
 - [ ] **2. Round the outbuilding and the shed.** Every side of both that can be reached,
   corners and ground line in shot, including the passage between the house and the shed
-  and whatever is behind them. *Why:* settles how big the outbuilding really is (the
-  footage and the block plan disagree) and fills the blank behind both.
+  and whatever is behind them. *Why:* the outbuilding's front is measured from the garden
+  and its east wall and depth from the attic window (about 6.0 x 7.0 m), but its west and
+  north sides have never been seen, and neither has the ground behind it.
 - [ ] **3. Front garden and the front of the house.** A loop with the camera on the
   house, then the same loop looking outwards. *Why:* nothing north of the house has been
   filmed; the front elevation is from the drawings alone.
 - [ ] **4. Drive, entrance and south-east corner.** From the road entrance in along the
-  drive, then along the inside of the south wall as far as the bench.
+  drive, then along the inside of the south wall as far as the bench. So far the drive has
+  only been seen across the lawn (gravel, a parked car, shrubs in front).
 - [ ] **5. Roof and chimneys.** Still photos: each roof slope and chimney, zoomed in, from
-  the far corners of the garden and from the road.
+  the far corners of the garden and from the road. The east end is now well covered
+  (the clips from the east lawn); the north slope, the west gable and its stack are not.
 
 ### Measurements
 
@@ -52,13 +55,13 @@ once its footage has been worked into the model, and moved to the log at the bot
   corner, floor to ceiling. Then walk out through the open door with the camera running,
   so inside and outside join up.
 - [ ] **8. Inside the shed.** The same.
-- [ ] **9. Inside the house: the rooms not yet filmed.** The layout of both floors is in
-  the model from the floor plans, and a first set of clips has given finishes and fittings
-  for about half the rooms. Each room's card in the viewer (open the house with **Ground
-  floor** or **First floor**) says whether it has been filmed. For the rest: one clip per
-  room, 20 to 30 seconds, standing in a corner and turning slowly, lights on and curtains
-  open. *Lowest priority:* the plans already fix every size; footage only adds what the
-  rooms look like.
+- [ ] **9. Inside the house: the rooms not yet filmed.** All three storeys are in the
+  model from the floor plans, and clips have given finishes and fittings for the attic and
+  about half the rooms below it. Each room's card in the viewer (open the house with
+  **Attic**, **First floor** or **Ground floor**) says whether it has been filmed. For the
+  rest: one clip per room, 20 to 30 seconds, standing in a corner and turning slowly,
+  lights on and curtains open. *Lowest priority:* the plans already fix every size;
+  footage only adds what the rooms look like.
 
 ## Done
 
@@ -69,3 +72,5 @@ once its footage has been worked into the model, and moved to the log at the bot
 | 2026-11-26 | Walk round the patio | Back of the house, patio, a second viewpoint on the west side |
 | 2026-11-26 | Measured building survey and block plan | Scale, levels, north, house, shed, apple tree, drains, plot boundary |
 | 2026-11-26 | Fourteen short clips and a photo inside the house | Both floors built from the floor plans; finishes, beams and fittings for the rooms filmed |
+| 2026-11-26 | Six clips in the attic | Attic storey built from the attic plan and section. One clip looks out of the gable window: it fixed the outbuilding's east wall and depth |
+| 2026-11-26 | Three upright clips from the east lawn | Joined to the survey (all 247 frames). East side of the house checked and detailed; kitchen garden, hedge, brick edging and a dozen objects placed; the stump and the compost bin corrected by more than a metre |

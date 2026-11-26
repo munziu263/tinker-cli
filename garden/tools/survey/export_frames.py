@@ -16,11 +16,14 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from plan import Survey  # noqa: E402
 
-# clip prefix -> (title shown in the viewer, how many stills, how to spread them)
+# clip prefix -> (title shown in the viewer, how many stills, how to spread them[, last frame number to use])
 CLIPS = {
     "f": ("Pan from the lawn", 44, "yaw"),
     "g": ("Walk east across the lawn", 28, "time"),
     "h": ("Walk round the patio", 28, "time"),
+    "i": ("Along the road hedge", 22, "time"),
+    "j": ("East side of the house", 8, "time"),
+    "k": ("Turn by the stump", 22, "time", 284),          # stops before someone walks into shot
 }
 
 
@@ -46,7 +49,8 @@ def to_three(v):
 
 
 def sharp(sv, i):
-    im = np.asarray(sv.image(i).convert("L").resize((480, 360)), np.float32)
+    im = sv.image(i).convert("L")
+    im = np.asarray(im.resize((480, 360) if im.width >= im.height else (360, 480)), np.float32)
     lap = im[1:-1, 1:-1] * 4 - im[:-2, 1:-1] - im[2:, 1:-1] - im[1:-1, :-2] - im[1:-1, 2:]
     return float(lap.var())
 
@@ -74,8 +78,10 @@ def main():
     for f in os.listdir(out_dir):
         os.remove(os.path.join(out_dir, f))
     frames, clips = [], []
-    for prefix, (title, count, how) in CLIPS.items():
+    for prefix, (title, count, how, *last) in CLIPS.items():
         ids = sv.clip(prefix)
+        if last:
+            ids = [i for i in ids if int(sv.names[i][2:6]) <= last[0]]
         if not ids:
             continue
         picked = choose(sv, ids, count, how)
@@ -84,14 +90,18 @@ def main():
             R = sv.R[i] @ sv.T.T                  # plan frame -> camera
             right, down, fwd = R[0], R[1], R[2]
             M = np.stack([to_three(right), to_three(-down), to_three(-fwd)], axis=1)
-            name = f"{len(frames):02d}.jpg"
-            sv.image(i).resize((640, 480), Image.LANCZOS).save(os.path.join(out_dir, name), quality=72, optimize=True)
+            name = f"{len(frames):02d}.jpg" if len(frames) < 100 else f"{len(frames)}.jpg"
+            f_px, cx, cy = (float(v) for v in sv.intr[i][:3])
+            w_px, h_px = 2 * cx, 2 * cy                           # this frame's own shape: some clips are filmed upright
+            size = (640, 480) if w_px >= h_px else (480, 640)
+            sv.image(i).resize(size, Image.LANCZOS).save(os.path.join(out_dir, name), quality=72, optimize=True)
             num = int(sv.names[i][2:6])
             frames.append({
                 "file": f"frames/{name}", "clip": len(clips) - 1, "src": num, "t": round(num / 30.0, 2),
                 "pos": [round(float(v), 4) for v in to_three(sv.centre(i))],
                 "quat": [round(v, 6) for v in mat_to_quat(M)],
-                "vfov": round(float(np.degrees(2 * np.arctan((sv.H / 2) / sv.intr[i][0]))), 3),
+                "vfov": round(float(np.degrees(2 * np.arctan((h_px / 2) / f_px))), 3),
+                "aspect": round(w_px / h_px, 4),
             })
     meta = {"aspect": sv.W / sv.H, "vfov": frames[0]["vfov"], "clips": clips, "frames": frames}
     with open(os.path.join(viewer_dir, "frames.json"), "w") as fh:

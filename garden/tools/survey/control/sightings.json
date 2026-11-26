@@ -9,5 +9,11 @@
   "picnic table top, north end": [[100, 1762, 655], ["h_0040.jpg", 992, 461]],
   "hardboard sheet, foot (west side)": [[100, 1790, 690], ["h_0040.jpg", 1013, 497]],
   "green pot at the patio corner, rim": [["h_0198.jpg", 1635, 1185], ["h_0231.jpg", 1345, 1290], ["g_0034.jpg", 745, 545]],
-  "green pot at the patio corner, foot": [["h_0198.jpg", 1650, 1340], ["h_0231.jpg", 1350, 1410], ["g_0034.jpg", 745, 600]]
+  "green pot at the patio corner, foot": [["h_0198.jpg", 1650, 1340], ["h_0231.jpg", 1350, 1410], ["g_0034.jpg", 745, 600]],
+
+  "_later_clips": "i_, j_ and k_ are three upright clips (1440 x 1920) filmed from the east lawn on another day.",
+  "glass ball on the stump": [["j_0102.jpg", 682, 827], ["k_0278.jpg", 658, 1535]],
+  "compost bin, centre of the lid": [["i_0004.jpg", 1148, 200], ["i_0262.jpg", 861, 1073]],
+  "lantern on its post, head": [["k_0162.jpg", 186, 714], ["k_0038.jpg", 142, 883]],
+  "pop-up goal, top of the arch": [["i_0047.jpg", 944, 529], ["i_0207.jpg", 483, 699]]
 }

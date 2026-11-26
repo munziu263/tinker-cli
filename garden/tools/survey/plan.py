@@ -192,23 +192,28 @@ class Survey:
     def image(self, i):
         return Image.open(self.image_path(i)).convert("RGB")
 
+    def frame_size(self, i):
+        """Width and height of one frame: clips filmed upright differ from the rest."""
+        return int(round(2 * self.intr[i][1])), int(round(2 * self.intr[i][2]))
+
     def gridded(self, i, step=100, scale=1.0, box=None):
         """Frame with a labelled pixel grid, for reading off coordinates by eye."""
         im = self.image(i)
+        W, H = im.size
         dr = ImageDraw.Draw(im)
-        for x in range(0, self.W, step):
-            dr.line([(x, 0), (x, self.H)], fill=(255, 255, 0) if x % 500 == 0 else (255, 255, 255), width=1)
+        for x in range(0, W, step):
+            dr.line([(x, 0), (x, H)], fill=(255, 255, 0) if x % 500 == 0 else (255, 255, 255), width=1)
             dr.text((x + 3, 3), str(x), fill=(255, 255, 0))
-            dr.text((x + 3, self.H // 2 + 3), str(x), fill=(255, 255, 0))
-        for y in range(0, self.H, step):
-            dr.line([(0, y), (self.W, y)], fill=(255, 255, 0) if y % 500 == 0 else (255, 255, 255), width=1)
+            dr.text((x + 3, H // 2 + 3), str(x), fill=(255, 255, 0))
+        for y in range(0, H, step):
+            dr.line([(0, y), (W, y)], fill=(255, 255, 0) if y % 500 == 0 else (255, 255, 255), width=1)
             dr.text((3, y + 3), str(y), fill=(255, 255, 0))
-            dr.text((self.W // 2 + 3, y + 3), str(y), fill=(255, 255, 0))
+            dr.text((W // 2 + 3, y + 3), str(y), fill=(255, 255, 0))
         # horizon line of this frame
-        us = np.linspace(0, self.W, 50)
+        us = np.linspace(0, W, 50)
         hv = []
         for u in us:
-            lo, hi = 0.0, float(self.H)
+            lo, hi = 0.0, float(H)
             for _ in range(30):
                 mid = (lo + hi) / 2
                 if self.ray(i, u, mid)[2] > 0:
@@ -238,10 +243,11 @@ class Survey:
         wsum = np.zeros(nx * ny, np.float32)
         for i in (frames if frames is not None else range(0, len(self.names), every)):
             c = self.centre(i)
+            W, H = self.frame_size(i)
             dist = np.hypot(G[:, 0] - c[0], G[:, 1] - c[1])
             u, v, zc = self.project(i, G)
             dep = np.degrees(np.arctan2(c[2] - z, np.maximum(dist, 1e-6)))
-            ok = (zc > 0.1) & (u >= 1) & (u < self.W - 2) & (v >= 1) & (v < self.H - 2) \
+            ok = (zc > 0.1) & (u >= 1) & (u < W - 2) & (v >= 1) & (v < H - 2) \
                 & (dist < max_range) & (dep > min_depress_deg)
             if not ok.any():
                 continue
@@ -251,7 +257,7 @@ class Survey:
             fu, fv = (uu - iu)[:, None], (vv - iv)[:, None]
             s = (img[iv, iu] * (1 - fu) * (1 - fv) + img[iv, iu + 1] * fu * (1 - fv)
                  + img[iv + 1, iu] * (1 - fu) * fv + img[iv + 1, iu + 1] * fu * fv)
-            wgt = (1 - ((uu - self.cx) / (self.W / 2)) ** 2) * (1 - ((vv - self.cy) / (self.H / 2)) ** 2)
+            wgt = (1 - ((uu - W / 2) / (W / 2)) ** 2) * (1 - ((vv - H / 2) / (H / 2)) ** 2)
             wgt = np.clip(wgt, 0.02, 1) ** 2
             if near_power:      # with several viewpoints, trust the camera that is closest to the spot
                 wgt = wgt / np.maximum(dist[ok], 0.5) ** near_power

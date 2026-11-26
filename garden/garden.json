@@ -6,8 +6,8 @@
   "grid": "Site grid. Origin: the outer south-east corner of the rear outshot at ground level, by the back door. +X runs south, away from the back of the house; +Y runs east, towards the road. z = 0 is level 20.00 m on the measured survey.",
   "north": [-0.943, -0.334],
   "north_note": "Grid north, as a direction in (X, Y). The back of the house faces 20 degrees west of south.",
-  "source": "Three phone clips (a pan from the lawn and two short walks) reconstructed with COLMAP: 472 frames, 174,000 points. Vertical from brick coursing. Scale, position and height datum from eight control points read off the measured building survey (1:50 plans, 1:100 elevations). Plot boundary and north from the 1:500 block plan.",
-  "accuracy": "House and shed: a few centimetres (measured survey). Patio and east garden, filmed on foot: about 0.1 to 0.2 m. South and west garden, filmed from one spot: checked against a second viewpoint and good to about half a metre along the line of sight, better across it. Outbuilding: front wall within 0.3 m, the rest assumed. Drive, front garden and everything behind the shed: not surveyed.",
+  "source": "Six phone clips (a pan from the lawn and five short walks) reconstructed with COLMAP: 719 frames, 310,000 points. Vertical from brick coursing. Scale, position and height datum from eight control points read off the measured building survey (1:50 plans, 1:100 elevations). Plot boundary and north from the 1:500 block plan. One frame through the attic window, oriented by the window frame, for the far side of the outbuilding.",
+  "accuracy": "House and shed: a few centimetres (measured survey). Patio and east garden, filmed on foot: about 0.1 to 0.2 m. South and west garden, filmed from one spot: checked against a second viewpoint and good to about half a metre along the line of sight, better across it. Outbuilding: front wall within 0.3 m, east wall and depth within 0.4 m, west and north walls inferred. Drive, front garden and the ground behind the outbuilding: not surveyed.",
   "calibration": {
    "control_points": 8,
    "rms_m": 0.058,
@@ -208,12 +208,13 @@
     "rough": 0.4
    },
    {
-    "kind": "soil",
-    "shape": "rect",
-    "box": [-11.5, 2.9, -6.4, 8.4],
-    "soft": 0.4,
+    "kind": "rough",
+    "shape": "ellipse",
+    "c": [-4.9, 5.1],
+    "r": [0.75, 1.9],
+    "soft": 0.5,
     "rough": 0.8,
-    "strength": 0.9
+    "strength": 0.85
    },
    {
     "kind": "soil",
@@ -228,13 +229,15 @@
     "kind": "litter",
     "shape": "band",
     "path": [
-     [-17.0, 9.0],
-     [-9.0, 9.6],
-     [-2.0, 9.8],
-     [9.0, 9.4]
+     [-17.0, 8.4],
+     [-11.0, 8.1],
+     [-8.0, 8.5],
+     [-4.5, 8.7],
+     [0.0, 8.5],
+     [10.0, 8.3]
     ],
-    "w": 0.9,
-    "soft": 0.7,
+    "w": 0.5,
+    "soft": 0.5,
     "rough": 0.8,
     "strength": 0.7
    },
@@ -311,6 +314,40 @@
     ],
     "soft": 0.4,
     "rough": 0.5
+   },
+   {
+    "kind": "soil",
+    "shape": "poly",
+    "soft": 0.3,
+    "rough": 0.8,
+    "strength": 0.9,
+    "pts": [
+     [-11.5, 4.6],
+     [-11.5, 6.75],
+     [-10.9, 6.95],
+     [-10.3, 7.3],
+     [-9.4, 7.4],
+     [-8.6, 7.5],
+     [-8.0, 7.7],
+     [-7.5, 8.1],
+     [-7.2, 7.4],
+     [-7.2, 4.6]
+    ]
+   },
+   {
+    "kind": "soil",
+    "shape": "poly",
+    "soft": 0.3,
+    "rough": 0.8,
+    "strength": 0.9,
+    "pts": [
+     [-8.3, 2.6],
+     [-5.5, 2.6],
+     [-5.5, 5.3],
+     [-7.2, 5.3],
+     [-7.2, 4.6],
+     [-8.3, 4.6]
+    ]
    }
   ]
  },
@@ -450,18 +487,22 @@
    "type": "hedge",
    "params": {
     "path": [
-     [-18.0, 9.6],
-     [-16.6, 10.0],
-     [-9.0, 10.6],
-     [-2.0, 10.8],
-     [4.0, 10.7],
-     [9.5, 10.4]
+     [-18.0, 9.25],
+     [-14.0, 9.35],
+     [-8.0, 9.75],
+     [-6.0, 9.9],
+     [-4.0, 9.85],
+     [-2.0, 9.65],
+     [0.0, 9.55],
+     [4.0, 9.45],
+     [8.0, 9.45],
+     [12.0, 9.35]
     ],
-    "height": 1.9,
-    "width": 1.8
+    "height": 1.8,
+    "width": 1.5
    },
-   "confidence": "estimated",
-   "notes": "Clipped beech about 1.9 m tall. Its garden face is measured from the walking clip, 9.0 to 9.6 m east of the grid origin; the road side is not seen, so the thickness is assumed. Taller trees stand in it towards the north end."
+   "confidence": "measured",
+   "notes": "Clipped beech, 1.75 to 1.8 m tall. Its garden face is measured from a clip filmed walking along it: 9.0 m east of the grid origin beside the kitchen garden, 8.6 m further south. The road side is not seen, so its thickness (1.5 m) is assumed, and north of the kitchen garden its line is carried on by eye. A telegraph pole stands in it."
   },
   {
    "id": "gate_posts",
@@ -530,6 +571,7 @@
      {
       "box": [-7.33, -6.27, 1.32, 1.79],
       "top": 7.48,
+      "z0": 5.9,
       "pots": 2
      }
     ],
@@ -596,10 +638,28 @@
       "bars": [3, 2]
      },
      {
+      "face": "east",
+      "at": [0.14, 0.89],
+      "z": [3.28, 4.0],
+      "bars": [2, 2]
+     },
+     {
       "face": "outshot_east",
-      "at": [1.62, 4.25],
-      "z": [1.25, 1.95],
-      "lights": 3
+      "at": [1.63, 2.46],
+      "z": [1.21, 1.85],
+      "lights": 2
+     },
+     {
+      "face": "outshot_east",
+      "at": [2.63, 3.41],
+      "z": [1.21, 1.85],
+      "lights": 2
+     },
+     {
+      "face": "outshot_east",
+      "at": [3.5, 4.25],
+      "z": [1.21, 1.85],
+      "lights": 2
      },
      {
       "face": "outshot_west",
@@ -631,6 +691,80 @@
      "x": -2.41,
      "y_north": -0.26
     },
+    "gable_windows": [
+     {
+      "face": "west",
+      "x": [-6.97, -6.13],
+      "z": [4.92, 5.72]
+     }
+    ],
+    "frame": [
+     {
+      "a": [1.47, 1.97],
+      "b": [4.26, 1.97],
+      "w": 0.14
+     },
+     {
+      "a": [1.47, 1.17],
+      "b": [4.26, 1.17],
+      "w": 0.08
+     },
+     {
+      "a": [1.55, 1.17],
+      "b": [1.55, 1.97],
+      "w": 0.14
+     },
+     {
+      "a": [2.545, 1.17],
+      "b": [2.545, 1.97],
+      "w": 0.14
+     },
+     {
+      "a": [3.455, 1.17],
+      "b": [3.455, 1.97],
+      "w": 0.09
+     },
+     {
+      "a": [2.52, 0.05],
+      "b": [2.52, 1.17],
+      "w": 0.09
+     },
+     {
+      "a": [3.47, 0.05],
+      "b": [3.47, 1.17],
+      "w": 0.09
+     },
+     {
+      "a": [2.52, 0.93],
+      "b": [3.47, 0.93],
+      "w": 0.08
+     },
+     {
+      "a": [2.52, 0.5],
+      "b": [3.47, 0.5],
+      "w": 0.08
+     },
+     {
+      "a": [1.98, 2.44],
+      "b": [3.0, 2.44],
+      "w": 0.1
+     },
+     {
+      "a": [2.72, 3.02],
+      "b": [3.16, 2.03],
+      "w": 0.1
+     },
+     {
+      "a": [3.75, 2.03],
+      "b": [3.75, 3.9],
+      "w": 0.1
+     },
+     {
+      "a": [3.75, 2.97],
+      "b": [4.26, 2.97],
+      "w": 0.1
+     }
+    ],
     "rooflights": [
      {
       "y": [-1.556, -0.995],
@@ -640,7 +774,7 @@
     "posts": [-2.17]
    },
    "confidence": "measured",
-   "notes": "From the measured building survey (1:50 plans, 1:100 elevations and section): main range 8.52 x 5.66 m, rear outshot 4.38 x 4.38 m under a catslide roof that comes down to 0.9 m, ridge 7.62 m, half-hipped at both ends, three chimneys, lean-to WC on the west side. Wall positions are good to a few centimetres. The north (front) and west elevations are from the drawings only; window bars and joinery are indicative. The first floor has projecting oriel windows on the front and at the north end of the east wall, drawn here as flat openings."
+   "notes": "From the measured building survey (1:50 plans, 1:100 elevations and section): main range 8.52 x 5.66 m, rear outshot 4.38 x 4.38 m under a catslide roof that comes down to 0.9 m, ridge 7.62 m, half-hipped at both ends, three chimneys, lean-to WC on the west side. Wall positions are good to a few centimetres. The east end of the rear wing is timber-framed with brick infill, and its black frame is drawn from the east elevation and the footage. The north (front) and west elevations are from the drawings only; window bars and joinery are indicative. The first floor has projecting oriel windows on the front and at the north end of the east wall, drawn here as flat openings."
   },
   {
    "id": "shed",
@@ -668,11 +802,11 @@
    "at": [-2.71, -18.18],
    "rot": 88.0,
    "params": {
-    "width": 6.7,
-    "depth": 5.0,
+    "width": 6.0,
+    "depth": 7.0,
     "front_h": 2.02,
     "back_h": 2.02,
-    "rise": 0.25,
+    "rise": 0.0,
     "window": {
      "x": 1.29,
      "w": 1.84,
@@ -684,10 +818,19 @@
      "w": 0.83,
      "z": 0.03,
      "h": 1.9
-    }
+    },
+    "side_windows": [
+     {
+      "y": 4.46,
+      "w": 1.31,
+      "z": 0.73,
+      "h": 1.17
+     }
+    ],
+    "roof": "roof_sheet_green"
    },
    "confidence": "estimated",
-   "notes": "Roughcast walls, black fascia and sheet roof. The front wall, its west corner, the window and the door are triangulated from two clips (rays meet within 5 cm): the front is 13 m from the middle of the lawn and at least 5.9 m long. The east end is hidden behind the shed, and nothing behind the front wall has been filmed: the 6.7 x 5.0 m footprint is an assumption. The block plan draws a 5.0 x 6.7 m building here, the other way round and 2.4 m further east, so one of the two is wrong. Walking round it will settle it."
+   "notes": "Roughcast walls, black fascia, green corrugated sheet roof: about 6.0 x 7.0 m. The front wall, its west corner, the window and the door are triangulated from two clips in the garden (rays meet within 5 cm). The east wall, with a second window, and the north end were then fixed from a clip filmed through the attic window, whose direction comes from the window frame itself: it puts the east wall 1.3 m beyond the shed and the building 7 m deep, good to about 0.4 m. The west and north walls have not been seen: they are drawn square to the others. The roof looks nearly flat and its fall is not established. The block plan draws a 5.0 x 6.7 m building: the same depth, but a metre narrower and 1 to 2 m further east."
   },
   {
    "id": "patio",
@@ -914,23 +1057,76 @@
   },
   {
    "id": "shrub_lawn",
-   "label": "Shrub in the east lawn",
+   "label": "Shrub clump in the east lawn",
    "layer": "planting",
-   "type": "multistem_shrub",
-   "at": [4.45, 3.25],
+   "type": "shrub",
+   "at": [4.5, 3.4],
    "rot": 0.0,
    "params": {
-    "height": 1.8,
-    "stems": 9,
-    "spread": 34,
-    "stool": 0.35,
+    "rx": 0.95,
+    "ry": 0.85,
+    "h": 1.75,
+    "leaf": "leaf_green",
+    "body": "foliage_green",
     "seed": 49,
-    "twigs": "twigs_hazel",
-    "stem_r": [0.012, 0.025],
-    "twig_size": 0.7
+    "density": 26,
+    "card": 0.26,
+    "twiggy": "twigs_hazel"
    },
    "confidence": "measured",
-   "notes": "Bushy deciduous shrub in a ring of bare soil, 1.9 m across and 1.75 m tall. Measured from the walking clip."
+   "notes": "An evergreen with glossy leaves and bare deciduous stems growing up through it, in a ring of bare soil: about 2 m across and 1.75 m tall. Seen from both sides."
+  },
+  {
+   "id": "shrub_bare_lawn",
+   "label": "Young bare-stemmed shrub",
+   "layer": "planting",
+   "type": "bare_stems",
+   "at": [1.55, 6.85],
+   "rot": 0.0,
+   "params": {
+    "height": 1.3,
+    "n": 7,
+    "radius": 0.18,
+    "twig_size": 0.5,
+    "seed": 77
+   },
+   "confidence": "estimated",
+   "notes": "A whippy young shrub or fruit bush in the lawn near the goal. A second one stands close by."
+  },
+  {
+   "id": "lantern_post",
+   "label": "Lantern on a post",
+   "layer": "objects",
+   "type": "fittings",
+   "at": [3.27, 3.85],
+   "rot": 0.0,
+   "params": {
+    "items": [
+     {
+      "box": [-0.02, 0.02, -0.02, 0.02],
+      "z": [0.06, 1.28],
+      "mat": "paint_black"
+     },
+     {
+      "at": [0, 0],
+      "r": 0.045,
+      "z": [0.72, 1.08],
+      "mat": "paint_white"
+     },
+     {
+      "box": [-0.075, 0.075, -0.075, 0.075],
+      "z": [1.28, 1.5],
+      "mat": "cast_iron"
+     },
+     {
+      "box": [-0.1, 0.1, -0.1, 0.1],
+      "z": [1.5, 1.54],
+      "mat": "paint_black"
+     }
+    ]
+   },
+   "confidence": "measured",
+   "notes": "A black lantern on a slim post beside the shrub clump, its head 1.4 m above the grass, with a pale tube on the post below it: a garden light, or a bird feeder with a baffle. Triangulated from two frames (rays meet within 2 cm)."
   },
   {
    "id": "shrub_grey",
@@ -1043,7 +1239,7 @@
     "seed": 31
    },
    "confidence": "estimated",
-   "notes": "Dark evergreens 8 to 10 m tall, seen over the vegetable plots. Position within a couple of metres."
+   "notes": "Dark evergreens 8 to 10 m tall, seen over the vegetable plot. Position within a couple of metres."
   },
   {
    "id": "conifer_ne2",
@@ -1312,87 +1508,280 @@
    "notes": "The bed beside the viewpoint. The pan started and ended here so only its edges were filmed; the far side of it is assumed."
   },
   {
-   "id": "veg_a",
+   "id": "veg_plot",
    "label": "Vegetable plot",
    "layer": "planting",
-   "type": "raised_bed",
-   "at": [-10.2, 5.6],
+   "type": "border",
+   "at": [0.0, 0.0],
    "rot": 0.0,
    "params": {
-    "size": [2.1, 5.0],
-    "h": 0.08,
-    "planted": null,
-    "seed": 5
+    "plants": [],
+    "outline": [
+     [-11.5, 4.6],
+     [-11.5, 6.75],
+     [-10.9, 6.95],
+     [-10.3, 7.3],
+     [-9.4, 7.4],
+     [-8.6, 7.5],
+     [-8.0, 7.7],
+     [-7.5, 8.1],
+     [-7.2, 7.4],
+     [-7.2, 4.6]
+    ]
    },
    "confidence": "estimated",
-   "notes": "Bare dug plots with canes, seen across the lawn from 12 m. Outline within about half a metre."
+   "notes": "Dug over in ridges running east to west, with a few seedlings. The brick edging along its hedge side is measured. Its north and west edges were out of frame: they are drawn where earlier footage, from across the lawn, put them."
   },
   {
-   "id": "veg_b",
-   "label": "Vegetable plot",
+   "id": "veg_bed_house",
+   "label": "Bed by the house",
    "layer": "planting",
-   "type": "raised_bed",
-   "at": [-7.7, 5.6],
+   "type": "border",
+   "at": [0.0, 0.0],
    "rot": 0.0,
    "params": {
-    "size": [2.1, 5.0],
-    "h": 0.08,
-    "planted": null,
-    "seed": 6
+    "plants": [],
+    "outline": [
+     [-8.3, 2.6],
+     [-5.5, 2.6],
+     [-5.5, 5.3],
+     [-7.2, 5.3],
+     [-7.2, 4.6],
+     [-8.3, 4.6]
+    ]
    },
-   "confidence": "estimated"
+   "confidence": "estimated",
+   "notes": "Bare soil with seedlings, pots and seed trays, starting 0.8 m out from the east wall of the house. Its south and east edges are measured; its north end was out of frame."
+  },
+  {
+   "id": "edging_hedge",
+   "label": "Brick edging by the hedge",
+   "layer": "ground",
+   "type": "brick_row",
+   "params": {
+    "path": [
+     [-11.3, 6.8],
+     [-10.9, 7.0],
+     [-10.3, 7.4],
+     [-9.4, 7.46],
+     [-8.6, 7.55],
+     [-8.0, 7.8],
+     [-7.6, 8.3],
+     [-6.9, 8.54],
+     [-6.15, 8.6],
+     [-4.85, 8.56]
+    ]
+   },
+   "confidence": "measured",
+   "notes": "Old red bricks laid end to end between the vegetable plot and the strip of ivy and leaf litter under the hedge. Read off the footage with the survey grid drawn on the ground: within about 0.15 m. It probably carries on north of where the clip starts."
+  },
+  {
+   "id": "edging_lawn",
+   "label": "Brick edging by the lawn",
+   "layer": "ground",
+   "type": "brick_row",
+   "params": {
+    "path": [
+     [-3.3, 4.0],
+     [-3.3, 6.6]
+    ],
+    "seed": 22
+   },
+   "confidence": "estimated",
+   "notes": "A straight line of bricks where the kitchen garden meets the lawn, running from beside the stump towards the hedge."
+  },
+  {
+   "id": "boards",
+   "label": "Boards on the ground",
+   "layer": "objects",
+   "type": "beams",
+   "at": [0.0, 0.0],
+   "rot": 0.0,
+   "params": {
+    "items": [
+     {
+      "a": [-4.05, 6.2],
+      "b": [-4.2, 8.2],
+      "w": 0.22,
+      "z": [0.08, 0.12],
+      "mat": "wood_grey"
+     },
+     {
+      "a": [-4.32, 6.5],
+      "b": [-4.44, 8.1],
+      "w": 0.2,
+      "z": [0.08, 0.12],
+      "mat": "wood_grey"
+     }
+    ]
+   },
+   "confidence": "estimated",
+   "notes": "Two long boards lying in the grass between the compost bin and the hedge."
+  },
+  {
+   "id": "wigwam",
+   "label": "Cane wigwam",
+   "layer": "objects",
+   "type": "cane_wigwam",
+   "at": [-6.7, 8.45],
+   "rot": 0.0,
+   "params": {
+    "n": 7,
+    "r": 0.5,
+    "h": 2.2
+   },
+   "confidence": "estimated",
+   "notes": "Bean canes tied in a wigwam, standing over the brick edging: about 2.2 m tall. Position within about 0.4 m."
   },
   {
    "id": "cane_1",
-   "label": "Canes",
+   "label": "Cane",
    "layer": "objects",
    "type": "stake",
-   "at": [-9.6, 4.0],
+   "at": [-8.5, 7.6],
    "rot": 0.0,
    "params": {
-    "h": 1.7,
+    "h": 1.0,
     "lean": [0.03, -0.02]
    },
    "confidence": "estimated"
   },
   {
    "id": "cane_2",
-   "label": "Canes",
+   "label": "Cane",
    "layer": "objects",
    "type": "stake",
-   "at": [-9.9, 6.6],
+   "at": [-8.25, 7.78],
    "rot": 70.0,
    "params": {
-    "h": 1.7,
+    "h": 1.0,
     "lean": [0.03, -0.02]
    },
    "confidence": "estimated"
   },
   {
-   "id": "cane_3",
-   "label": "Canes",
+   "id": "bean_poles_1",
+   "label": "Bean poles against the house",
    "layer": "objects",
-   "type": "stake",
-   "at": [-7.4, 5.0],
-   "rot": 140.0,
+   "type": "leaning_poles",
+   "at": [-4.9, 1.79],
+   "rot": 180.0,
    "params": {
-    "h": 1.7,
-    "lean": [0.03, -0.02]
+    "n": 5,
+    "h": 2.0,
+    "out": 0.5,
+    "spread": 0.4,
+    "seed": 41
+   },
+   "confidence": "measured",
+   "notes": "A bundle of hazel poles stood against the east wall, reaching 2 m up it."
+  },
+  {
+   "id": "bean_poles_2",
+   "label": "Bean poles against the house",
+   "layer": "objects",
+   "type": "leaning_poles",
+   "at": [-5.25, 1.79],
+   "rot": 180.0,
+   "params": {
+    "n": 5,
+    "h": 2.0,
+    "out": 0.5,
+    "spread": 0.4,
+    "seed": 42
+   },
+   "confidence": "measured",
+   "notes": "A bundle of hazel poles stood against the east wall, reaching 2 m up it."
+  },
+  {
+   "id": "bean_poles_3",
+   "label": "Bean poles against the house",
+   "layer": "objects",
+   "type": "leaning_poles",
+   "at": [-5.75, 1.79],
+   "rot": 180.0,
+   "params": {
+    "n": 5,
+    "h": 2.0,
+    "out": 0.5,
+    "spread": 0.4,
+    "seed": 43
+   },
+   "confidence": "measured",
+   "notes": "A bundle of hazel poles stood against the east wall, reaching 2 m up it."
+  },
+  {
+   "id": "pot_black_east",
+   "label": "Black pot",
+   "layer": "objects",
+   "type": "pot",
+   "at": [-5.9, 2.9],
+   "rot": 0.0,
+   "params": {
+    "r": 0.2,
+    "h": 0.3,
+    "style": "bucket",
+    "mat": "plastic_black"
    },
    "confidence": "estimated"
   },
   {
-   "id": "cane_4",
-   "label": "Canes",
+   "id": "tub_white",
+   "label": "White tub",
    "layer": "objects",
-   "type": "stake",
-   "at": [-7.9, 7.4],
-   "rot": 210.0,
+   "type": "pot",
+   "at": [-5.95, 2.05],
+   "rot": 0.0,
    "params": {
-    "h": 1.7,
-    "lean": [0.03, -0.02]
+    "r": 0.15,
+    "h": 0.22,
+    "style": "bucket",
+    "mat": "paint_white",
+    "soil": false
    },
    "confidence": "estimated"
+  },
+  {
+   "id": "pot_terracotta_e1",
+   "label": "Terracotta pot",
+   "layer": "objects",
+   "type": "pot",
+   "at": [-5.7, 2.15],
+   "rot": 0.0,
+   "params": {
+    "r": 0.11,
+    "h": 0.18,
+    "seed": 11
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "pot_terracotta_e2",
+   "label": "Terracotta pot",
+   "layer": "objects",
+   "type": "pot",
+   "at": [-5.75, 3.9],
+   "rot": 0.0,
+   "params": {
+    "r": 0.12,
+    "h": 0.2,
+    "seed": 12
+   },
+   "confidence": "estimated"
+  },
+  {
+   "id": "mushroom",
+   "label": "Wooden mushroom",
+   "layer": "objects",
+   "type": "mushroom",
+   "at": [-9.95, 8.55],
+   "rot": 0.0,
+   "params": {
+    "h": 0.5,
+    "cap_r": 0.2
+   },
+   "confidence": "estimated",
+   "notes": "A carved garden ornament in the strip under the hedge."
   },
   {
    "id": "picnic_table",
@@ -1845,45 +2234,78 @@
    "label": "Big tree stump",
    "layer": "objects",
    "type": "stump",
-   "at": [-3.9, 3.85],
+   "at": [-2.55, 3.45],
    "rot": 0.0,
    "params": {
-    "r": 0.8,
-    "h": 0.55,
-    "flare": 1.8,
+    "r": 0.7,
+    "h": 0.58,
+    "flare": 1.5,
     "seed": 11,
     "roots": 7
    },
    "confidence": "measured",
-   "notes": "A very large stump: 1.6 m across the cut, root flares spreading to about 3 m, 0.55 m high. Measured from the walking clip."
+   "notes": "A very large stump: about 1.4 m across the cut and 0.6 m high, with root flares spreading to a little over 2 m. The earlier model, which had only seen it from across the garden, had it 1.7 m too far north. It is now fixed from close up: the glass ball that sits on it is triangulated to under a centimetre."
+  },
+  {
+   "id": "stump_trough",
+   "label": "Stone trough on the stump",
+   "layer": "objects",
+   "type": "pot",
+   "at": [-2.29, 3.31, 0.58],
+   "rot": 0.0,
+   "params": {
+    "r": 0.2,
+    "h": 0.13,
+    "style": "bowl",
+    "mat": "concrete",
+    "soil": false
+   },
+   "confidence": "measured"
+  },
+  {
+   "id": "stump_ball",
+   "label": "Glass ball",
+   "layer": "objects",
+   "type": "ball",
+   "at": [-2.29, 3.31, 0.6],
+   "rot": 0.0,
+   "params": {
+    "r": 0.085,
+    "mat": "glaze_teal"
+   },
+   "confidence": "measured",
+   "notes": "A blue-green glass ball in the stone trough. Sighted from two frames 66 degrees apart: the rays pass within 7 mm of each other."
   },
   {
    "id": "compost_bin",
-   "label": "Blue compost bin",
+   "label": "Green compost bin",
    "layer": "objects",
    "type": "compost_bin",
-   "at": [-5.45, 6.1],
+   "at": [-4.42, 5.8],
    "rot": 0.0,
    "params": {
-    "r": 0.38,
-    "h": 0.9,
-    "mat": "plastic_teal"
+    "r": 0.3,
+    "h": 0.68,
+    "mat": "plastic_green"
    },
-   "confidence": "estimated"
+   "confidence": "measured",
+   "notes": "A small cone-shaped bin among long grass, its lid 0.76 m above datum. Triangulated from two frames (rays meet within a centimetre). The earlier model had it 1.1 m away."
   },
   {
-   "id": "tarp_blue",
-   "label": "Blue tarp",
+   "id": "toy_blue",
+   "label": "Blue ride-on toy",
    "layer": "objects",
    "type": "lump",
-   "at": [-2.0, 7.1],
-   "rot": 0.0,
+   "at": [-1.93, 7.03],
+   "rot": 10.0,
    "params": {
-    "size": [0.9, 0.7, 0.3],
+    "size": [0.75, 0.35, 0.4],
     "mat": "tarp_blue",
-    "seed": 9
+    "seed": 9,
+    "lumps": 0.1
    },
-   "confidence": "estimated"
+   "confidence": "measured",
+   "notes": "Lying on the lawn in the later clips, where the first clips showed something blue that was taken for a tarp. It will have moved since."
   },
   {
    "id": "tarp_blue_2",
@@ -1897,17 +2319,19 @@
     "mat": "tarp_blue",
     "seed": 10
    },
-   "confidence": "estimated"
+   "confidence": "assumed",
+   "notes": "Seen once from across the garden; the later clips do not look that way."
   },
   {
    "id": "goal_popup",
    "label": "Pop-up goal",
    "layer": "objects",
    "type": "pop_up_goal",
-   "at": [0.9, 8.6],
-   "rot": 200.0,
+   "at": [0.55, 8.25],
+   "rot": -26.0,
    "params": {},
-   "confidence": "measured"
+   "confidence": "measured",
+   "notes": "By the hedge, its mouth towards the lawn. The top of the arch is triangulated; which way it faces is judged from how narrow it looks from the north."
   },
   {
    "id": "ctx_house_west",
@@ -1955,20 +2379,22 @@
    "label": "Telegraph pole",
    "layer": "context",
    "type": "telegraph_pole",
-   "at": [-4.5, 12.1],
-   "rot": 0.0,
+   "at": [-4.0, 9.7],
+   "rot": 100.0,
    "params": {},
-   "confidence": "estimated"
+   "confidence": "estimated",
+   "notes": "Stands in the hedge line; a cable runs from it to the east gable of the house. Position within about a metre."
   },
   {
    "id": "ctx_sign",
    "label": "Road sign",
    "layer": "context",
    "type": "sign_board",
-   "at": [-2.0, 12.4],
+   "at": [-1.9, 11.7],
    "rot": 100.0,
    "params": {},
-   "confidence": "estimated"
+   "confidence": "estimated",
+   "notes": "On the verge behind the hedge. Position within about a metre."
   },
   {
    "id": "ctx_trees_south",
@@ -2164,7 +2590,7 @@
     "dash": [0.4, 0.3]
    },
    "confidence": "estimated",
-   "notes": "5.0 x 6.7 m on the map. The footage puts the front wall in the same east-west line but 2.4 m further west and at least 5.9 m long."
+   "notes": "5.0 x 6.7 m on the map. The footage agrees with its depth and its north end, but puts the building 1 to 2 m further west and makes it 6.0 m wide. Tree cover over the west end may be why the map draws it short."
   },
   {
    "id": "origin",
@@ -2557,22 +2983,22 @@
   },
   {
    "id": "gap_west",
-   "label": "Not yet surveyed: behind the shed and outbuilding",
+   "label": "Glimpsed only: the yard between house, shed and outbuilding",
    "layer": "gaps",
    "type": "ground_patch",
    "params": {
     "outline": [
-     [-10.3, -19.4],
-     [-8.1, -19.6],
-     [-8.1, -11.2],
-     [-5.7, -11.2],
-     [-5.7, -8.0],
-     [-10.3, -7.6]
+     [-10.3, -19.6],
+     [-9.85, -19.6],
+     [-9.85, -12.0],
+     [-5.5, -12.0],
+     [-5.5, -7.0],
+     [-10.3, -7.0]
     ],
     "mat": "hatch"
    },
    "confidence": "assumed",
-   "notes": "Nothing behind the shed or the outbuilding has been filmed."
+   "notes": "Seen once, steeply from the attic window: rough grass and ivy, bins against the house wall, a boarded fence on the shed side, a gravel path past the chimney. Nothing north or west of the outbuilding has been filmed."
   },
   {
    "id": "gap_drive",
@@ -2624,7 +3050,7 @@
     "disc": 0.45
    },
    "confidence": "assumed",
-   "notes": "Every side of both that you can reach, with the corners and the ground line in shot, including the passage between the house and the shed and whatever is behind them. This settles how big the outbuilding really is."
+   "notes": "Every side of both that you can reach, with the corners and the ground line in shot, including the passage between the house and the shed and whatever is behind them. The outbuilding now measures about 6.0 x 7.0 m from the garden and the attic window: this would confirm it and fill in what is behind."
   },
   {
    "id": "shot_3",

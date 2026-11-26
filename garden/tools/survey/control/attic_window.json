@@ -1,0 +1,18 @@
+{
+  "about": "A frame filmed through the window in the west gable of the attic, for window_view.py. It is the only view of the outbuilding's east wall and north end. The window's corners are from the attic plan and the west elevation; pixels are in the 1920 x 1440 frame.",
+  "camera": {"f": 1588.13, "cx": 960, "cy": 720, "k1": 0.0162},
+  "window": {
+    "wall_axis": [1, 0, 0],
+    "outward": [0, -1, 0],
+    "corners_px": [[112, 250], [1795, 93], [1650, 1215], [458, 1288]],
+    "corners_site": [[-6.13, -6.50, 5.71], [-6.97, -6.50, 5.71], [-6.97, -6.50, 4.96], [-6.13, -6.50, 4.96]]
+  },
+  "sightings": [
+    {"name": "outbuilding east window, south jamb", "top": [1127, 606], "bottom": [1130, 797], "height": 1.17},
+    {"name": "outbuilding east window, north jamb", "top": [1408, 593], "bottom": [1410, 790], "height": 1.17},
+    {"name": "outbuilding east window, head, south end", "pixel": [1127, 606], "z": 1.93},
+    {"name": "outbuilding east window, head, north end", "pixel": [1408, 593], "z": 1.93},
+    {"name": "outbuilding roof edge, east side (1)", "pixel": [1200, 537], "z": 2.15},
+    {"name": "outbuilding roof edge, east side (2)", "pixel": [1500, 508], "z": 2.15}
+  ]
+}

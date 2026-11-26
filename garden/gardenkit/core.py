@@ -105,6 +105,9 @@ MATERIAL_DEFS = {
     "aga_cream": dict(colour=(0.88, 0.84, 0.72), rough=0.35),
     "appliance_white": dict(colour=(0.90, 0.90, 0.90), rough=0.4),
     "worktop": dict(colour=(0.70, 0.57, 0.40), rough=0.6),
+    "limewash": dict(colour=(0.86, 0.84, 0.78), rough=0.95),
+    "rooflight_glass": dict(colour=(0.16, 0.20, 0.23), rough=0.08),
+    "roof_sheet_green": dict(colour=(0.33, 0.45, 0.42), rough=0.7),
 }
 
 

@@ -608,3 +608,59 @@ def toys(seed=3):
             c.cylinder(0.15, 0.04, "plastic_black", seg=12)
             m.merge(c, translate(x + dx, -0.02, 0.15) @ rot_x(90))
     return m
+
+
+def brick_row(path, mat="brick_red_old", seed=21, proud=0.045, gap=0.012):
+    """Bricks laid end to end, half sunk, along a path: the edge of a bed."""
+    m = Mesh()
+    rng = np.random.default_rng(seed)
+    P = np.asarray(path, float)
+    seg_len = np.linalg.norm(np.diff(P, axis=0), axis=1)
+    total, s = float(seg_len.sum()), 0.0
+    cum = np.r_[0.0, np.cumsum(seg_len)]
+    while s + 0.215 <= total + 0.05:
+        mid = min(s + 0.1075, total - 1e-6)
+        k = int(np.searchsorted(cum, mid, side="right") - 1)
+        k = min(k, len(seg_len) - 1)
+        t = (mid - cum[k]) / seg_len[k]
+        c = P[k] + (P[k + 1] - P[k]) * t
+        ang = math.degrees(math.atan2(P[k + 1][1] - P[k][1], P[k + 1][0] - P[k][0])) + rng.normal(0, 4.0)
+        M = translate(c[0] + rng.normal(0, 0.012), c[1] + rng.normal(0, 0.012), -0.065 + proud + rng.normal(0, 0.008)) @ rot_z(ang)
+        m.box((0.215, 0.1025, 0.065), mat, M=M)
+        s += 0.215 + gap + abs(rng.normal(0, 0.01))
+    return m
+
+
+def cane_wigwam(n=7, r=0.55, h=2.2, mat="twig", seed=31):
+    """Bean canes pushed in round a circle and tied together near the top."""
+    m = Mesh()
+    rng = np.random.default_rng(seed)
+    tie = np.array([0.0, 0.0, h * 0.88])
+    for i in range(n):
+        a = 2 * math.pi * i / n + rng.normal(0, 0.12)
+        foot = np.array([r * math.cos(a) * rng.uniform(0.85, 1.1), r * math.sin(a) * rng.uniform(0.85, 1.1), 0.0])
+        top = foot + (tie - foot) * (h / tie[2]) * rng.uniform(0.97, 1.08)      # carries on past the tie
+        m.tube([foot, top], [0.012, 0.007], mat, seg=5)
+    m.cylinder(0.03, 0.05, "straw", seg=8, M=translate(0, 0, tie[2] - 0.025))
+    return m
+
+
+def leaning_poles(n=5, h=2.0, out=0.5, spread=0.45, mat="twig", seed=41):
+    """A bundle of poles stood against a wall. The wall is the local X axis, facing -Y;
+    the feet stand `out` from it and the tops rest on it at height h."""
+    m = Mesh()
+    rng = np.random.default_rng(seed)
+    for i in range(n):
+        x0 = (i / max(1, n - 1) - 0.5) * spread + rng.normal(0, 0.03)
+        foot = np.array([x0, -out * rng.uniform(0.75, 1.15), 0.0])
+        top = np.array([x0 * 0.35 + rng.normal(0, 0.06), -0.02, h * rng.uniform(0.82, 1.0)])
+        m.tube([foot, top], [0.014, 0.008], mat, seg=5)
+    return m
+
+
+def mushroom(h=0.5, cap_r=0.2, mat="wood_grey"):
+    """Carved wooden mushroom, the garden ornament kind."""
+    m = Mesh()
+    m.lathe([(cap_r * 0.42, 0.0), (cap_r * 0.3, h * 0.55), (cap_r * 0.34, h * 0.6)], mat, seg=10)
+    m.lathe([(cap_r, h * 0.56), (cap_r * 0.96, h * 0.68), (cap_r * 0.7, h * 0.88), (cap_r * 0.3, h * 0.99), (0.01, h)], mat, seg=14)
+    return m
