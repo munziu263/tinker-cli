@@ -1,0 +1,680 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Garden Survey Model</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a full-bleed 3D stage dressed like a survey drawing — title block and scale bar
+     pinned bottom-left, tools as small drafting panels floating over the model. */
+  :root {
+    --paper: #e9ece5;
+    --ink: #1c2420;
+    --muted: #56615a;
+    --line: rgba(28, 36, 32, 0.18);
+    --panel: rgba(247, 248, 243, 0.94);
+    --panel-solid: #f7f8f3;
+    --accent: #0d6a55;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(13, 106, 85, 0.12);
+    --measured: #2c7a4c;
+    --estimated: #b4761c;
+    --assumed: #7a7f9a;
+    --shadow: 0 1px 2px rgba(20, 28, 24, 0.10), 0 6px 20px rgba(20, 28, 24, 0.10);
+    --font-ui: "Barlow", "Segoe UI", system-ui, sans-serif;
+    --font-label: "Barlow Semi Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+    --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #111513; --ink: #e8ede7; --muted: #9ba79f; --line: rgba(232, 237, 231, 0.18);
+      --panel: rgba(23, 28, 25, 0.93); --panel-solid: #171c19; --accent: #62d2b4; --accent-ink: #052019;
+      --accent-soft: rgba(98, 210, 180, 0.15); --measured: #6cc98f; --estimated: #e2ab55; --assumed: #a6abc6;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #111513; --ink: #e8ede7; --muted: #9ba79f; --line: rgba(232, 237, 231, 0.18);
+    --panel: rgba(23, 28, 25, 0.93); --panel-solid: #171c19; --accent: #62d2b4; --accent-ink: #052019;
+    --accent-soft: rgba(98, 210, 180, 0.15); --measured: #6cc98f; --estimated: #e2ab55; --assumed: #a6abc6;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+
+  html, body { height: 100%; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.4; overflow: hidden; }
+  #app { position: relative; height: 100%; overflow: hidden; background: var(--paper); }
+  #stage { position: absolute; inset: 0; }
+  #stage canvas { position: absolute; display: block; touch-action: none; outline: none; }
+  #photo { position: absolute; pointer-events: none; object-fit: fill; opacity: 0; }
+  button, input, summary { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow); backdrop-filter: blur(6px); }
+  .eyebrow { font-family: var(--font-label); font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+  .data { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+  /* top row: mode switch + tools */
+  #top { position: absolute; top: 0; left: 0; right: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); pointer-events: none; }
+  #top > * { pointer-events: auto; }
+  .seg { display: flex; padding: 3px; gap: 2px; }
+  .seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 3px; font-family: var(--font-label); font-weight: 600; font-size: 13px; letter-spacing: 0.03em; color: var(--muted); white-space: nowrap; }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  .spacer { flex: 1 1 0; min-width: 0; }
+  .tool { border: 1px solid var(--line); background: var(--panel); border-radius: 4px; padding: 8px 12px; box-shadow: var(--shadow); font-family: var(--font-label); font-weight: 600; font-size: 13px; letter-spacing: 0.03em; }
+  .tool[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+
+  details.panel { min-width: 0; }
+  details.panel > summary { list-style: none; cursor: pointer; padding: 8px 12px; font-family: var(--font-label); font-weight: 600; font-size: 13px; letter-spacing: 0.03em; display: flex; align-items: center; gap: 8px; }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  details.panel > summary::after { content: ""; width: 7px; height: 7px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); margin-left: auto; margin-top: -3px; transition: transform 0.15s; }
+  details.panel[open] > summary::after { transform: rotate(-135deg); margin-top: 3px; }
+  .panel-body { padding: 2px 12px 12px; display: grid; gap: 4px; width: 216px; max-width: calc(100vw - 32px); }
+  .check { display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
+  .check input { width: 15px; height: 15px; accent-color: var(--accent); margin: 0; }
+  .check .count { margin-left: auto; color: var(--muted); font-size: 11px; }
+  .rule { height: 1px; background: var(--line); margin: 6px 0; }
+  .legend { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  /* view presets */
+  #presets { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: calc(58px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 4px; }
+  #presets button { text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 3px; padding: 5px 10px; font-size: 12.5px; color: var(--muted); box-shadow: var(--shadow); }
+  #presets button:hover { color: var(--ink); border-color: var(--accent); }
+
+  /* title block, bottom-left, like the corner of a survey drawing */
+  #titleblock { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); padding: 10px 12px; display: grid; gap: 6px; max-width: min(340px, calc(100vw - 32px)); pointer-events: none; }
+  #titleblock h1 { margin: 0; font-family: var(--font-label); font-weight: 600; font-size: 19px; letter-spacing: 0.02em; line-height: 1.1; text-wrap: balance; }
+  #titleblock p { margin: 0; color: var(--muted); font-size: 12px; }
+  #scalebar { display: flex; align-items: flex-end; gap: 8px; }
+  #scalebar .bar { height: 7px; border: 1.5px solid var(--ink); border-top: 0; position: relative; min-width: 20px; }
+  #scalebar .bar::after { content: ""; position: absolute; left: 50%; bottom: 0; height: 5px; border-left: 1.5px solid var(--ink); }
+  #scalebar .data { font-size: 11px; line-height: 1; }
+
+  /* object card */
+  #card { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: min(320px, calc(100vw - 32px)); padding: 12px 14px 14px; display: grid; gap: 8px; }
+  #card h2 { margin: 0; font-family: var(--font-label); font-weight: 600; font-size: 18px; line-height: 1.15; padding-right: 26px; text-wrap: balance; }
+  #card p { margin: 0; font-size: 13px; color: var(--muted); }
+  #card .close { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; background: transparent; border-radius: 3px; font-size: 17px; line-height: 1; color: var(--muted); }
+  #card .close:hover { background: var(--accent-soft); color: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 20px; padding: 2px 9px; font-size: 12px; }
+  .dims { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 12.5px; }
+  .dims dt { color: var(--muted); }
+  .dims dd { margin: 0; }
+
+  /* compare bar */
+  #comparebar { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: min(680px, calc(100vw - 32px)); padding: 10px 14px 12px; display: grid; gap: 8px; }
+  #comparebar .row { display: grid; grid-template-columns: 88px 1fr 64px; gap: 10px; align-items: center; }
+  #comparebar label { font-family: var(--font-label); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  #comparebar .data { font-size: 11.5px; text-align: right; color: var(--muted); }
+  #comparebar p { margin: 0; font-size: 12px; color: var(--muted); }
+  input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; min-width: 0; }
+
+  #tip { position: absolute; pointer-events: none; padding: 3px 8px; font-size: 12px; white-space: nowrap; transform: translate(12px, 14px); z-index: 5; }
+  #measure-label { position: absolute; pointer-events: none; padding: 3px 8px; font-size: 12px; transform: translate(-50%, -130%); white-space: nowrap; border-color: var(--accent); }
+  #hint { position: absolute; left: 50%; transform: translateX(-50%); top: calc(58px + env(safe-area-inset-top, 0px)); padding: 5px 12px; font-size: 12.5px; color: var(--muted); max-width: calc(100vw - 32px); text-align: center; }
+
+  #loading { position: absolute; inset: 0; display: grid; place-items: center; background: var(--paper); z-index: 20; }
+  #loading .box { display: grid; gap: 10px; width: min(300px, calc(100vw - 48px)); }
+  #loading .track { height: 3px; background: var(--line); }
+  #loading .fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.2s; }
+  #loading p { margin: 0; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 700px) {
+    #presets { display: none; }
+    #titleblock { padding: 8px 10px; }
+    #titleblock h1 { font-size: 16px; }
+    #titleblock p.long { display: none; }
+    #card { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: auto; }
+    .seg button { padding: 6px 9px; }
+    #comparebar .row { grid-template-columns: 62px 1fr 48px; }
+    #hint { top: calc(104px + env(safe-area-inset-top, 0px)); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="app">
+  <div id="stage"><img id="photo" alt="Frame from the garden video"></div>
+
+  <div id="top">
+    <div class="panel seg" role="group" aria-label="View">
+      <button id="mode-explore" aria-pressed="true">Explore</button>
+      <button id="mode-plan" aria-pressed="false">Plan</button>
+      <button id="mode-compare" aria-pressed="false">Compare with video</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="tool" id="tool-measure" aria-pressed="false">Measure</button>
+    <details class="panel" id="layers">
+      <summary>Layers</summary>
+      <div class="panel-body">
+        <div id="layer-list"></div>
+        <div class="rule"></div>
+        <label class="check"><input type="checkbox" id="opt-confidence"> Colour by how sure I am</label>
+        <div class="legend" id="legend" hidden>
+          <span><i class="dot" style="background: var(--measured)"></i>Measured from the footage</span>
+          <span><i class="dot" style="background: var(--estimated)"></i>Estimated (partly hidden)</span>
+          <span><i class="dot" style="background: var(--assumed)"></i>Assumed (out of frame)</span>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div id="presets" aria-label="Viewpoints"></div>
+  <div id="hint" class="panel" hidden></div>
+
+  <div id="titleblock" class="panel">
+    <span class="eyebrow">Existing garden &middot; surveyed 26 Nov 2026</span>
+    <h1>Garden Survey Model</h1>
+    <p class="long">Rebuilt from a 15-second phone pan. Good to about &plusmn;0.2&nbsp;m near where you stood, looser further away.</p>
+    <div id="scalebar"><div class="bar" style="width: 80px"></div><span class="data">5 m</span></div>
+  </div>
+
+  <div id="card" class="panel" hidden>
+    <button class="close" id="card-close" aria-label="Close details">&times;</button>
+    <h2 id="card-title"></h2>
+    <div class="chips" id="card-chips"></div>
+    <dl class="dims data" id="card-dims"></dl>
+    <p id="card-notes"></p>
+  </div>
+
+  <div id="comparebar" class="panel" hidden>
+    <div class="row"><label for="scrub">Pan</label><input type="range" id="scrub" min="0" max="43" step="0.01" value="14"><span class="data" id="scrub-val">0.0 s</span></div>
+    <div class="row"><label for="blend">Model / video</label><input type="range" id="blend" min="0" max="1" step="0.01" value="0.5"><span class="data" id="blend-val">50%</span></div>
+    <p>The 3D camera sits exactly where the phone was for each frame. Slide <b>Model / video</b> to fade between them and judge the fit.</p>
+  </div>
+
+  <div id="tip" class="panel" hidden></div>
+  <div id="measure-label" class="panel data" hidden></div>
+
+  <div id="loading"><div class="box"><span class="eyebrow">Garden survey model</span><div class="track"><div class="fill" id="load-fill"></div></div><p id="load-text">Loading the model&hellip;</p></div></div>
+</div>
+
+<script type="module">
+// three.js r170 with OrbitControls and GLTFLoader, bundled into one local file (see vendor/THREE-LICENSE.txt)
+import { THREE, OrbitControls, GLTFLoader } from './vendor/three-bundle.js';
+
+const $ = (id) => document.getElementById(id);
+const app = $('app'), stage = $('stage'), photo = $('photo');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const small = matchMedia('(max-width: 700px)').matches;
+// model coordinates are metres: +X east wall, +Y up the lawn, +Z up. three.js is Y-up.
+const P = (x, y, z = 0) => new THREE.Vector3(x, z, -y);
+
+// ---------------------------------------------------------------- renderer + scene
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.insertBefore(renderer.domElement, photo);
+const canvas = renderer.domElement;
+canvas.setAttribute('aria-label', '3D model of the garden');
+
+const scene = new THREE.Scene();
+const HORIZON = new THREE.Color(0xe9edee), ZENITH = new THREE.Color(0xbfcbd6);
+scene.fog = new THREE.Fog(HORIZON, 70, 320);
+const sky = new THREE.Mesh(
+  new THREE.SphereGeometry(500, 32, 16),
+  new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: { top: { value: ZENITH }, bottom: { value: HORIZON } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying vec3 vP; void main(){ float h = clamp(normalize(vP).y, 0.0, 1.0); gl_FragColor = vec4(mix(bottom, top, pow(h, 0.55)), 1.0); }',
+  }));
+sky.renderOrder = -1;
+scene.add(sky);
+
+// flat, bright overcast: a strong sky dome and only a weak sun for soft grounding shadows
+scene.add(new THREE.HemisphereLight(0xf1f4f8, 0x8d8a76, 2.5));
+const sun = new THREE.DirectionalLight(0xfff6ea, 1.0);
+sun.position.copy(P(-26, 20, 36));
+sun.target.position.copy(P(-2, 0, 0));
+sun.castShadow = true;
+sun.shadow.mapSize.set(small ? 2048 : 4096, small ? 2048 : 4096);
+Object.assign(sun.shadow.camera, { left: -34, right: 34, top: 40, bottom: -40, near: 1, far: 140 });
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.05;
+sun.shadow.radius = 5;
+scene.add(sun, sun.target);
+
+// soft green apron so the world does not end at the edge of the survey
+const apron = new THREE.Mesh(new THREE.CircleGeometry(520, 48), new THREE.MeshStandardMaterial({ color: 0x6a8246, roughness: 1, metalness: 0 }));
+apron.rotation.x = -Math.PI / 2; apron.position.y = -0.03;
+scene.add(apron);
+
+const persp = new THREE.PerspectiveCamera(50, 1, 0.1, 900);
+const ortho = new THREE.OrthographicCamera(-20, 20, 20, -20, 0.1, 400);
+let camera = persp;
+const controls = new OrbitControls(persp, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.09;
+controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.minDistance = 1.2; controls.maxDistance = 110;
+controls.zoomToCursor = true;
+const planControls = new OrbitControls(ortho, canvas);
+planControls.enableRotate = false; planControls.screenSpacePanning = true; planControls.enabled = false;
+planControls.minZoom = 0.35; planControls.maxZoom = 14; planControls.zoomToCursor = true;
+planControls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+planControls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
+
+let dirty = true;
+const invalidate = () => { dirty = true; };
+controls.addEventListener('change', invalidate);
+planControls.addEventListener('change', invalidate);
+
+// ---------------------------------------------------------------- state
+const state = { mode: 'explore', measuring: false, confidence: false, frames: null, frameImgs: [], blend: 0.5, scrub: 14 };
+const features = [];            // feature root objects (have userData.label)
+const layerRoots = {};          // layer key -> root object
+const pickables = [];
+const original = new Map();     // mesh -> original material(s)
+const LAYER_ORDER = ['ground', 'boundaries', 'buildings', 'planting', 'objects', 'context'];
+const LAYER_NAMES = { ground: 'Ground', boundaries: 'Walls and hedges', buildings: 'Buildings', planting: 'Trees and planting', objects: 'Furniture and objects', context: 'Surroundings' };
+const CONF_TEXT = { measured: 'Measured', estimated: 'Estimated', assumed: 'Assumed' };
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------------------------------------------------------------- load
+const loader = new GLTFLoader();
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
+// GLTFLoader decodes embedded textures with fetch(blob:) when createImageBitmap exists; plain <img>
+// decoding works in more sandboxes, so hide createImageBitmap until the parser has been set up.
+const nativeBitmap = window.createImageBitmap;
+try { window.createImageBitmap = undefined; } catch (e) { /* read-only: leave it */ }
+const restoreBitmap = () => { try { window.createImageBitmap = nativeBitmap; } catch (e) { /* ignore */ } };
+function onModel(gltf) {
+  restoreBitmap();
+  const root = gltf.scene;
+  root.traverse((o) => {
+    if (o.userData && o.userData.layer && !o.userData.label) layerRoots[o.userData.layer] = o;
+    if (o.userData && o.userData.label) features.push(o);
+  });
+  for (const f of features) {
+    const layer = f.userData.layer;
+    f.traverse((m) => {
+      if (!m.isMesh) return;
+      m.userData.feature = f;
+      m.receiveShadow = true;
+      m.castShadow = layer !== 'ground' || f.name !== 'lawn';
+      pickables.push(m);
+      const mats = Array.isArray(m.material) ? m.material : [m.material];
+      for (const mat of mats) {
+        for (const key of ['map', 'normalMap']) if (mat[key]) mat[key].anisotropy = key === 'map' ? maxAniso : 4;
+        if (/^(leaf_|twigs_)/.test(mat.name)) {
+          mat.alphaTest = 0.4; mat.transparent = false; mat.alphaToCoverage = true;
+          mat.side = THREE.DoubleSide; mat.shadowSide = THREE.DoubleSide;
+        }
+        if (mat.normalMap) mat.normalScale.set(0.8, 0.8);
+      }
+      original.set(m, m.material);
+    });
+  }
+  scene.add(root);
+  buildLayerList();
+  setupBackdrop();
+  $('loading').hidden = true;
+  setMode('explore', true);
+  goPreset(0, true);
+  window.__garden.ready = true;
+  invalidate();
+}
+function onModelError(err) {
+  restoreBitmap();
+  $('load-text').textContent = 'The model file did not load. Check that the model folder sits beside this page, then reload.';
+  console.error(err);
+}
+
+// The model ships as plain web files: scene JSON, texture images, and the geometry buffer as
+// base64 text. Put the JSON and the decoded buffer back together as one in-memory .glb.
+function base64ToBytes(b64) {
+  const bin = atob(b64), out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function packGLB(json, bin) {
+  let text = new TextEncoder().encode(JSON.stringify(json));
+  const jsonLen = Math.ceil(text.length / 4) * 4, binLen = Math.ceil(bin.length / 4) * 4;
+  const out = new Uint8Array(12 + 8 + jsonLen + 8 + binLen), dv = new DataView(out.buffer);
+  dv.setUint32(0, 0x46546c67, true); dv.setUint32(4, 2, true); dv.setUint32(8, out.length, true);
+  dv.setUint32(12, jsonLen, true); dv.setUint32(16, 0x4e4f534a, true);
+  out.fill(0x20, 20, 20 + jsonLen); out.set(text, 20);
+  dv.setUint32(20 + jsonLen, binLen, true); dv.setUint32(24 + jsonLen, 0x004e4942, true);
+  out.set(bin, 28 + jsonLen);
+  return out.buffer;
+}
+async function loadModel() {
+  const get = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error(url + ' ' + r.status); return r; };
+  $('load-fill').style.width = '15%';
+  const [json, b64] = await Promise.all([
+    get('model/garden.gltf.json').then((r) => r.json()),
+    get('model/geometry.b64.txt').then((r) => r.text()),
+  ]);
+  $('load-fill').style.width = '60%';
+  $('load-text').textContent = 'Putting the garden together…';
+  const bin = base64ToBytes(b64.trim());
+  json.buffers = [{ byteLength: bin.length }];
+  loader.parse(packGLB(json, bin), 'model/', onModel, onModelError);
+}
+loadModel().catch(onModelError);
+
+fetch('frames.json').then((r) => r.ok ? r.json() : null).then((j) => {
+  if (!j) { $('mode-compare').hidden = true; return; }   // no stills beside the page: nothing to compare with
+  state.frames = j;
+  for (const f of j.frames) { f.p = new THREE.Vector3(...f.pos); f.q = new THREE.Quaternion(...f.quat); }
+  $('scrub').max = String(j.frames.length - 1);
+}).catch(() => { $('mode-compare').hidden = true; });
+
+// ---------------------------------------------------------------- layers + confidence
+function buildLayerList() {
+  const host = $('layer-list');
+  for (const key of LAYER_ORDER) {
+    if (!layerRoots[key]) continue;
+    const n = features.filter((f) => f.userData.layer === key).length;
+    const row = document.createElement('label');
+    row.className = 'check';
+    row.innerHTML = `<input type="checkbox" id="layer-${key}" checked> ${LAYER_NAMES[key]} <span class="count data">${n}</span>`;
+    row.querySelector('input').addEventListener('change', (e) => { layerRoots[key].visible = e.target.checked; select(null); invalidate(); });
+    host.appendChild(row);
+  }
+}
+// Trees beyond the boundary are a backdrop. Hide a belt once the camera has moved out to it,
+// so it never stands between you and the garden; in plan view they are all hidden.
+const backdrop = [];
+const GARDEN_CENTRE = P(-1, -2, 0);
+function setupBackdrop() {
+  const b = new THREE.Box3(), c = new THREE.Vector3();
+  for (const f of features) {
+    if (f.userData.layer !== 'context' || !['tree_belt', 'shrub', 'conifer'].includes(f.userData.kind)) continue;
+    b.setFromObject(f).getCenter(c);
+    const v = new THREE.Vector2(c.x - GARDEN_CENTRE.x, c.z - GARDEN_CENTRE.z);
+    backdrop.push({ f, dist: v.length(), dir: v.clone().normalize() });
+  }
+}
+function updateBackdrop() {
+  const cx = camera.position.x - GARDEN_CENTRE.x, cz = camera.position.z - GARDEN_CENTRE.z;
+  for (const b of backdrop) {
+    const along = cx * b.dir.x + cz * b.dir.y;
+    b.f.visible = state.mode !== 'plan' && along < b.dist - 7;
+  }
+}
+const confMats = {};
+function applyConfidence(on) {
+  state.confidence = on;
+  $('legend').hidden = !on;
+  for (const [mesh, mat] of original) {
+    const f = mesh.userData.feature;
+    if (!on || f.name === 'lawn') { mesh.material = mat; continue; }
+    const c = f.userData.confidence || 'estimated';
+    if (!confMats[c]) confMats[c] = new THREE.MeshLambertMaterial({ color: new THREE.Color(cssVar('--' + c)), side: THREE.DoubleSide });
+    mesh.material = confMats[c];
+  }
+  invalidate();
+}
+$('opt-confidence').addEventListener('change', (e) => applyConfidence(e.target.checked));
+if (!small) $('layers').open = true;
+
+// ---------------------------------------------------------------- views
+const PRESETS = [
+  { name: 'Overview', pos: P(5.5, 24, 17), target: P(-1.2, -3.2, 0.4) },
+  { name: 'Willow corner', pos: P(-3.2, -3.8, 2.3), target: P(2.4, -11.4, 1.1) },
+  { name: 'Bench and tables', pos: P(-0.6, 0.9, 1.9), target: P(5.2, -1.4, 0.9) },
+  { name: 'Outbuilding and shed', pos: P(-0.8, -2.6, 2.1), target: P(-8.8, -7.6, 1.3) },
+  { name: 'Patio', pos: P(2.6, 9.4, 2.6), target: P(-5.2, 4.6, 0.6) },
+  { name: 'Where you stood', pos: P(0.0, 0.0, 1.65), target: P(2.5, -7, 1.0) },
+];
+PRESETS.forEach((p, i) => {
+  const b = document.createElement('button');
+  b.textContent = p.name;
+  b.addEventListener('click', () => { if (state.mode !== 'explore') setMode('explore'); goPreset(i); });
+  $('presets').appendChild(b);
+});
+let tween = null;
+function goPreset(i, instant = false) {
+  const p = PRESETS[i];
+  if (instant || reduceMotion) { persp.position.copy(p.pos); controls.target.copy(p.target); controls.update(); invalidate(); return; }
+  tween = { t0: performance.now(), dur: 900, p0: persp.position.clone(), p1: p.pos, q0: controls.target.clone(), q1: p.target };
+  invalidate();
+}
+
+function setMode(mode, force = false) {
+  if (mode === state.mode && !force) return;
+  if (mode === 'compare' && !state.frames) return;
+  state.mode = mode;
+  for (const m of ['explore', 'plan', 'compare']) $('mode-' + m).setAttribute('aria-pressed', String(m === mode));
+  controls.enabled = mode === 'explore';
+  planControls.enabled = mode === 'plan';
+  $('presets').hidden = mode !== 'explore';
+  $('comparebar').hidden = mode !== 'compare';
+  $('titleblock').hidden = mode === 'compare';
+  photo.style.opacity = mode === 'compare' ? String(state.blend) : '0';
+  if (mode === 'compare') { select(null); setMeasuring(false); }
+  $('tool-measure').hidden = mode === 'compare';
+  camera = mode === 'plan' ? ortho : persp;
+  persp.fov = 50;
+  if (mode === 'plan') {
+    ortho.position.copy(P(-2, 2, 120)); ortho.up.set(0, 0, -1); ortho.lookAt(P(-2, 2, 0));
+    planControls.target.copy(P(-2, 2, 0)); ortho.zoom = 1; planControls.update();
+  }
+  sky.visible = mode !== 'plan';
+  scene.fog.near = mode === 'plan' ? 1e5 : 70; scene.fog.far = mode === 'plan' ? 1e6 : 320;
+  layout();
+  if (mode === 'compare') applyFrame(state.scrub);
+  updateHint();
+  invalidate();
+}
+$('mode-explore').addEventListener('click', () => setMode('explore'));
+$('mode-plan').addEventListener('click', () => setMode('plan'));
+$('mode-compare').addEventListener('click', () => setMode('compare'));
+
+function updateHint() {
+  const h = $('hint');
+  if (state.measuring) { h.hidden = false; h.textContent = measure.pts.length === 1 ? 'Now click the second point.' : 'Click two points on the model to measure between them.'; }
+  else h.hidden = true;
+}
+
+// ---------------------------------------------------------------- layout
+let box = { x: 0, y: 0, w: 1, h: 1 };
+function layout() {
+  const W = app.clientWidth, H = app.clientHeight;
+  if (state.mode === 'compare') {
+    const topPad = small ? 100 : 58, botPad = ($('comparebar').offsetHeight || 120) + 28;
+    const availH = Math.max(120, H - topPad - botPad), availW = W - (small ? 0 : 32);
+    const aspect = state.frames ? state.frames.aspect : 4 / 3;
+    let w = availW, h = w / aspect;
+    if (h > availH) { h = availH; w = h * aspect; }
+    box = { x: Math.round((W - w) / 2), y: Math.round(topPad + (availH - h) / 2), w: Math.round(w), h: Math.round(h) };
+  } else box = { x: 0, y: 0, w: W, h: H };
+  for (const el of [canvas, photo]) Object.assign(el.style, { left: box.x + 'px', top: box.y + 'px', width: box.w + 'px', height: box.h + 'px' });
+  renderer.setSize(box.w, box.h, false);
+  persp.aspect = box.w / box.h; persp.updateProjectionMatrix();
+  const span = 46, a = box.w / box.h;
+  if (a >= 1) Object.assign(ortho, { left: -span * a / 2, right: span * a / 2, top: span / 2, bottom: -span / 2 });
+  else Object.assign(ortho, { left: -span / 2, right: span / 2, top: span / a / 2, bottom: -span / a / 2 });
+  ortho.updateProjectionMatrix();
+  invalidate();
+}
+new ResizeObserver(layout).observe(app);
+
+function updateScaleBar() {
+  // how many pixels is a metre at the middle of the view?
+  let pxPerM;
+  if (camera === ortho) pxPerM = box.w / ((ortho.right - ortho.left) / ortho.zoom);
+  else {
+    const d = persp.position.distanceTo(controls.target);
+    pxPerM = box.h / (2 * d * Math.tan(THREE.MathUtils.degToRad(persp.fov / 2)));
+  }
+  const steps = [0.5, 1, 2, 5, 10, 20, 50];
+  let m = steps[0];
+  for (const s of steps) if (s * pxPerM <= 130) m = s;
+  const bar = document.querySelector('#scalebar .bar'), lab = document.querySelector('#scalebar .data');
+  bar.style.width = Math.max(20, Math.round(m * pxPerM)) + 'px';
+  lab.textContent = (camera === ortho ? '' : '≈ ') + (m < 1 ? '50 cm' : m + ' m') + (camera === ortho ? '' : ' at the centre');
+}
+
+// ---------------------------------------------------------------- compare with the video
+function applyFrame(v) {
+  const fr = state.frames.frames, n = fr.length;
+  v = Math.min(n - 1, Math.max(0, v));
+  state.scrub = v;
+  const i = Math.min(n - 2, Math.floor(v)), t = v - i;
+  const a = fr[i], b = fr[i + 1];
+  persp.position.lerpVectors(a.p, b.p, t);
+  persp.quaternion.slerpQuaternions(a.q, b.q, t);
+  persp.fov = state.frames.vfov; persp.updateProjectionMatrix();
+  const near = fr[Math.round(v)];
+  if (photo.dataset.src !== near.file) { photo.dataset.src = near.file; photo.src = near.file; }
+  // snap the 3D camera to the shown frame when the scrubber is nearly on it, so the overlay is exact
+  if (Math.abs(v - Math.round(v)) < 0.12) { persp.position.copy(near.p); persp.quaternion.copy(near.q); }
+  $('scrub-val').textContent = near.t.toFixed(1) + ' s';
+  invalidate();
+}
+$('scrub').addEventListener('input', (e) => applyFrame(parseFloat(e.target.value)));
+$('blend').addEventListener('input', (e) => {
+  state.blend = parseFloat(e.target.value);
+  photo.style.opacity = String(state.blend);
+  $('blend-val').textContent = Math.round(state.blend * 100) + '%';
+});
+$('blend-val').textContent = '50%';
+
+// ---------------------------------------------------------------- picking, details, measuring
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+function hitAt(ev) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hits = ray.intersectObjects(pickables, false);
+  for (const h of hits) {
+    let o = h.object, vis = true;
+    while (o) { if (!o.visible) { vis = false; break; } o = o.parent; }
+    if (vis) return h;
+  }
+  return null;
+}
+let selBox = null, selected = null;
+function select(f) {
+  selected = f;
+  if (selBox) { scene.remove(selBox); selBox.geometry.dispose(); selBox = null; }
+  $('card').hidden = !f;
+  if (!f) { invalidate(); return; }
+  const u = f.userData;
+  selBox = new THREE.Box3Helper(new THREE.Box3().setFromObject(f), new THREE.Color(cssVar('--accent')));
+  selBox.material.depthTest = false; selBox.renderOrder = 10;
+  scene.add(selBox);
+  $('card-title').textContent = u.label;
+  const c = u.confidence || 'estimated';
+  $('card-chips').innerHTML = `<span class="chip">${LAYER_NAMES[u.layer] || u.layer}</span><span class="chip"><i class="dot" style="background: var(--${c})"></i>${CONF_TEXT[c]}</span>`;
+  const dims = [];
+  const m = (v) => Number(v).toFixed(v >= 10 ? 1 : 2) + ' m';
+  if (f.name === 'lawn') dims.push(['Surveyed area', 'about 37 × 55 m']);
+  else if (u.length) { dims.push(['Length', m(u.length)]); dims.push(['Height', m(u.size_h)]); }
+  else { dims.push(['Footprint', `${m(u.size_w)} × ${m(u.size_d)}`]); dims.push(['Height', m(u.size_h)]); }
+  $('card-dims').innerHTML = dims.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  $('card-notes').textContent = u.notes || '';
+  $('card-notes').hidden = !u.notes;
+  invalidate();
+}
+$('card-close').addEventListener('click', () => select(null));
+
+const measure = { pts: [], line: null, dots: [] };
+const dotGeo = new THREE.SphereGeometry(0.07, 12, 8);
+function clearMeasure() {
+  for (const d of measure.dots) scene.remove(d);
+  if (measure.line) { scene.remove(measure.line); measure.line.geometry.dispose(); }
+  measure.pts = []; measure.dots = []; measure.line = null;
+  $('measure-label').hidden = true;
+  invalidate();
+}
+function setMeasuring(on) {
+  state.measuring = on;
+  $('tool-measure').setAttribute('aria-pressed', String(on));
+  canvas.style.cursor = on ? 'crosshair' : '';
+  if (!on) clearMeasure(); else select(null);
+  updateHint();
+}
+$('tool-measure').addEventListener('click', () => setMeasuring(!state.measuring));
+function addMeasurePoint(p) {
+  if (measure.pts.length === 2) clearMeasure();
+  measure.pts.push(p.clone());
+  const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(cssVar('--accent')), depthTest: false }));
+  dot.position.copy(p); dot.renderOrder = 11; scene.add(dot); measure.dots.push(dot);
+  if (measure.pts.length === 2) {
+    const g = new THREE.BufferGeometry().setFromPoints(measure.pts);
+    measure.line = new THREE.Line(g, new THREE.LineBasicMaterial({ color: new THREE.Color(cssVar('--accent')), depthTest: false }));
+    measure.line.renderOrder = 11; scene.add(measure.line);
+    const [a, b] = measure.pts, d = a.distanceTo(b), rise = Math.abs(a.y - b.y), run = Math.hypot(a.x - b.x, a.z - b.z);
+    $('measure-label').textContent = `${d.toFixed(2)} m` + (rise > 0.15 ? `  (${run.toFixed(2)} along, ${rise.toFixed(2)} up)` : '');
+    $('measure-label').hidden = false;
+  }
+  updateHint();
+  invalidate();
+}
+
+let down = null;
+canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
+canvas.addEventListener('pointerup', (e) => {
+  if (!down || state.mode === 'compare') return;
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  down = null;
+  if (moved > 5) return;
+  const h = hitAt(e);
+  if (state.measuring) { if (h) addMeasurePoint(h.point); return; }
+  select(h ? h.object.userData.feature : null);
+});
+let lastMove = 0;
+canvas.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse' || state.mode === 'compare' || e.buttons) { $('tip').hidden = true; return; }
+  const now = performance.now();
+  if (now - lastMove < 40) return;
+  lastMove = now;
+  const h = hitAt(e), tip = $('tip');
+  if (h && h.object.userData.feature.name !== 'lawn') {
+    const r = app.getBoundingClientRect();
+    tip.textContent = h.object.userData.feature.userData.label;
+    tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px';
+    tip.hidden = false;
+    if (!state.measuring) canvas.style.cursor = 'pointer';
+  } else { tip.hidden = true; if (!state.measuring) canvas.style.cursor = ''; }
+});
+canvas.addEventListener('pointerleave', () => { $('tip').hidden = true; });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { select(null); setMeasuring(false); } });
+
+// ---------------------------------------------------------------- frame loop (renders only when something changed)
+const v3 = new THREE.Vector3();
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (tween) {
+    const k = Math.min(1, (now - tween.t0) / tween.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    persp.position.lerpVectors(tween.p0, tween.p1, e);
+    controls.target.lerpVectors(tween.q0, tween.q1, e);
+    if (k >= 1) tween = null;
+    dirty = true;
+  }
+  if (state.mode === 'explore') controls.update();
+  else if (state.mode === 'plan') planControls.update();
+  if (!dirty) return;
+  dirty = false;
+  updateBackdrop();
+  sky.position.copy(camera.position);
+  renderer.render(scene, camera);
+  if (state.mode !== 'compare') updateScaleBar();
+  if (measure.pts.length === 2) {
+    v3.copy(measure.pts[0]).add(measure.pts[1]).multiplyScalar(0.5).project(camera);
+    const lab = $('measure-label');
+    lab.style.left = (box.x + (v3.x + 1) / 2 * box.w) + 'px';
+    lab.style.top = (box.y + (1 - v3.y) / 2 * box.h) + 'px';
+  }
+}
+requestAnimationFrame(frame);
+
+// hooks used for automated checks
+window.__garden = {
+  ready: false, setMode, applyFrame, goPreset, select, applyConfidence,
+  setBlend(v) { $('blend').value = v; $('blend').dispatchEvent(new Event('input')); },
+  setScrub(v) { $('scrub').value = v; applyFrame(v); },
+  camera: () => camera, controls, planControls, scene, features, invalidate,
+  setCamera(pos, target) { persp.position.set(...pos); controls.target.set(...target); controls.update(); invalidate(); },
+};
+</script>
