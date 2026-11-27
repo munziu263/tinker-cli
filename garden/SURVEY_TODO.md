@@ -25,6 +25,9 @@ once its footage has been worked into the model, and moved to the log at the bot
 
 ### First: fixed points for everything that follows
 
+- [ ] **A ten-minute trial.** Two markers on one wall, the distance between them taped,
+  twenty photographs (`CAPTURE.md`). It proves print, paper, camera settings and file
+  transfer on real material before the full walk.
 - [ ] **Markers, a tape, and one walk round the whole site.** Put up 16 to 24 printed
   markers (how and where: `CAPTURE.md`), tape about a dozen long distances between them,
   and photograph the whole site once with them in view: three to five hundred stills.
@@ -32,7 +35,7 @@ once its footage has been worked into the model, and moved to the log at the bot
   drawings and on clips that had to be slid into place afterwards. With markers fixed
   to a centimetre, everything photographed later lands on the same grid by itself, and
   the items below can be done in any order, on any day, a piece at a time.
-- [ ] **Ask the surveyors for their files.** The measured survey was issued as drawings.
+- [ ] **Ask the surveyors for their files** *(parked: a last resort if it costs anything)*. The measured survey was issued as drawings.
   The CAD file behind them (DWG or DXF) gives every wall face as a coordinate rather
   than a line to read off a PDF, and if the building was laser-scanned, the point cloud
   (E57 or similar) is the house to a few millimetres, inside and out. Ask too whether

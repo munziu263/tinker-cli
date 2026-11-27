@@ -22,8 +22,8 @@ landscaper.
 ## Rebuild
 
 ```
-pip install bpy numpy pillow        # Blender as a Python module (Python 3.13)
-python build.py                     # about a minute
+pip install -r requirements.txt     # Python 3.13: Blender as a module, COLMAP, OpenCV
+python build.py                     # about a minute and a half
 python tools/serve.py               # preview at http://localhost:8765
 ```
 
@@ -432,6 +432,9 @@ Five more work on the survey as a whole:
   modelled surface. It reads the web copy of the model that `build.py` writes, so what
   is checked is what the viewer shows. Plants count as explained within 0.6 m, since the
   model only sketches them; hard surfaces within 0.3 m.
+- `export_colmap.py` writes the survey as a **COLMAP dataset on the site grid**, pictures
+  undistorted and cameras as pinholes: the input a Gaussian-splat trainer wants. What
+  is trained from it comes out on the model's own grid.
 - `anchor.py` **moves a group of clips** (frames and the points that belong to them)
   onto a building of known shape or onto sightings of things with known places, and
   leaves the rest of the survey alone. `align.py` records which clip each point belongs

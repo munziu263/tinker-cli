@@ -101,6 +101,12 @@ Four rules cover almost everything:
 4. **Keep markers in the picture.** A photograph with two markers in it is worth
    several without.
 
+**A ten-minute trial comes before all of it.** Print two markers, tape them a few
+metres apart on one wall, measure between their arrowed corners, and take twenty
+photographs of that wall as described under "Walls and buildings" below. Send those.
+They prove the whole chain on real paper and real photographs (print size, glare, file
+format, how the phone was held) before an hour is spent on the full walk.
+
 The shoots, in the order worth doing them:
 
 - **The network** (once, first): with all markers up, walk the whole site, round the
@@ -148,9 +154,13 @@ camera goes into this repository.
 A thorough capture of a house and garden is two to four thousand photographs, 5 to
 10 GB. That is too much to pass through a chat a file at a time, so it wants one of:
 
-- **work where the photographs are**: run the session on the computer that holds them
-  (which also gives it that computer's graphics card, needed for the dense and
-  photoreal reconstructions);
+- **work where the photographs are**: run the session on the computer that holds them.
+  Nothing is uploaded, the photographs never leave the machine, and its graphics
+  processor is there for the dense and photoreal reconstructions, which a rented cloud
+  machine without one cannot do. An Apple Silicon Mac on macOS 14 or later, or a PC
+  with a recent graphics card, is enough. `CLAUDE.md` and `requirements.txt` are what a
+  session needs to set itself up there; photographs go in `garden/private/photos/`,
+  one folder per shoot, which git ignores;
 - **a private store the session can read**: a private repository or drive holding the
   originals and the survey's working files;
 - **direct upload** for small, targeted sets: single photographs are well under any
@@ -175,3 +185,17 @@ From there the photographs give, in turn: camera positions good to a centimetre 
 two; a dense cloud of points on every surface, from which shapes are measured rather
 than judged; true-to-scale pictures of each wall and of the ground to trace details
 from; and the real surfaces to put on the model.
+
+And a photoreal copy of the place as it stands:
+
+```
+python tools/survey/export_colmap.py survey.npz twin --max-side 1600 -- photos/
+```
+
+writes the photographs (lens distortion removed) and their cameras as a standard
+COLMAP dataset *on the site grid*. A Gaussian-splat trainer run on that folder (Brush
+is a free one with a ready-made build for Apple Silicon) learns a scene that can be
+walked through and looks like the photographs, and because the cameras were given in
+site coordinates it lands on the model with no fitting. That copy cannot be edited the
+way the model can. The two are meant to be used together: redesign in the model,
+judge it against the copy.
