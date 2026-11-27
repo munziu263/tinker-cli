@@ -94,6 +94,11 @@ def options(a, flags):
     return opt
 
 
+def some(n, one, many):
+    """'1 picture is' or '7 pictures are'."""
+    return f"{n} {one if n == 1 else many}"
+
+
 def record_of(path):
     """What a photograph says about how it was taken. Never where: the location block is not read."""
     with Image.open(path) as im:
@@ -196,7 +201,7 @@ def intake(a):
         json.dump(book, fh, indent=1)
 
     ph = mine["photos"]
-    print(f"shoot '{shoot}': {len(new)} photographs taken in ({time.time() - t0:.0f}s), {len(ph)} in all, as {img_dir}/{shoot}_NNNN.jpg")
+    print(f"shoot '{shoot}': {some(len(new), 'photograph', 'photographs')} taken in ({time.time() - t0:.0f}s), {len(ph)} in all, as {img_dir}/{shoot}_NNNN.jpg")
     if not ph:
         raise SystemExit(f"no photographs found in {src_dir}")
     if unread:
@@ -222,20 +227,20 @@ def intake(a):
         notes.append("more than one lens or zoom setting: each gets a camera of its own in the reconstruction. Keep to the main lens at 1x.")
     small = [p for p in ph if p["size"][0] * p["size"][1] < 11e6 and not max_side]
     if small:
-        notes.append(f"{len(small)} pictures are under 11 megapixels (first: {small[0]['source']}): shrunk copies, or the camera set low. The originals at 24 megapixels are what is wanted.")
+        notes.append(f"{some(len(small), 'picture is', 'pictures are')} under 11 megapixels (first: {small[0]['source']}): shrunk copies, or the camera set low. The originals at 24 megapixels are what is wanted.")
     blank = [p for p in ph if not p["focal35"]]
     if blank:
-        notes.append(f"{len(blank)} pictures carry no record of the lens (first: {blank[0]['source']}): they have been through something that strips it, which usually shrinks them too. Their focal length will be a guess to start from.")
+        notes.append(f"{some(len(blank), 'picture carries', 'pictures carry')} no record of the lens (first: {blank[0]['source']}): something has stripped it, which usually means shrunk as well. The focal length will be a guess to start from.")
     slow = [p for p in ph if p["exposure_s"] and p["exposure_s"] > 1 / 50]
     if slow:
-        notes.append(f"{len(slow)} pictures were exposed for longer than 1/50 s (dim light): the hand moves in that time. Brighter light, or stand very still.")
+        notes.append(f"{some(len(slow), 'picture was', 'pictures were')} exposed for longer than 1/50 s (dim light): the hand moves in that time. Brighter light, or stand very still.")
     zoomed = [p for p in ph if p["zoom"] and p["zoom"] > 1.01]
     if zoomed:
-        notes.append(f"{len(zoomed)} pictures were taken with digital zoom (first: {zoomed[0]['source']}): a crop, with a different field of view from the rest.")
+        notes.append(f"{some(len(zoomed), 'picture was', 'pictures were')} taken with digital zoom (first: {zoomed[0]['source']}): a crop, with a different field of view from the rest.")
     sharp = np.array([p["sharp"] for p in ph])
     soft = [p for p in ph if p["sharp"] < 0.3 * np.median(sharp)]
     if soft and len(ph) >= 8:
-        notes.append(f"{len(soft)} pictures are much less sharp than the rest (may be blurred, or simply of something plain): " + ", ".join(f"{p['name']} ({p['source']})" for p in sorted(soft, key=lambda p: p["sharp"])[:6]))
+        notes.append(f"{some(len(soft), 'picture is', 'pictures are')} much less sharp than the rest (may be blurred, or simply of something plain): " + ", ".join(f"{p['name']} ({p['source']})" for p in sorted(soft, key=lambda p: p["sharp"])[:6]))
     for n in notes:
         print("   NOTE: " + n)
     print(f"next: python tools/survey/markers.py detect {work}/markers.json {img_dir}      and      python tools/survey/photos.py sfm {work}")
@@ -324,7 +329,7 @@ def sfm(a):
         (cid,), = con.execute("select camera_id from images where name = ?", (group[0],))
         con.close()
         started[int(cid)] = (f35, lens_name, f)
-        print(f"   {len(group)} pictures of {w} x {h}: {how} ({f:.0f} px)", flush=True)
+        print(f"   {some(len(group), 'picture', 'pictures')} of {w} x {h}: {how} ({f:.0f} px)", flush=True)
     print(f"features found in {len(names)} pictures ({time.time() - t0:.0f}s)", flush=True)
 
     t0 = time.time()
@@ -388,7 +393,7 @@ def sfm(a):
         f, k1 = float(c.params[0]), float(c.params[3])
         cams.append(dict(size=list(size), focal35=f35, lens=lens_name, f=f, cx=float(c.params[1]), cy=float(c.params[2]), k1=k1, pictures=n,
                          held=bool(held), reprojection_px=float(best.compute_mean_reprojection_error())))
-        print(f"   camera for {size[0]} x {size[1]} ({n} pictures): focal length {f:.1f} px = {f / max(size):.4f} of the longer side"
+        print(f"   camera for {size[0]} x {size[1]} ({some(n, 'picture', 'pictures')}): focal length {f:.1f} px = {f / max(size):.4f} of the longer side"
               + (" (held)" if held else f", {(f / f_first - 1) * 100:+.1f}% on where it started") + f"; k1 {k1:+.4f}")
     if not held:
         rel = [c["f"] / max(c["size"]) for c in cams if c["pictures"] >= 5]
