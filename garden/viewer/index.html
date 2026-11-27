@@ -76,6 +76,15 @@
   .check input { width: 15px; height: 15px; accent-color: var(--accent); margin: 0; }
   .check .count { margin-left: auto; color: var(--muted); font-size: 11px; }
   .rule { height: 1px; background: var(--line); margin: 6px 0; }
+  .panel-body .seg { border: 1px solid var(--line); border-radius: 4px; }
+  .panel-body .seg button { flex: 1 1 0; }
+  .slider { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: baseline; margin-top: 8px; }
+  .slider label { font-family: var(--font-label); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .slider .data { font-size: 12px; }
+  .slider input { grid-column: 1 / -1; }
+  .note { margin: 8px 0 6px; font-size: 12px; color: var(--muted); min-height: 3.2em; }
+  .panel-body .tool { box-shadow: none; padding: 6px 10px; }
+  .note.fine { min-height: 0; margin: 8px 0 0; font-size: 11.5px; }
   .legend { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
   .legend span { display: flex; align-items: center; gap: 7px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
@@ -168,6 +177,22 @@
     </div>
     <div class="spacer"></div>
     <button class="tool" id="tool-measure" aria-pressed="false">Measure</button>
+    <details class="panel" id="light">
+      <summary>Light</summary>
+      <div class="panel-body">
+        <div class="seg" id="light-mode" role="group" aria-label="Lighting">
+          <button data-light="overcast" aria-pressed="true">Overcast</button>
+          <button data-light="sun" aria-pressed="false">Sun</button>
+        </div>
+        <div id="sun-controls" hidden>
+          <div class="slider"><label for="sun-month">Date</label><span class="data" id="sun-month-val">21 Jun</span><input type="range" id="sun-month" min="0" max="11" step="1" value="5"></div>
+          <div class="slider"><label for="sun-hour">Clock time</label><span class="data" id="sun-hour-val">14:00</span><input type="range" id="sun-hour" min="4" max="22" step="0.25" value="14"></div>
+          <p class="note" id="sun-note"></p>
+          <button class="tool" id="sun-play" aria-pressed="false">Run the day</button>
+          <p class="note fine">Buildings, walls and hedges cast true shadows. Trees are drawn as they stood in late November, so summer shade under them is understated.</p>
+        </div>
+      </div>
+    </details>
     <details class="panel" id="layers">
       <summary>Layers</summary>
       <div class="panel-body">
@@ -237,7 +262,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;    // the plain filter is the one whose softness can be set (shadow.radius)
 stage.insertBefore(renderer.domElement, photo);
 const canvas = renderer.domElement;
 canvas.setAttribute('aria-label', '3D model of the garden');
@@ -249,25 +274,33 @@ const sky = new THREE.Mesh(
   new THREE.SphereGeometry(500, 32, 16),
   new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { top: { value: ZENITH }, bottom: { value: HORIZON } },
+    uniforms: { top: { value: ZENITH.clone() }, bottom: { value: HORIZON.clone() } },
     vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
     fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying vec3 vP; void main(){ float h = clamp(normalize(vP).y, 0.0, 1.0); gl_FragColor = vec4(mix(bottom, top, pow(h, 0.55)), 1.0); }',
   }));
 sky.renderOrder = -1;
 scene.add(sky);
 
-// flat, bright overcast: a strong sky dome and only a weak sun for soft grounding shadows
-scene.add(new THREE.HemisphereLight(0xf1f4f8, 0x8d8a76, 2.5));
+// Two lightings (see applyLight). Overcast, the default: flat and bright, a strong sky dome and only a weak
+// sun for soft grounding shadows. Sun: the sun where it stands at a chosen date and hour, for seeing where
+// light and shade fall.
+const hemi = new THREE.HemisphereLight(0xf1f4f8, 0x8d8a76, 2.5);
+scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff6ea, 1.0);
-sun.position.copy(P(26, 6, 38));               // from the south, as it is for most of the day
-sun.target.position.copy(P(-2, -4, 0));
+const SUN_TARGET = P(-2, -6, 0), SUN_DIST = 120;
+const OVERCAST_DIR = P(28, 10, 38).normalize();   // from the south, as it is for most of the day
+sun.position.copy(SUN_TARGET).addScaledVector(OVERCAST_DIR, SUN_DIST);
+sun.target.position.copy(SUN_TARGET);
 sun.castShadow = true;
 sun.shadow.mapSize.set(small ? 2048 : 4096, small ? 2048 : 4096);
-Object.assign(sun.shadow.camera, { left: -34, right: 34, top: 40, bottom: -40, near: 1, far: 140 });
-sun.shadow.bias = -0.0004;
-sun.shadow.normalBias = 0.05;
-sun.shadow.radius = 5;
+Object.assign(sun.shadow.camera, { left: -42, right: 42, top: 42, bottom: -42, near: 1, far: 260 });
+sun.shadow.bias = -0.0005;
+sun.shadow.normalBias = 0.07;
+sun.shadow.radius = 4;
 scene.add(sun, sun.target);
+const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(9, 24, 12), new THREE.MeshBasicMaterial({ color: 0xfff3d0, fog: false, depthWrite: false, toneMapped: false }));
+sunDisc.visible = false;
+scene.add(sunDisc);
 
 // soft green apron so the world does not end at the edge of the survey. The modelled ground
 // has relief and dips below the datum in places, so once the model is in, the apron is
@@ -310,6 +343,7 @@ planControls.addEventListener('change', invalidate);
 
 // ---------------------------------------------------------------- state
 const state = { mode: 'explore', storey: 'all', measuring: false, confidence: false, frames: null, frameImgs: [], blend: 0.5, scrub: 14 };
+const light = { mode: 'overcast', month: new Date().getMonth(), hour: 14, playing: false };
 const features = [];            // feature root objects (have userData.label)
 const layerRoots = {};          // layer key -> root object
 const pickables = [];
@@ -530,6 +564,97 @@ function goPreset(i, instant = false) {
   invalidate();
 }
 
+// ---------------------------------------------------------------- light: overcast, or the sun at a date and hour
+// The sun's place in the sky from the date and the clock, by the usual formulas. LATITUDE is to the nearest
+// couple of degrees, which is as much as the sun's path cares about; clock time runs an hour ahead of the sun
+// from April to October (summer time). Bearings are turned to the site's own north.
+const LATITUDE = 52;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAY_21 = [21, 52, 80, 111, 141, 172, 202, 233, 264, 294, 325, 355];     // the 21st of each month, as a day of the year
+const WINDS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+function sunAngles(month, hour) {
+  const day = DAY_21[month], rad = Math.PI / 180, lat = LATITUDE * rad;
+  const decl = 23.44 * rad * Math.sin(2 * Math.PI * (284 + day) / 365);
+  const b = 2 * Math.PI * (day - 81) / 364;
+  const equation = 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);       // minutes the sundial runs ahead of the clock
+  const solar = hour - (month >= 3 && month <= 9 ? 1 : 0) + equation / 60;
+  const h = (solar - 12) * 15 * rad;
+  const el = Math.asin(Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(h));
+  const az = Math.atan2(Math.sin(h), Math.cos(h) * Math.sin(lat) - Math.tan(decl) * Math.cos(lat)) + Math.PI;   // clockwise from north
+  return { el, az };
+}
+const EAST = new THREE.Vector3(-NORTH.z, 0, NORTH.x);          // north turned a quarter clockwise, seen from above
+const sunDir = OVERCAST_DIR.clone();
+const mix = (a, b, t) => new THREE.Color(a).lerp(new THREE.Color(b), t);
+const ramp = (lo, hi, v) => { const t = Math.min(1, Math.max(0, (v - lo) / (hi - lo))); return t * t * (3 - 2 * t); };
+function applyLight() {
+  const sunny = light.mode === 'sun' && state.mode !== 'compare';
+  let shade = true;
+  if (!sunny) {
+    sunDir.copy(OVERCAST_DIR);
+    hemi.color.set(0xf1f4f8); hemi.groundColor.set(0x8d8a76); hemi.intensity = 2.5;
+    sun.color.set(0xfff6ea); sun.intensity = 1.0; sun.shadow.radius = 4;
+    sky.material.uniforms.top.value.copy(ZENITH); sky.material.uniforms.bottom.value.copy(HORIZON);
+    renderer.toneMappingExposure = 1.0;
+  } else {
+    const { el, az } = sunAngles(light.month, light.hour), deg = el * 180 / Math.PI;
+    const up = Math.max(el, 2 * Math.PI / 180);                 // keep the lamp just above the ground at sunrise and sunset
+    sunDir.copy(NORTH).multiplyScalar(Math.cos(az) * Math.cos(up)).addScaledVector(EAST, Math.sin(az) * Math.cos(up));
+    sunDir.y = Math.sin(up);
+    sunDir.normalize();
+    const day = ramp(-6, 8, deg), high = ramp(2, 32, deg), risen = ramp(-1.5, 6, deg);
+    hemi.color.copy(mix(0x4c5878, 0xd3e3f6, day)); hemi.groundColor.copy(mix(0x2e2f33, 0x8d8a76, day)); hemi.intensity = 0.22 + 0.85 * day;
+    sun.color.copy(mix(0xff9a52, 0xfff2de, high)); sun.intensity = 3.3 * risen; sun.shadow.radius = 2.2;
+    sky.material.uniforms.top.value.copy(mix(0x1d2740, 0x4c84c8, day));
+    sky.material.uniforms.bottom.value.copy(mix(0x39415a, 0xf0c9a2, day)).lerp(new THREE.Color(0xd8e6ef), high);
+    shade = risen > 0.02;
+    sunDisc.material.color.copy(mix(0xffb070, 0xfff6dc, high));
+    // a low sun lights the ground far less than a high one; the eye, and a camera, open up to match
+    const onGround = 0.5 * hemi.intensity + sun.intensity * Math.max(Math.sin(el), 0.08);
+    renderer.toneMappingExposure = Math.min(2.6, Math.max(0.8, 2.3 / onGround));
+  }
+  scene.fog.color.copy(sky.material.uniforms.bottom.value);
+  sun.position.copy(SUN_TARGET).addScaledVector(sunDir, SUN_DIST);
+  sun.castShadow = shade && state.storey === 'all';    // walls cut at head height throw long shadows across the rooms: read better without
+  sunDisc.visible = sunny && shade && state.mode !== 'plan';
+  invalidate();
+}
+function describeSun() {
+  const { el, az } = sunAngles(light.month, light.hour), deg = el * 180 / Math.PI;
+  $('sun-month-val').textContent = '21 ' + MONTHS[light.month];
+  const hh = Math.floor(light.hour), mm = Math.round((light.hour - hh) * 60);
+  $('sun-hour-val').textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  const wind = WINDS[Math.round(az / (Math.PI / 4)) % 8];
+  $('sun-note').textContent = deg < -0.8 ? 'The sun is down.'
+    : deg < 3 ? `The sun is on the horizon, in the ${wind}.`
+    : `Sun ${Math.round(deg)}° up, in the ${wind}. Shadows are ${(1 / Math.tan(el)).toFixed(1)} times as long as things are tall.`;
+}
+function setLight(mode, month = light.month, hour = light.hour) {
+  light.mode = mode === 'sun' ? 'sun' : 'overcast';
+  light.month = Math.min(11, Math.max(0, Math.round(month)));
+  light.hour = Math.min(22, Math.max(4, hour));
+  for (const b of $('light-mode').querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.light === light.mode));
+  $('sun-controls').hidden = light.mode !== 'sun';
+  $('sun-month').value = light.month; $('sun-hour').value = light.hour;
+  describeSun();
+  applyLight();
+  try { localStorage.setItem('garden-light', JSON.stringify({ mode: light.mode, month: light.month, hour: light.hour })); } catch (e) { /* private window: nothing to remember */ }
+}
+function playDay(on) {
+  light.playing = on && !reduceMotion;
+  $('sun-play').setAttribute('aria-pressed', String(light.playing));
+  $('sun-play').textContent = light.playing ? 'Stop' : (reduceMotion ? 'An hour on' : 'Run the day');
+  if (on && reduceMotion) setLight('sun', light.month, light.hour >= 22 ? 4 : light.hour + 1);
+  invalidate();
+}
+for (const b of $('light-mode').querySelectorAll('button')) b.addEventListener('click', () => { playDay(false); setLight(b.dataset.light); });
+$('sun-month').addEventListener('input', (e) => setLight('sun', +e.target.value, light.hour));
+$('sun-hour').addEventListener('input', (e) => { if (light.playing) playDay(false); setLight('sun', light.month, +e.target.value); });
+$('sun-play').addEventListener('click', () => playDay(!light.playing));
+if (reduceMotion) $('sun-play').textContent = 'An hour on';
+try { const saved = JSON.parse(localStorage.getItem('garden-light') || 'null'); if (saved) Object.assign(light, { mode: saved.mode === 'sun' ? 'sun' : 'overcast', month: +saved.month || 0, hour: +saved.hour || 14 }); } catch (e) { /* nothing saved */ }
+setLight(light.mode);
+
 function setMode(mode, force = false) {
   if (mode === state.mode && !force) return;
   if (mode === 'compare' && !state.frames) return;
@@ -544,6 +669,8 @@ function setMode(mode, force = false) {
   if (mode === 'compare') { select(null); setMeasuring(false); if (state.storey !== 'all') setStorey('all'); }
   $('storey').hidden = mode === 'compare' || !layerRoots.inside_gf;
   $('tool-measure').hidden = mode === 'compare';
+  $('light').hidden = mode === 'compare';
+  if (mode === 'compare') playDay(false);
   camera = mode === 'plan' ? ortho : persp;
   persp.fov = 50;
   if (mode === 'plan') {
@@ -556,7 +683,7 @@ function setMode(mode, force = false) {
   layout();
   if (mode === 'compare') applyFrame(state.scrub);
   updateHint();
-  invalidate();
+  applyLight();
 }
 $('mode-explore').addEventListener('click', () => setMode('explore'));
 $('mode-plan').addEventListener('click', () => setMode('plan'));
@@ -591,7 +718,7 @@ function setStorey(key) {
   state.storey = key;
   cutPlane.constant = STOREYS[key].cut;
   roofPlane.constant = STOREYS[key].roof ?? 1e6;
-  sun.castShadow = key === 'all';                    // walls cut at head height throw long shadows across the rooms: read better without
+  applyLight();                                      // shadows go off when the house is opened
   for (const btn of $('storey').querySelectorAll('button')) btn.setAttribute('aria-pressed', String(btn.dataset.storey === key));
   select(null);
   const s = STOREYS[key];
@@ -821,10 +948,16 @@ function frame(now) {
   }
   if (state.mode === 'explore') controls.update();
   else if (state.mode === 'plan') planControls.update();
+  if (light.playing) {                                // the whole day in about twenty seconds
+    const dt = Math.min(0.1, (now - (light.last || now)) / 1000);
+    setLight('sun', light.month, light.hour + dt * 0.9 >= 22 ? 4 : light.hour + dt * 0.9);
+  }
+  light.last = now;
   if (!dirty) return;
   dirty = false;
   updateBackdrop();
   sky.position.copy(camera.position);
+  if (sunDisc.visible) sunDisc.position.copy(camera.position).addScaledVector(sunDir, 460);
   renderer.render(scene, camera);
   if (state.mode !== 'compare') updateScaleBar();
   updateRoomLabels();
@@ -842,7 +975,7 @@ window.__garden = {
   ready: false, setMode, setStorey, applyFrame, goPreset, select, applyConfidence,
   setBlend(v) { $('blend').value = v; $('blend').dispatchEvent(new Event('input')); },
   setScrub(v) { $('scrub').value = v; applyFrame(v); },
-  camera: () => camera, controls, planControls, scene, features, invalidate,
+  camera: () => camera, controls, planControls, scene, features, invalidate, setLight, sunAngles,
   setCamera(pos, target) { persp.position.set(...pos); controls.target.set(...target); controls.update(); invalidate(); },
 };
 </script>

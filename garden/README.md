@@ -11,8 +11,10 @@ landscaper.
 - `build.py` turns that file into a Blender scene (`out/garden.blend`), a one-file
   `out/garden.glb`, and the web model the viewer loads (`viewer/model/`).
 - `viewer/` is the three.js page: orbit, a north-up plan, layer toggles, a tape measure,
-  and a mode that puts the 3D camera exactly where the phone was for each still so the
-  model can be checked against the footage.
+  a mode that puts the 3D camera exactly where the phone was for each still so the
+  model can be checked against the footage, and a sun study: the light as it falls on
+  the 21st of any month at any hour, turned to the site's own north, to see where sun
+  and shade lie.
 - `tools/survey/` is the surveying: reconstruction, levelling, control, triangulation.
   `tools/capture/` prints the survey markers, and `CAPTURE.md` says how to photograph a
   site so that the result is accurate.
