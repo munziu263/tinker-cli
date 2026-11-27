@@ -17,6 +17,8 @@ interior.json
 capture/*
 !capture/markers_a4.pdf
 
-# everything private on a local machine: photographs, frames, reconstructions, surveys
+# everything private on a local machine: photographs, frames, reconstructions, surveys,
+# and the notes that say where the work stands
 private/
+CLAUDE.local.md
 .venv/

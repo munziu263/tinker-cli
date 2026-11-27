@@ -169,17 +169,33 @@ A thorough capture of a house and garden is two to four thousand photographs, 5 
 ## What happens to them
 
 ```
-python tools/capture/make_markers.py capture/markers_a4.pdf          # the sheets to print
-python tools/survey/markers.py detect obs.json photos/               # find every marker in every photograph
-python tools/survey/markers.py locate survey.npz obs.json tags.json --distances distances.json
-python tools/survey/markers.py control obs_new.json tags.json control.json
-python tools/survey/place.py piece/0 survey.npz out.npz --control control.json
+S=tools/survey; W=private/work/<shoot>
+python tools/capture/make_markers.py capture/markers_a4.pdf      # the sheets to print
+python $S/photos.py intake private/photos/<shoot> $W             # upright, in the order taken, stripped of where they were taken
+python $S/markers.py detect $W/markers.json $W/images            # find every marker in every photograph
+python $S/photos.py sfm $W                                       # reconstruct the photographs by themselves
+python $S/align.py $W/sparse/0 $W/free.npz --markers $W/markers.json
+python $S/markers.py locate $W/free.npz $W/markers.json $W/tags.json --distances $W/distances.json
 ```
 
-`detect` needs no help. `locate` fixes each marker on the site grid from every line of
-sight to it and checks the survey's size against the tape. `control` and `place.py`
-then lay any later set of photographs, reconstructed by itself, onto the same grid by
-the markers it shows: the two sets need not share a single picture.
+`intake` takes HEIC or JPEG as the phone wrote them and says what looks wrong with the
+set: shrunk copies, a zoom, long exposures, blurred pictures. `detect` needs no help.
+`sfm` finds where every photograph was taken from and calibrates the lens as it goes.
+`align.py --markers` stands the result upright and sizes it by the markers' printed
+squares, and `locate` then fixes each marker from every line of sight to it and compares
+the taped distances with the reconstruction's. That is the whole of the ten-minute
+trial.
+
+For the site itself the markers are given places on the site grid once, from the first
+walk round (laid on the grid by the house, whose walls are measured). After that:
+
+```
+python $S/markers.py control $W/markers.json tags.json $W/control.json
+python $S/place.py $W/sparse/0 survey.npz out.npz --control $W/control.json
+```
+
+lays any later set of photographs, reconstructed by itself, onto the same grid by the
+markers it shows: the two sets need not share a single picture.
 
 From there the photographs give, in turn: camera positions good to a centimetre or
 two; a dense cloud of points on every surface, from which shapes are measured rather

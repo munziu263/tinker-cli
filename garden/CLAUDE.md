@@ -12,7 +12,10 @@ before touching anything.
   `interior.json`. No names, addresses, map references or anything else that says
   where the place is or whose it is, in files, commit messages or published pages.
   Only dimensions on the site grid are committed. `.gitignore` enforces the file part;
-  check `git status` before every commit all the same.
+  check `git status` before every commit all the same. Where the private documents are
+  present, `git diff --cached | .venv/bin/python -I tools/privcheck.py private/drawings --ok private/privcheck-ok.txt -`
+  lists the words a change shares with them that have not been passed before: read
+  the list, and treat a name in it as a stop.
 - **Published stills** (the viewer's "Compare with video") must have the name board on
   the gate, number plates, the roadside sign and printed labels blurred, and must not
   show a person. `tools/survey/control/clips.json` holds the blur list and the frames to
@@ -30,17 +33,26 @@ before touching anything.
 | `build.py`, `gardenkit/` | turn that into a Blender scene and the web model (`viewer/model/`, not committed) |
 | `viewer/` | the page. `tools/serve.py` previews it on port 8765 |
 | `tools/survey/` | the surveying chain; each tool's docstring says what it is for |
+| `setup.sh` | sets up the Python environment on a new machine and says what is in place |
 | `tools/capture/`, `capture/markers_a4.pdf` | printed survey markers |
 | `CAPTURE.md` | how the site should be photographed |
 | `SURVEY_TODO.md` | what is still to capture and measure, and the log of what was done |
 
-Private working files are not here. The owner has a private published copy of the
-viewer; its `source/` folder holds `interior.json`, the survey itself
-(`survey_cameras.json`, `survey_points_*.json`, with a README saying how to turn them
-back into the `survey.npz` the tools read) and the scripts that generate `garden.json`
-and `interior.json`. Ask the owner for the link. On a local machine keep everything
-private under `garden/private/` (ignored by git): `photos/<date>-<area>/`, `frames/`,
-`work/`, `survey/`.
+Private working files are not here. On the owner's own machine they sit beside this
+file, ignored by git: `private/` (the survey, the drawings, the scripts that generate
+`garden.json` and `interior.json`, photographs, reconstructions), `interior.json`, the
+built `viewer/model/` and the viewer's stills. **If `private/README.md` exists, read it
+before anything else**: it is the hand-over, with the state of the work, what each
+private file is and what to do next. `CLAUDE.local.md`, also ignored, carries the
+private standing notes. Keep everything private under `private/`:
+`photos/<date>-<area>/`, `work/<shoot>/`, `survey/`. Where the generators are present
+(`private/generators/`), they are the model's source and `garden.json` is their output:
+change the model there and run them, or the next run undoes the change.
+
+The owner also has a private published copy of the viewer; its `source/` folder is a
+second copy of the survey (`survey_cameras.json`, `survey_points_*.json`, with a README
+saying how to turn them back into the `survey.npz` the tools read), `interior.json` and
+the generators. Ask the owner for the link.
 
 ## The site grid
 
@@ -52,19 +64,23 @@ the measured survey. Rotations are degrees anticlockwise from +X. three.js is Y-
 ## Setting up
 
 ```
-uv venv --python 3.13 .venv
-uv pip install --python .venv/bin/python -r requirements.txt
+bash setup.sh                          # .venv with Python 3.13 and requirements.txt; says what is in place
 .venv/bin/python build.py              # about a minute and a half
 .venv/bin/python tools/serve.py        # http://localhost:8765
 ```
 
-`ffmpeg` is needed to cut frames from video. On a Mac the ready-made pycolmap needs
-Apple Silicon and macOS 14 or later.
+`setup.sh` needs `uv` and installs nothing outside this folder. `ffmpeg` is needed only
+to cut frames from video. On a Mac the ready-made pycolmap and bpy need Apple Silicon
+and macOS 14 or later. Run the tools with `.venv/bin/python`, and with `-I` when they
+read files that came from outside.
 
 ## The chain, in one breath
 
-Frames are named `<clip>_<number>.jpg`. `sfm.py` / `sfm_add.py` / `sfm_part.py`
-reconstruct; `align.py` puts a reconstruction in the grid; `place.py` lays a separately
+Frames are named `<clip>_<number>.jpg`. For photographs, `photos.py` takes a folder of
+them in (HEIC or JPEG, any way up, stripped of where they were taken) and reconstructs
+them by themselves; for video, `sfm.py` / `sfm_add.py` / `sfm_part.py` reconstruct.
+`align.py` puts a reconstruction in the grid, or gives a set that shows printed markers
+a frame of its own sized by them; `place.py` lays a separately
 reconstructed piece onto the survey (shared cameras, sightings, or control points);
 `markers.py` finds printed markers and turns them into control; `anchor.py` moves a
 group of clips onto a building of known shape or onto sightings of known things;

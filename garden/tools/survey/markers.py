@@ -9,17 +9,20 @@ The markers are the sheets that tools/capture/make_markers.py prints: AprilTags 
 
 detect   reads every frame and writes where each marker's four corners are, to a fraction
          of a pixel. Nothing is picked by hand. Corners are in the pattern's own order:
-         the corner the arrow on the sheet points at first, then clockwise.
+         the corner the arrow on the sheet points at first, then clockwise. They are
+         found by fitting a line to each edge of the black square, which blur does not
+         shift (see `find`). They are written counting from the middle of the top-left
+         pixel; a reconstruction counts from that pixel's corner, half a pixel
+         different, and `locate` and `control` allow for it.
 
 locate   takes a survey that holds those frames and finds each corner in the site grid,
          as the point nearest to all the lines of sight to it (the pictures that show the
          marker large count for most). For each marker it prints where it is, how many
          frames saw it, how well their lines of sight meet, and the side of the black
-         square as found. Blur rounds the corners of a marker that is small in the
-         picture and draws them inward, evenly all round: in frames of video the square
-         reads 2% small while its middle is right to a millimetre. So what is written to
-         tags.json is a square of the printed size (--size: check a sheet with a ruler)
-         laid on the four corners found, same middle, same turn.
+         square as found, which is the reconstruction's size against the paper's. What
+         is written to tags.json is a square of the printed size (--size: check a sheet
+         with a ruler) laid on the four corners found, same middle, same turn: the
+         middle of a marker is surer than any one of its corners.
          --distances compares taped distances with the survey's:
              {"corner": 0, "pairs": [[3, 7, 12.345], [3, 11, 8.02], ...]}
          each from the arrowed corner of one marker to the arrowed corner of another,
@@ -48,11 +51,12 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 FAMILY = cv2.aruco.DICT_APRILTAG_36h11
+HALF = 0.5              # from the detector's pixel count (middle of the first pixel) to the reconstruction's (its corner)
 
 
-def detector():
+def detector(method=None):
     p = cv2.aruco.DetectorParameters()
-    p.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+    p.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_APRILTAG if method is None else method
     p.cornerRefinementMaxIterations = 60
     p.cornerRefinementMinAccuracy = 0.01
     p.minMarkerPerimeterRate = 0.01                 # down to a few dozen pixels a side, whatever the size of the picture
@@ -60,16 +64,60 @@ def detector():
     return cv2.aruco.ArucoDetector(cv2.aruco.getPredefinedDictionary(FAMILY), p)
 
 
-def find(gray, det, ids=None):
-    """{marker number: 4 x 2 corners in pixels} for one picture."""
-    corners, found, _ = det.detectMarkers(gray)
-    out = {}
+_PAIR = None
+
+
+def offset_of(det):
+    """What a search adds to every corner's position, measured by showing it a marker drawn at a known place.
+    The edge search counts pixels from the corner of the first one (0.5); the corner search from its middle (0).
+    Measured and not assumed, so that a version of OpenCV that counts differently cannot shift every marker."""
+    side, at = 240, 80
+    img = np.full((side + 2 * at, side + 2 * at), 255, np.uint8)
+    img[at:at + side, at:at + side] = cv2.aruco.generateImageMarker(cv2.aruco.getPredefinedDictionary(FAMILY), 0, side)
+    corners, found, _ = det.detectMarkers(img)
     if found is None:
-        return out
-    for c, k in zip(corners, found.ravel()):
-        if ids is None or int(k) in ids:
-            out[int(k)] = c.reshape(4, 2).astype(float)
-    return out
+        raise SystemExit("the marker search cannot find a marker drawn for it: this build of OpenCV is not usable here")
+    true = np.array([[at, at], [at + side, at], [at + side, at + side], [at, at + side]], float) - 0.5
+    off = float((corners[0].reshape(4, 2) - true).mean())
+    if abs(off - round(off * 2) / 2) > 0.02:
+        raise SystemExit(f"the marker search puts a drawn marker {off:+.3f} px from where it is: this build of OpenCV is not usable here")
+    return round(off * 2) / 2
+
+
+def find(gray, ids=None):
+    """{marker number: 4 x 2 corners in pixels} for one picture, and the numbers found only by the second search.
+
+    Two searches. The first fits a straight line to each edge of the black square and takes the corners where the
+    lines cross. Blur moves an edge no way at all, so the square comes out the right size however soft the picture:
+    on test pictures 0.0% out, corners right to 0.2 px. (It counts pixels from the corner of the first one, half a
+    pixel different from everything else here, and is brought into line: see offset_of.) The second looks for each corner by
+    itself, which blur rounds off and draws inward: the square reads 1 to 2% small when it is some dozens of pixels
+    across. It finds a few small markers the first misses, and is used for those only."""
+    global _PAIR
+    if _PAIR is None:
+        _PAIR = [(det, offset_of(det)) for det in (detector(), detector(cv2.aruco.CORNER_REFINE_SUBPIX))]
+    out, second = {}, set()
+    for n, (det, off) in enumerate(_PAIR):
+        corners, found, _ = det.detectMarkers(gray)
+        if found is None:
+            continue
+        for c, k in zip(corners, found.ravel()):
+            k = int(k)
+            if (ids is None or k in ids) and k not in out:
+                out[k] = c.reshape(4, 2).astype(float) - off
+                if n == 1:
+                    second.add(k)
+    return out, second
+
+
+def read_one(job):
+    path, ids = job
+    # as the reconstruction sees them: the pixels as stored, whatever the file says about which way up it was held
+    gray = cv2.imread(path, cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
+    if gray is None:
+        return path, None, None
+    cv2.setNumThreads(1)                            # pictures are read side by side: one core each
+    return (path,) + find(gray, ids)
 
 
 def images(args):
@@ -88,24 +136,31 @@ def detect(a):
         lo, hi = (int(v) for v in a[i + 1].split("-"))
         ids = set(range(lo, hi + 1))
         del a[i:i + 2]
-    out, det, frames, seen, n = a[0], detector(), {}, {}, 0
-    for path in images(a[1:]):
-        # as the reconstruction sees them: the pixels as stored, whatever the file says about which way up it was held
-        gray = cv2.imread(path, cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
-        if gray is None:
-            continue
-        n += 1
-        got = find(gray, det, ids)
-        if got:
-            frames[os.path.basename(path)] = {str(k): np.round(c, 2).tolist() for k, c in sorted(got.items())}
-            for k, c in got.items():
-                seen.setdefault(k, []).append(float(np.linalg.norm(c - np.roll(c, 1, axis=0), axis=1).mean()))
+    import concurrent.futures
+    out, frames, seen, by_second, n = a[0], {}, {}, {}, 0
+    jobs = [(path, ids) for path in images(a[1:])]
+    with concurrent.futures.ProcessPoolExecutor(max_workers=min(8, os.cpu_count() or 2)) as pool:
+        for path, got, second in pool.map(read_one, jobs, chunksize=4):
+            if got is None:
+                continue
+            n += 1
+            if got:
+                name = os.path.basename(path)
+                frames[name] = {str(k): np.round(c, 2).tolist() for k, c in sorted(got.items())}
+                if second:
+                    by_second[name] = sorted(second)
+                for k, c in got.items():
+                    seen.setdefault(k, []).append(float(np.linalg.norm(c - np.roll(c, 1, axis=0), axis=1).mean()))
+            if n % 100 == 0:
+                print(f"   {n} of {len(jobs)} pictures", flush=True)
     with open(out, "w") as fh:
-        json.dump({"family": "apriltag_36h11", "frames": frames}, fh)
+        json.dump({"family": "apriltag_36h11", "frames": frames, "by_corner_search": by_second}, fh)
     print(f"{n} pictures read; markers found in {len(frames)} of them")
     for k in sorted(seen):
         s = np.array(seen[k])
-        print(f"   marker {k:2d}: in {len(s):4d} pictures, side {s.min():.0f} to {s.max():.0f} px (median {np.median(s):.0f})")
+        few = sum(k in v for v in by_second.values())
+        print(f"   marker {k:2d}: in {len(s):4d} pictures, side {s.min():.0f} to {s.max():.0f} px (median {np.median(s):.0f})"
+              + (f"; {few} of them by the second, rougher search" if few else ""))
     print("saved", out)
 
 
@@ -155,7 +210,8 @@ def locate(a):
             unknown += 1
             continue
         for k, c in tags.items():
-            side = float(np.linalg.norm(np.array(c) - np.roll(np.array(c), 1, axis=0), axis=1).mean())
+            c = np.array(c, float) + HALF
+            side = float(np.linalg.norm(c - np.roll(c, 1, axis=0), axis=1).mean())
             for j, (u, v) in enumerate(c):
                 rays.setdefault(int(k), {}).setdefault(j, []).append((where[name], u, v, side))
     if unknown:
@@ -170,8 +226,8 @@ def locate(a):
             r = rays[k][j]
             C = np.array([sv.centre(i) for i, *_ in r])
             D = np.array([sv.ray(i, u, v) for i, u, v, _ in r])
-            # a marker that is small in the picture has its corners rounded off by blur and read a little
-            # inside where they are: the pictures that show it large have the say
+            # a marker that is small in the picture is found less surely (and by the second search, a little
+            # small): the pictures that show it large have the say
             say = np.clip(np.array([side for *_, side in r]) / 50.0, 0.15, 1.0) ** 2
             if len(r) < 2:
                 corners = []
@@ -197,7 +253,7 @@ def locate(a):
         centre = c.mean(0)
         flat = float(np.abs((c - centre) @ np.linalg.svd(c - centre)[2][2]).max())
         weak = spread < 4.0
-        c = square_on(c, size)                      # blur draws a small marker's corners inward, evenly: its middle and turn are surer than its edges
+        c = square_on(c, size)                      # a marker's middle and turn are surer than any one of its corners
         tags[k] = dict(corners=np.round(c, 4).tolist(), centre=np.round(centre, 4).tolist(), side=float(sides.mean()), pictures=n,
                        spread_deg=round(spread, 1), miss_m=float(np.mean(misses)), rms_px=float(np.sqrt(np.mean(np.square(px)))), weak=bool(weak))
         print(f"{k:6d} {centre[0]:8.3f} {centre[1]:8.3f} {centre[2]:7.3f}   {n:6d}   {spread:5.1f}°   {np.mean(misses) * 1000:6.1f} mm   {tags[k]['rms_px']:6.2f} px rms    "
@@ -211,11 +267,13 @@ def locate(a):
         with open(opt["--distances"]) as fh:
             dist = json.load(fh)
         j = int(dist.get("corner", 0))
-        rows = [(p, q, m, float(np.linalg.norm(np.array(tags[p]["corners"][j]) - np.array(tags[q]["corners"][j]))))
+        rows = [(p, q, m, float(np.linalg.norm(np.array(tags[p]["corners"][j]) - np.array(tags[q]["corners"][j]))), tags[p]["weak"] or tags[q]["weak"])
                 for p, q, m in dist["pairs"] if p in tags and q in tags]
         print(f"taped distances, from the arrowed corner of one marker to that of another ({len(rows)} of {len(dist['pairs'])} between markers that were fixed):")
-        for p, q, m, s in rows:
-            print(f"   {p:2d} to {q:2d}: tape {m:7.3f} m, survey {s:7.3f} m, difference {(s - m) * 1000:+6.0f} mm ({(s / m - 1) * 100:+.2f}%)")
+        for p, q, m, s, weak in rows:
+            print(f"   {p:2d} to {q:2d}: tape {m:7.3f} m, survey {s:7.3f} m, difference {(s - m) * 1000:+6.0f} mm ({(s / m - 1) * 100:+.2f}%)"
+                  + ("   one end is a weak fix: not counted below" if weak else ""))
+        rows = [r for r in rows if not r[4]]
         if rows:
             m, s = np.array([r[2] for r in rows]), np.array([r[3] for r in rows])
             k = float((m * s).sum() / (s * s).sum())
@@ -246,7 +304,7 @@ def control(a):
     for k, seen in sorted(best.items(), key=lambda kv: int(kv[0])):
         for _, name, c in sorted(seen, key=lambda t: -t[0])[:per]:           # the pictures that show it largest
             for j in range(4):
-                points.append({"name": f"marker {k} corner {j}", "site": tags[k]["corners"][j], "frame": name, "px": [float(c[j, 0]), float(c[j, 1])]})
+                points.append({"name": f"marker {k} corner {j}", "site": tags[k]["corners"][j], "frame": name, "px": [float(c[j, 0]) + HALF, float(c[j, 1]) + HALF]})
     with open(a[2], "w") as fh:
         json.dump({"points": points}, fh)
     print(f"{len(points)} control points from {len(best)} markers of known place; saved {a[2]}")

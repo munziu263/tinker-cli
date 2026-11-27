@@ -2,6 +2,7 @@
 
     align.py <sparse_model_dir> <out.npz> [camera_height_m]
     align.py <sparse_model_dir> <out.npz> --like <earlier_survey.npz> [--without <clip[:from-to],...>]
+    align.py <sparse_model_dir> <out.npz> --markers <obs.json> [--size 0.160]
 
 First form: world frame from scratch. Z up, ground at z = 0, origin on the ground below
 the mean camera position, metres (scale set by the camera height given).
@@ -9,6 +10,12 @@ the mean camera position, metres (scale set by the camera height given).
 Second form: for a reconstruction that extends an earlier one (see sfm_add.py). The frames
 the two share are used to put the new model in exactly the same world frame, so every
 coordinate measured before stays valid.
+
+Third form: for a set of photographs that shows printed survey markers (photos.py,
+markers.py detect). A frame of the set's own: Z up from the way the phone was held, metres
+from the printed size of the markers' black squares, z = 0 near the lowest things seen. It
+is not the site grid (place.py lays the set on that); it is what `markers.py locate` needs
+to check the set against taped distances, and enough to measure in.
 
 --without leaves clips out: their frames, and every point that most of its sightings come
 from them. For clips that the incremental registration got wrong (a walk that drifted),
@@ -140,6 +147,78 @@ def frame_from_scratch(frames, P, E, TL, cam_h):
     return A, origin, s
 
 
+def frame_from_markers(frames, cams, P, obs_path, size):
+    """A frame of its own for photographs that show printed markers: up from how the phone was held, metres from
+    the printed size of the markers. Returns A, origin, s as the others do, and the cameras' mean height."""
+    import json
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from markers import meet
+    with open(obs_path) as fh:
+        obs = json.load(fh)["frames"]
+    by_name = {f[0]: f for f in frames}
+    rays = {}                                                    # marker -> corner -> [(camera centre, direction, side in px)]
+    for name, tags in obs.items():
+        if name not in by_name:
+            continue
+        _, R, t, cid = by_name[name]
+        par = cams[cid].params
+        f, cx, cy, k1 = par[0], par[1], par[2], (par[3] if len(par) > 3 else 0.0)
+        C = -R.T @ t
+        for k, c in tags.items():
+            c = np.array(c, float) + 0.5                         # the detector counts from the middle of the first pixel, COLMAP from its corner
+            side = float(np.linalg.norm(c - np.roll(c, 1, axis=0), axis=1).mean())
+            for j, (u, v) in enumerate(c):
+                xd, yd = (u - cx) / f, (v - cy) / f
+                x, y = xd, yd
+                for _ in range(8):
+                    g = 1 + k1 * (x * x + y * y)
+                    x, y = xd / g, yd / g
+                d = R.T @ np.array([x, y, 1.0])
+                rays.setdefault(int(k), {}).setdefault(j, []).append((C, d / np.linalg.norm(d), side))
+
+    def corners(k, soft):
+        out = []
+        for j in range(4):
+            r = rays[k].get(j, [])
+            if len(r) < 2:
+                return None
+            C, D = np.array([x[0] for x in r]), np.array([x[1] for x in r])
+            if np.degrees(np.arccos(np.clip((D @ D.T).min(), -1, 1))) < 4.0:      # seen from one direction only: no depth
+                return None
+            say = np.clip(np.array([x[2] for x in r]) / 50.0, 0.15, 1.0) ** 2
+            out.append(meet(C, D, say, rounds=1 if soft is None else 4, soft=soft or 1.0)[0])
+        return np.array(out)
+
+    def side_of(c):
+        return float(np.linalg.norm(c - np.roll(c, -1, axis=0), axis=1).mean())
+
+    rough = [side_of(c) for c in (corners(k, None) for k in sorted(rays)) if c is not None]
+    if not rough:
+        raise SystemExit("no marker is seen from two directions in this reconstruction: there is nothing to size it by")
+    unit = float(np.median(rough))                               # a first idea of a marker's size in the reconstruction's own units
+    fine = {k: c for k, c in ((k, corners(k, 0.06 * unit)) for k in sorted(rays)) if c is not None}
+    sides = {k: side_of(c) for k, c in fine.items()}
+    s = size / float(np.median(list(sides.values())))
+    print(f"sized by {len(sides)} marker(s), printed {size * 1000:.0f} mm: " + ", ".join(f"{k}: {v * s * 1000:.1f} mm" for k, v in sides.items()))
+    if len(sides) > 1:
+        v = np.array(list(sides.values())) * s
+        print(f"   the markers agree on the size to {(v.max() - v.min()) / size * 100:.1f}% between the largest and the smallest. "
+              "A square is a short ruler: taped distances between markers (markers.py locate --distances) are the real check.")
+    centres = np.array([-R.T @ t for _, R, t, _ in frames])
+    up = estimate_up(frames)
+    f0 = frames[0][1][2]
+    x = f0 - (f0 @ up) * up
+    x /= np.linalg.norm(x)
+    A = np.stack([x, np.cross(up, x), up])
+    cmean = centres.mean(0)
+    low = float(np.percentile((P - cmean) @ up, 2)) if len(P) else 0.0
+    origin = cmean + low * up                                    # below the middle of the cameras, level with the lowest things seen
+    cam_h = float(((centres - origin) @ up).mean() * s)
+    print(f"scale: {s:.5f} m per sfm unit; up taken from how the phone was held; cameras {cam_h:.2f} m above z = 0 on average")
+    return A, origin, s, cam_h
+
+
 def frame_like(frames, earlier_npz):
     """Recover the earlier survey's world frame from the cameras both models share:
     world = s * A @ (sfm - origin). A similarity (Umeyama) fit of the shared camera
@@ -168,10 +247,18 @@ def frame_like(frames, earlier_npz):
 
 
 def main():
-    without = ()
+    without, markers, size = (), None, 0.160
     if "--without" in sys.argv:
         k = sys.argv.index("--without")
         without = parse_without(sys.argv[k + 1])
+        del sys.argv[k:k + 2]
+    if "--markers" in sys.argv:
+        k = sys.argv.index("--markers")
+        markers = sys.argv[k + 1]
+        del sys.argv[k:k + 2]
+    if "--size" in sys.argv:
+        k = sys.argv.index("--size")
+        size = float(sys.argv[k + 1])
         del sys.argv[k:k + 2]
     model_dir, out = sys.argv[1], sys.argv[2]
     rec, cams, frames, P, C, E, TL, homes = load(model_dir, without)
@@ -180,7 +267,9 @@ def main():
     for cid, c in cams.items():
         print(f"camera {cid}:", c.model, c.width, c.height, "params", np.round(c.params, 4))
     print("registered frames:", len(frames), " points:", len(P))
-    if len(sys.argv) > 4 and sys.argv[3] == "--like":
+    if markers:
+        A, origin, s, cam_h = frame_from_markers(frames, cams, P, markers, size)
+    elif len(sys.argv) > 4 and sys.argv[3] == "--like":
         A, origin, s = frame_like(frames, sys.argv[4])
         cam_h = float(np.load(sys.argv[4])["cam_h"])
     else:
