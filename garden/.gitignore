@@ -12,3 +12,7 @@ tools/survey/survey.npz
 # The inside of the house: room layout from the floor plans and notes from the interior clips.
 # Private by default. build.py adds it to the model when the file is present.
 interior.json
+
+# the capture folder holds the printable markers and nothing from the camera
+capture/*
+!capture/markers_a4.pdf

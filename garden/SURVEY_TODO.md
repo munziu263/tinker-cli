@@ -4,27 +4,39 @@ The running list of what to film or measure next, most useful first. The numbers
 the orange "To film" markers in the viewer's **Still to survey** layer. An item is ticked
 once its footage has been worked into the model, and moved to the log at the bottom.
 
-## How to film
+## How to capture
 
-- **Walk, do not pan.** Distances come from moving the camera sideways. Turning on the
-  spot gives directions only.
-- Slowly, phone held landscape, ordinary 1x lens, with the ground in the bottom third of
-  the picture.
-- Start or finish each clip on something already in the model (the back door corner, the
-  patio, the shed gable) so the new clip can be joined to the old ones.
-- Keep something other than the thing itself in the picture. A frame filled with one
-  brick wall, a hedge or a lawn could be anywhere; the same wall with a tree, a corner or
-  a building beyond it can only be in one place. Stand back and film along, not at.
-- Turn corners slowly: three or four seconds for a quarter turn. A clip is most likely to
-  go wrong where the camera swings round, and what follows the swing goes wrong with it.
-- Have part of the house in the picture whenever you can. Its shape is known to the
-  centimetre, so a clip that shows a wall or two of it can be checked against it and put
-  right; one that shows only lawn and shrubs has to be taken on trust.
-- One clip per item, 30 to 60 seconds. Photos every step or two work just as well.
-- Flat, overcast light is best. Send the original files, not trimmed or compressed copies.
-- Keep the earlier clips: new footage is registered against them.
+`CAPTURE.md` is the full method: what to shoot with, how to walk, and why. In short:
+
+- **Photographs, not video**, at full resolution, wherever position or shape matters. A
+  frame of phone video is under 3 megapixels; a still is 24 or 48.
+- **Markers first.** Print the sheets in `capture/markers_a4.pdf`, fix them about the
+  site and leave them there. Every photograph that shows one is tied to the same fixed
+  points, which is what stops a walk drifting.
+- **Move sideways, never just turn**, and overlap each photograph with the last by four
+  fifths: a step for every four steps of distance to the subject.
+- **Close every loop**, and have part of the house or a marker in the picture whenever
+  you can: a walk that ends where it began, and sees things whose places are known, can
+  be checked. One that does neither has to be taken on trust.
+- Bright overcast, the middle of the day, dry and still. Move the car first.
+- Send the original files, not copies shrunk by a messaging app, and keep them.
 
 ## To do
+
+### First: fixed points for everything that follows
+
+- [ ] **Markers, a tape, and one walk round the whole site.** Put up 16 to 24 printed
+  markers (how and where: `CAPTURE.md`), tape about a dozen long distances between them,
+  and photograph the whole site once with them in view: three to five hundred stills.
+  *Why first:* every figure in the model so far rests on eight points read off the
+  drawings and on clips that had to be slid into place afterwards. With markers fixed
+  to a centimetre, everything photographed later lands on the same grid by itself, and
+  the items below can be done in any order, on any day, a piece at a time.
+- [ ] **Ask the surveyors for their files.** The measured survey was issued as drawings.
+  The CAD file behind them (DWG or DXF) gives every wall face as a coordinate rather
+  than a line to read off a PDF, and if the building was laser-scanned, the point cloud
+  (E57 or similar) is the house to a few millimetres, inside and out. Ask too whether
+  the garden was surveyed for levels beyond the spot heights on the drawing.
 
 ### Outside
 

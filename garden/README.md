@@ -14,6 +14,8 @@ landscaper.
   and a mode that puts the 3D camera exactly where the phone was for each still so the
   model can be checked against the footage.
 - `tools/survey/` is the surveying: reconstruction, levelling, control, triangulation.
+  `tools/capture/` prints the survey markers, and `CAPTURE.md` says how to photograph a
+  site so that the result is accurate.
 - `gardenkit/` holds the builders: ground, walls and buildings, plants, objects, and the
   inside of the house.
 
@@ -205,7 +207,18 @@ these is more than the map's own tolerance: it wants checking on the ground.
 ### Making it better
 
 `SURVEY_TODO.md` is the running list of what to film and measure next, in order of
-usefulness; its numbers match the markers in the viewer. In general:
+usefulness; its numbers match the markers in the viewer. `CAPTURE.md` is how to do it:
+full-resolution photographs in place of video, loops that close, and printed markers
+(`capture/markers_a4.pdf`) left about the site as fixed points. `markers.py` finds the
+markers in the frames by itself, fixes them on the grid, checks the survey's size
+against taped distances between them, and hands them to `place.py` as control, so that
+a set of photographs reconstructed on its own is laid on the grid by the markers it
+shows. Tried on the survey's own frames with sheets pasted in at known places: read
+nine times in ten once a marker's side covers 30 pixels and never misread; fixed to 1 to
+6 mm from frames of video; distances between them right to 3 mm (5 at worst) over as much
+as 17 m; and a
+separately reconstructed set of 238 frames laid on the grid by seven markers alone to
+within a millimetre of where a hundred shared cameras put it. In general:
 
 - **Tape measurements.** A distance from the grid origin (or between any two things in
   the footage) goes into `control.json` under `distances` and is used by `calibrate.py`.

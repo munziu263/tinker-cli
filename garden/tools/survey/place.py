@@ -25,6 +25,11 @@ available is used together in one least-squares fit:
               should land where the survey has them (this alone is `align.py --like`).
   --control   points with known site coordinates picked in frames of the piece:
               {"points": [{"name": "...", "site": [x, y, z], "frame": "c3363_0150", "px": [u, v]}, ...]}
+              Picked by hand, or written by `markers.py control` from printed markers
+              whose places are known. Three or more points that are each seen in two
+              frames, and are not in a line, place the piece and give its size with no
+              other evidence: that is how a set of photographs is laid on the grid by
+              the markers it shows.
 
 The fit is reported class by class, so a wrong assumption shows: sightings should agree
 to a pixel or two. If they do for some survey frames and are hundreds of pixels out for
@@ -268,6 +273,33 @@ def pooled_guess(piece, sv, sight, scale, iters=6000, tol_px=5.0, seed=0):
     return (scale or 1.0), best[1], best[2], best[0]
 
 
+def control_fix(piece, control):
+    """Start from control points that two or more frames of the piece see: each is found in the piece's own
+    space from its lines of sight, and the points so found are laid on their site coordinates. Three or more,
+    not in a line, give the size as well as the place. Returns (scale, R, t, how many points)."""
+    by = {}
+    for c in control:
+        by.setdefault(c["name"], []).append(c)
+    X, Y = [], []
+    for cs in by.values():
+        if len({c["frame"] for c in cs}) >= 2:
+            X.append(piece.triangulate([(c["frame"], c["px"][0], c["px"][1]) for c in cs]))
+            Y.append(cs[0]["site"])
+    if len(X) < 3:
+        return None
+    X, Y = np.array(X), np.array(Y, float)
+    if np.linalg.svd(Y - Y.mean(0), compute_uv=False)[1] < 0.05:           # all in a line: the turn about it is free
+        return None
+    for _ in range(3):                                                    # once more without the points that fit worst (a marker seen from one side only)
+        s, R, t = umeyama(X, Y)
+        r = np.linalg.norm(s * X @ R.T + t - Y, axis=1)
+        keep = r < max(0.05, 2.5 * np.median(r))
+        if keep.all() or keep.sum() < 3:
+            break
+        X, Y = X[keep], Y[keep]
+    return s, R, t, len(X)
+
+
 def control_guess(piece, control, scale):
     """Start from control points: the frame holding the most of them (four or more) is
     resected against their site coordinates, and since that frame's place in the piece is
@@ -429,6 +461,10 @@ def main():
     control = json.load(open(opt["--control"]))["points"] if "--control" in opt else []
     for c in control:
         c["frame"] = c["frame"] if c["frame"].endswith(".jpg") else c["frame"] + ".jpg"
+    if control and any(c["frame"] not in piece.frames for c in control):
+        n0 = len(control)
+        control = [c for c in control if c["frame"] in piece.frames]
+        print(f"{n0 - len(control)} of {n0} control points are in frames that are not part of the piece and are passed over")
     sight, n_pairs = sightings(piece, sv, opt["--db"]) if "--db" in opt else ([], 0)
     print(f"piece: {len(piece.frames)} frames, {len(piece.xyz)} points. Evidence: {len(sight)} sightings from {len({i for i, *_ in sight})} survey frames "
           f"({n_pairs} matched pairs), {len(shared)} shared cameras, {len(control)} control points" + (f", scale given as {scale}" if scale else ""))
@@ -436,6 +472,9 @@ def main():
         s0, R0, t0 = umeyama(np.array([piece.frames[n]["C"] for n, _ in shared]), np.array([sv.C[k] for _, k in shared]))
         if scale is not None:
             s0 = scale
+    elif control and scale is None and control_fix(piece, control) is not None:
+        s0, R0, t0, n = control_fix(piece, control)
+        print(f"start: {n} control points found in the piece's own space and laid on their site coordinates; size {s0:.4f} m per unit")
     elif control and control_guess(piece, control, scale) is not None:
         s0, R0, t0, name, Cs = control_guess(piece, control, scale)
         print(f"start: {name} resected from its control points, standing at ({Cs[0]:.2f}, {Cs[1]:.2f}, {Cs[2]:.2f})")
@@ -467,8 +506,17 @@ def main():
         r = np.linalg.norm(res["shared"].reshape(-1, 3), axis=1) / 300.0
         print(f"shared cameras: mean {r.mean() * 100:.1f} cm apart, worst {r.max() * 100:.1f} cm")
     if "control" in res:
-        for c, r in zip(control, res["control"].reshape(-1, 2) / 3.0):
-            print(f"control {c.get('name', '?'):30s} {np.hypot(*r):6.1f} px off")
+        off = np.linalg.norm(res["control"].reshape(-1, 2) / 3.0, axis=1)
+        if len(control) <= 24:
+            for c, r in zip(control, off):
+                print(f"control {c.get('name', '?'):30s} {r:6.1f} px off")
+        else:                                           # markers: too many to list, so one line for each thing
+            groups = {}
+            for c, r in zip(control, off):
+                groups.setdefault(c.get("name", "?").rsplit(" corner", 1)[0], []).append(r)
+            print(f"control: {len(control)} points, {np.median(off):.1f} px off (median), {np.percentile(off, 95):.1f} px at the worst 5%")
+            for name, r in groups.items():
+                print(f"   {name:22s} {len(r):4d} points, {np.median(r):5.1f} px median, {np.max(r):5.1f} px worst")
     add = set(opt["--add"].split(",")) if "--add" in opt else {clip_of(n) for n in piece.frames if n not in idx}
     merge(a[1], a[2], piece, s, R, t, add)
 
