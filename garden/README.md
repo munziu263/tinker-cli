@@ -234,6 +234,22 @@ off and draws it inward but leaves the middle of an edge where it was: found cor
 corner, a marker 40 pixels across read 1 to 2% small, and a reconstruction sized by it
 came out 2% large. Found by its edges it reads true (0.03% on the same pictures).
 
+`photos.py` and the chain after it were tried on 139 frames of the survey's own clips
+dressed up as a shoot of photographs: file names in no order, a third of them HEIC,
+half held upright and stored on their side as a phone stores them, each with a
+location written into it. `intake` gave them back upright, in the order taken, with
+nothing of the phone's record left in them. `sfm` joined 134 of the 139 in one model
+(0.70 px) and found the lens from a start 10% out: 1595 and 1593 px for the two shapes
+of picture, against the 1588 px the whole survey gives. With marker sheets then pasted
+in at five known places, the reconstruction sized by nothing but the markers' printed
+squares had the six distances between the four well-seen markers (2.3 to 10.6 m) right
+to 15 mm at worst, 0.14%, and to 2 mm once the size was taken from the distances
+themselves: a square is a short ruler, a tape a long one. The quicker way of choosing
+which pictures to compare (`--pairs 20`) missed the one weak link between two halves of
+this set and gave two models, which is why every pair is compared by default up to 500
+pictures. These were frames of video, 2.8 megapixels each, with sheets pasted in: what
+photographs of real sheets do is still to be seen.
+
 In general:
 
 - **Tape measurements.** A distance from the grid origin (or between any two things in
